@@ -5,6 +5,18 @@ import axios from 'axios';
 import { AuthLayout } from '../components/AuthLayout.jsx';
 import { Input } from '../components/Input.jsx';
 
+const departments = [
+  'Computer Science',
+  'Information Technology',
+  'Electronics and Telecommunication',
+  'Mechanical Engineering ',
+  'Electrical Engineering',
+  'Textile Engineering',
+  'Instrumentation Engineering',
+  'Civil Engineering',
+  'Chemical Engineering'
+];
+
 const Signup = () => {
   const navigate = useNavigate();
   const [role, setRole] = useState('');
@@ -12,6 +24,7 @@ const Signup = () => {
     name: '',
     email: '',
     password: '',
+    department: '',
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -19,7 +32,7 @@ const Signup = () => {
   const handleRoleSelect = (selectedRole) => {
     setRole(selectedRole);
     setErrors({});
-    setFormData({ name: '', email: '', password: '' }); // Reset form when changing role
+    setFormData({ name: '', email: '', password: '', department: '' }); // Reset form when changing role
   };
 
   const handleChange = (e) => {
@@ -44,12 +57,12 @@ const Signup = () => {
       toast.success(response.data.message || 'Registration successful. Please wait for admin verification.');
 
       // Reset form after successful registration
-      setFormData({ name: '', email: '', password: '' });
+      setFormData({ name: '', email: '', password: '', department: '' });
       setRole('');
 
       setTimeout(() => {
         navigate('/login'); // Redirect to login
-      }, 1500); 
+      }, 1500);
     } catch (error) {
       toast.error(error.response?.data?.message || 'Registration failed. Please try again.');
     } finally {
@@ -115,6 +128,30 @@ const Signup = () => {
             error={errors.password}
             required
           />
+
+          {/* Department Selection */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Department
+            </label>
+            <select
+              name="department"
+              value={formData.department}
+              onChange={handleChange}
+              required
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            >
+              <option value="">Select your department</option>
+              {departments.map((dept, index) => (
+                <option key={index} value={dept}>
+                  {dept}
+                </option>
+              ))}
+            </select>
+            {errors.department && (
+              <p className="text-red-500 text-sm mt-1">{errors.department}</p>
+            )}
+          </div>
 
           <button
             type="submit"
