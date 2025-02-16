@@ -15,8 +15,8 @@ export const allocateLeave = async (req, res) => {
     fromDate,
     toDate,
     reason,
-    reportedByDoctor = false,
-    leftCampus = false,
+    reportedByDoctor = true,
+    leftCampus = true,
   } = req.body;
 
   // Validate required fields

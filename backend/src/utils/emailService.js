@@ -1,7 +1,7 @@
 import nodemailer from "nodemailer";
 
 const transporter = nodemailer.createTransport({
-  service: "Gmail",
+  service: "gmail",
   auth: {
     user: process.env.EMAIL, // Your Gmail ID
     pass: process.env.EMAIL_PASSWORD, // Your Gmail password
@@ -11,7 +11,7 @@ const transporter = nodemailer.createTransport({
 // Function to send email
 export const sendEmail = async (to, subject, text) => {
   const mailOptions = {
-    from: "MediCare System",
+    from: "sggs care",
     to,
     subject,
     text,
