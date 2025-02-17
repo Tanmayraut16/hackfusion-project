@@ -8,13 +8,20 @@ import Doctor from "../models/doctor.model.js";
 const verifyToken = async (req, res, next, allowedRoles) => {
   try {
     const token = req.headers.authorization?.split(" ")[1];
+   
     if (!token)
       return res
         .status(401)
         .json({ message: "Access Denied. No token provided." });
 
-    const decoded = jwt.verify(token, process.env.SECRET_KEY);
+
+    console.log(token);
+    console.log(process.env.SECRET_KEY);
+    
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    
     let user = null;
+    
 
     if (allowedRoles.includes("student"))
       user = await Student.findById(decoded.id);
@@ -25,6 +32,8 @@ const verifyToken = async (req, res, next, allowedRoles) => {
     if (allowedRoles.includes("doctor") && !user)
       user = await Doctor.findById(decoded.id);
 
+    
+    
     if (!user || !allowedRoles.includes(user.role)) {
       return res
         .status(403)
@@ -38,21 +47,38 @@ const verifyToken = async (req, res, next, allowedRoles) => {
   }
 };
 
-// Student Authentication Middleware
+// // Student Authentication Middleware
+// export const verifyStudent = (req, res, next) =>
+//   verifyToken(req, res, next, req.user.role);
+
+// export const verifyDoctor = (req, res, next) =>
+//   verifyToken(req, res, next, req.user.role);
+
+// // Faculty Authentication Middleware
+// export const verifyFaculty = (req, res, next) =>
+//   verifyToken(req, res, next, req.user.role);
+
+// // Admin Authentication Middleware
+// export const verifyAdmin = (req, res, next) =>
+//   verifyToken(req, res, next, req.user.role);
+
+// // Middleware to allow only Faculty & Admin
+// export const verifyFacultyOrAdmin = (req, res, next) =>
+//   verifyToken(req, res, next, req.user.role);
+
+// Middleware for each role
 export const verifyStudent = (req, res, next) =>
-  verifyToken(req, res, next, req.user.role);
+  verifyToken(req, res, next, ["student"]);
 
 export const verifyDoctor = (req, res, next) =>
-  verifyToken(req, res, next, req.user.role);
+  verifyToken(req, res, next, ["doctor"]);
 
-// Faculty Authentication Middleware
 export const verifyFaculty = (req, res, next) =>
-  verifyToken(req, res, next, req.user.role);
+  verifyToken(req, res, next, ["faculty"]);
 
-// Admin Authentication Middleware
 export const verifyAdmin = (req, res, next) =>
-  verifyToken(req, res, next, req.user.role);
+  verifyToken(req, res, next, ["admin"]);
 
 // Middleware to allow only Faculty & Admin
 export const verifyFacultyOrAdmin = (req, res, next) =>
-  verifyToken(req, res, next, req.user.role);
+  verifyToken(req, res, next, ["faculty", "admin"]);
