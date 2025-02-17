@@ -1,41 +1,62 @@
-import React from "react";
-import Sidebar from "../../components/Sidebar"; // Import Sidebar Component
+import React, { useState } from "react";
+import { useLocation } from "react-router-dom";
+import Sidebar from "../../components/Sidebar";
+import Navbar from "../../components/Navbar";
+import FacultyDashboard from "../../components/Faculty-Comp/FacultyDashboard";
+import FacultyComplaints from "../../components/Faculty-Comp/FacultyComplaints";
+import FacultyFacilityBooking from "../../components/Faculty-Comp/FacultyFacilityBooking";
 
 function FacultyHome() {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const location = useLocation();
+  const lastPart = location.pathname.split("/").pop();
+
+  let ContentComponent;
+  switch (lastPart) {
+    case "dashboard":
+      ContentComponent = <FacultyDashboard />;
+      break;
+    case "complaints":
+      ContentComponent = <FacultyComplaints />;
+      break;
+    case "booking":
+      ContentComponent = <FacultyFacilityBooking />;
+      break;
+    default:
+      ContentComponent = <FacultyDashboard />;
+  }
+
   return (
-    <div className="flex">
+    <div className="flex h-screen">
       {/* Sidebar for Faculty */}
-      <Sidebar role="Faculty" />
+      <Sidebar 
+        role="Faculty"
+        isOpen={isSidebarOpen}
+      />
 
       {/* Main Content */}
-      <div className="flex-1 min-h-screen bg-gradient-to-br from-purple-50 to-purple-100">
-        <div className="container mx-auto px-4 py-8">
-          <header className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">Welcome, Faculty Member</h1>
-            <p className="text-xl text-gray-600">
-              This is your dashboard where you can manage your courses, grades, and students.
-            </p>
-          </header>
-
-          <main>
-            {/* Courses Section */}
-            <div className="bg-white rounded-lg shadow-xl p-8 mb-8">
-              <h2 className="text-2xl font-semibold text-gray-900">Your Courses</h2>
-              <ul className="list-disc pl-6 mt-4 text-gray-700">
-                <li>Introduction to Programming</li>
-                <li>Advanced Data Structures</li>
-                <li>Linear Algebra</li>
-              </ul>
-            </div>
-
-            {/* Manage Students Section */}
-            <div className="bg-white rounded-lg shadow-xl p-8">
-              <h2 className="text-2xl font-semibold text-gray-900">Manage Students</h2>
-              <p className="text-gray-700 mt-4">
-                View and manage the students enrolled in your courses.
-              </p>
-            </div>
-          </main>
+      <div className="flex-1 flex flex-col bg-gradient-to-r from-purple-50 via-purple-30 to-purple-20"
+        style={{
+          marginLeft: isSidebarOpen ? '250px' : '0px',
+          width: `calc(100% - ${isSidebarOpen ? '250px' : '0px'})`
+        }}
+      >
+        {/* Navbar */}
+        <Navbar 
+          toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} 
+          userName="Tanmay"
+        />
+        
+        {/* Main Section with Dynamic Content */}
+        <div 
+          className="flex-1 bg-gradient-to-br from-purple-50 to-purple-100 px-4 py-8"
+          style={{
+            height: `calc(100vh - 60px)`
+          }}
+        >
+          <div className="container mx-auto px-20 py-10">
+            {ContentComponent}
+          </div>
         </div>
       </div>
     </div>

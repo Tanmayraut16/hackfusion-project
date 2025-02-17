@@ -6,6 +6,8 @@ import Signup from './pages/Signup';
 import StudentHome from './pages/Student/StudentHome';
 import FacultyHome from './pages/Faculty/FacultyHome';
 import AdminHome from './pages/Admin/AdminHome';
+import DocterDashboard from './pages/Docter/DocterDashboard';
+import LeaveApplication from './pages/Docter/LeaveApplication';
 
 function App() {
   return (
@@ -16,9 +18,11 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/" element={<Navigate to="/login" replace />} />
-          <Route path='/student-home' element={<StudentHome />} />
-          <Route path='/faculty-home' element={<FacultyHome />} />
-          <Route path='/admin-home' element={<AdminHome />} />
+          <Route path='/student/*' element={<StudentHome />} />
+          <Route path='/faculty/*' element={<FacultyHome />} />
+          <Route path='/admin/*' element={<AdminHome />} />
+          <Route path='/docter' element={<DocterDashboard />} />
+          <Route path='/docter/leave-application' element={<LeaveApplication />} />
         </Routes>
       </BrowserRouter>
     </>

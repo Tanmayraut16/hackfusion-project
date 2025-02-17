@@ -1,29 +1,71 @@
-import React from 'react';
+import React, { useState } from "react";
+import { useLocation } from "react-router-dom";
+import Sidebar from "../../components/Sidebar";
+import Navbar from "../../components/Navbar";
+import AdminDashboard from "../../components/Admin-Comp/AdminDashboard";
+import AdminUsers from "../../components/Admin-Comp/AdminUsers";
+import AdminElections from "../../components/Admin-Comp/AdminElections";
+import AdminApprovals from "../../components/Admin-Comp/AdminApprovals";
+import AdminSettings from "../../components/Admin-Comp/AdminSettings";
 
 function AdminHome() {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const location = useLocation();
+  const lastPart = location.pathname.split("/").pop();
+
+  let ContentComponent;
+  switch (lastPart) {
+    case "dashboard":
+      ContentComponent = <AdminDashboard />;
+      break;
+    case "users":
+      ContentComponent = <AdminUsers />;
+      break;
+    case "elections":
+      ContentComponent = <AdminElections />;
+      break;
+    case "approvals":
+      ContentComponent = <AdminApprovals />;
+      break;
+    case "settings":
+      ContentComponent = <AdminSettings />;
+      break;
+    default:
+      ContentComponent = <AdminDashboard />;
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
-      <div className="container mx-auto px-4 py-8">
-        <header className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Welcome, Admin</h1>
-          <p className="text-xl text-gray-600">This is your admin dashboard where you can manage users, roles, and the system.</p>
-        </header>
+    <div className="flex h-screen">
+      {/* Sidebar for Admin */}
+      <Sidebar 
+        role="Admin"
+        isOpen={isSidebarOpen}
+      />
 
-        <main>
-          <div className="bg-white rounded-lg shadow-xl p-8 mb-8">
-            <h2 className="text-2xl font-semibold text-gray-900">User Management</h2>
-            <ul className="list-disc pl-6 mt-4 text-gray-700">
-              <li>Create new user accounts</li>
-              <li>Assign roles (Student, Faculty, Admin)</li>
-              <li>Deactivate accounts</li>
-            </ul>
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col bg-gradient-to-r from-blue-50 via-blue-30 to-blue-20"
+        style={{
+          marginLeft: isSidebarOpen ? '250px' : '0px',
+          width: `calc(100% - ${isSidebarOpen ? '250px' : '0px'})`
+        }}
+      >
+        {/* Navbar */}
+        <Navbar 
+          toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} 
+          userName="Admin"
+        />
+        
+        {/* Main Section with Dynamic Content */}
+        <div 
+          className="flex-1 bg-gradient-to-br from-blue-50 to-blue-100 px-4 py-8"
+          style={{
+            height: `calc(100vh - 60px)`
+          }}
+        >
+          <div className="container mx-auto px-20 py-10">
+            {ContentComponent}
           </div>
-
-          <div className="bg-white rounded-lg shadow-xl p-8">
-            <h2 className="text-2xl font-semibold text-gray-900">System Settings</h2>
-            <p className="text-gray-700 mt-4">Configure and manage system-wide settings here.</p>
-          </div>
-        </main>
+        </div>
       </div>
     </div>
   );
