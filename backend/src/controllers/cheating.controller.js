@@ -45,9 +45,6 @@ export const addCheatingRecord = async (req, res) => {
 };
 
 
-
-
-
 // Get all cheating records (Public for all students & faculty)
 export const getCheatingRecords = async (req, res) => {
   try {
