@@ -45,7 +45,7 @@ const Login = () => {
       toast.success('Login successful');
 
       setTimeout(() => {
-        navigate(`/${role}-home`); // Redirect to login
+        navigate(`/${role}`); // Redirect to login
       }, 1500); 
 
     } catch (error) {

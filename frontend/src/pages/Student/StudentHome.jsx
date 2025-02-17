@@ -1,41 +1,66 @@
-import React from "react";
-import Sidebar from "../../components/Sidebar"; 
+import React, { useState } from "react";
+import { useLocation } from "react-router-dom";
+import Sidebar from "../../components/Sidebar";
+import Navbar from "../../components/Navbar";
+import StudentDashboard from "../../components/Student-Comp/StudentDashboard";
+import StudentElections from "../../components/Student-Comp/StudentElections";
+import StudentFacilityBooking from "../../components/Student-Comp/StudentFacilityBooking";
+import StudentComplaints from "../../components/Student-Comp/StudentComplaints";
 
 function StudentHome() {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const location = useLocation();
+  const lastPart = location.pathname.split("/").pop();
+
+  let ContentComponent;
+  switch (lastPart) {
+    case "dashboard":
+      ContentComponent = <StudentDashboard />;
+      break;
+    case "elections":
+      ContentComponent = <StudentElections />;
+      break;
+    case "booking":
+      ContentComponent = <StudentFacilityBooking />;
+      break;
+    case "complaints":
+      ContentComponent = <StudentComplaints />;
+      break;
+    default:
+      ContentComponent = <StudentDashboard />;
+  }
+
   return (
-    <div className="flex">
+    <div className="flex h-screen">
       {/* Sidebar for Students */}
-      <Sidebar role="Student" />
+      <Sidebar 
+        role="Student"
+        isOpen={isSidebarOpen}
+      />
 
       {/* Main Content */}
-      <div className="flex-1 min-h-screen bg-gradient-to-br from-green-50 to-green-100">
-        <div className="container mx-auto px-4 py-8">
-          <header className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">Welcome, Student</h1>
-            <p className="text-xl text-gray-600">
-              This is your dashboard where you can view your courses and grades.
-            </p>
-          </header>
-
-          <main>
-            {/* Courses Section */}
-            <div className="bg-white rounded-lg shadow-xl p-8 mb-8">
-              <h2 className="text-2xl font-semibold text-gray-900">Your Courses</h2>
-              <ul className="list-disc pl-6 mt-4 text-gray-700">
-                <li>Mathematics 101</li>
-                <li>History of College</li>
-                <li>Science Fundamentals</li>
-              </ul>
-            </div>
-
-            {/* Grades Section */}
-            <div className="bg-white rounded-lg shadow-xl p-8">
-              <h2 className="text-2xl font-semibold text-gray-900">Your Grades</h2>
-              <p className="text-gray-700 mt-4">
-                Your grades will appear here after assessments.
-              </p>
-            </div>
-          </main>
+      <div className="flex-1 flex flex-col bg-gradient-to-r from-blue-50 via-blue-30 to-blue-20"
+        style={{
+          marginLeft: isSidebarOpen ? '250px' : '0px',
+          width: `calc(100% - ${isSidebarOpen ? '250px' : '0px'})`
+        }}
+      >
+        {/* Navbar */}
+        <Navbar 
+          toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} 
+          userName="Tanmay"
+        />
+        
+        {/* Main Section with Dynamic Content */}
+        <div 
+          className="flex-1 bg-gradient-to-br from-green-50 to-green-100 px-4 py-8"
+          style={{
+            height: `calc(100vh - 60px)`
+          }}
+        >
+          <div className="container mx-auto px-20 py-10">
+            {ContentComponent}
+          </div>
         </div>
       </div>
     </div>
