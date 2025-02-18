@@ -236,7 +236,6 @@ export const getPositionVotes = async (req, res) => {
       return res.status(404).json({ message: "Position not found" });
     }
 
-    // Map candidates with their vote counts
     const results = position.candidates.map((cand) => ({
       candidate: cand.student.name,
       votes: cand.votes,
