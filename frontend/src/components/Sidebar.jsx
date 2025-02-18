@@ -21,9 +21,9 @@ const menuItems = {
     { name: "Manage Approvals", path: "/admin/approvals", icon: "ClipboardList" },
     { name: "Settings", path: "/admin/settings", icon: "Settings" },
   ],
-  Docter: [
-    { name: "Dashboard", path: "/docter", icon: "PieChart" },
-    { name: "Leave Application", path: "/docter/leave-application", icon: "Users" },
+  Doctor: [
+    { name: "Dashboard", path: "/doctor/dashboard", icon: "PieChart" },
+    { name: "Leave Application", path: "/doctor/leave-application", icon: "Users" },
   ],
 };
 
