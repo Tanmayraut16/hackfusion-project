@@ -15,7 +15,7 @@ export const verifyToken = async (req, res, next, allowedRoles) => {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     let user = null;
-    // console.log(decoded);
+    console.log(decoded);
 
     if (allowedRoles.includes("student"))
       user = await Student.findById(decoded.studentId);
