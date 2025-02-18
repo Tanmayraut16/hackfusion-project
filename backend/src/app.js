@@ -5,7 +5,11 @@ import studentRouter from "../src/routes/student.routes.js";
 import facultyRouter from "../src/routes/faculty.routes.js";
 import adminRouter from "../src/routes/admin.routes.js";
 import doctorRouter from "../src/routes/doctor.routes.js";
+
 import votingRouter from "../src/routes/election.routes.js";
+
+import cheatingRouter from '../src/routes/cheating.routes.js'
+
 
 const app = express();
 
@@ -26,6 +30,9 @@ app.use("/api/student-login", studentRouter);
 app.use("/api/faculty-login", facultyRouter);
 app.use("/api/admin", adminRouter);
 app.use("/api/doctor", doctorRouter);
+
 app.use("/api/election", votingRouter);
 
+
+app.use("/api/cheating",cheatingRouter);
 export { app };
