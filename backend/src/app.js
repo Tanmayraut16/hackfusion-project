@@ -12,6 +12,7 @@ import cheatingRouter from '../src/routes/cheating.routes.js'
 
 import bookingRouter from '../src/routes/booking.routes.js'
 import facilityRoutes from '../src/routes/facility.routes.js';
+import complaintRouter from '../src/routes/complaint.routes.js'
 
 
 const app = express();
@@ -38,6 +39,7 @@ app.use("/api/election", votingRouter);
 
 
 app.use("/api/cheating",cheatingRouter);
+app.use("/api/complaint",complaintRouter);
 
 app.use("/api/booking", bookingRouter);
 app.use('/api/facilities', facilityRoutes);

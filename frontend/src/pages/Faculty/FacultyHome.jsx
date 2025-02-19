@@ -5,6 +5,7 @@ import Navbar from "../../components/Navbar";
 import FacultyDashboard from "../../components/Faculty-Comp/FacultyDashboard";
 import FacultyComplaints from "../../components/Faculty-Comp/FacultyComplaints";
 import FacultyFacilityBooking from "../../components/Faculty-Comp/FacultyFacilityBooking";
+import ReportCheating from "../../components/ReportCheating";
 
 function FacultyHome() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -18,6 +19,9 @@ function FacultyHome() {
       break;
     case "complaints":
       ContentComponent = <FacultyComplaints />;
+      break;
+    case "report-cheating":
+      ContentComponent = <ReportCheating />;
       break;
     case "booking":
       ContentComponent = <FacultyFacilityBooking />;
