@@ -62,3 +62,7 @@ export const verifyAdmin = (req, res, next) =>
 // Middleware to allow only Faculty & Admin
 export const verifyFacultyOrAdmin = (req, res, next) =>
   verifyToken(req, res, next, ["faculty", "admin"]);
+
+// Middleware for booking creation (only Students and Faculty can book)
+export const verifyStudentOrFaculty = (req, res, next) =>
+  verifyToken(req, res, next, ["student", "faculty"]);

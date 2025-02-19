@@ -10,6 +10,9 @@ import votingRouter from "../src/routes/election.routes.js";
 
 import cheatingRouter from '../src/routes/cheating.routes.js'
 
+import bookingRouter from '../src/routes/booking.routes.js'
+import facilityRoutes from '../src/routes/facility.routes.js';
+
 
 const app = express();
 
@@ -35,4 +38,7 @@ app.use("/api/election", votingRouter);
 
 
 app.use("/api/cheating",cheatingRouter);
+
+app.use("/api/booking", bookingRouter);
+app.use('/api/facilities', facilityRoutes);
 export { app };

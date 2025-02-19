@@ -15,3 +15,5 @@ connectDB()
   .catch((err) => {
     console.log("MONGO db connection failed !!! ", err);
   });
+
+  import './scheduler.js'; // This will start the cron job.
