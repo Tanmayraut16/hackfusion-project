@@ -1,13 +1,13 @@
 import CheatingRecord from "../models/cheatingrecord.model.js";
 import Student from "../models/students.model.js";
+import { uploadOnCloudinary } from '../utils/cloudinary.js'; // Ensure correct path
 
-// Add a new cheating record (Faculty only)
+
 export const addCheatingRecord = async (req, res) => {
   try {
     const { registrationNumber, reason, examName } = req.body;
-    
-    // //current user is faculty no need to check faculty role 
-    
+
+    // Ensure only faculty can report cheating cases
     if (req.user.role !== "faculty") {
       return res.status(403).json({ error: "Only faculty can report cheating cases" });
     }
@@ -15,35 +15,49 @@ export const addCheatingRecord = async (req, res) => {
     // Construct the student's email using the registration number
     const studentEmail = `${registrationNumber}@sggs.ac.in`;
 
-    
-  
     // Find the student using the email
     const student = await Student.findOne({ email: studentEmail });
-  
-    
+
     if (!student) {
       return res.status(404).json({ error: "Student not found with this registration number" });
     }
 
+    let proofUrl = "";
+
+    // Check if a file was uploaded
+    if (req.file) {
+      const cloudinaryResponse = await uploadOnCloudinary(req.file.path);
+
+      if (!cloudinaryResponse) {
+        return res.status(500).json({ error: "File upload failed. Please try again." });
+      }
+
+      // If Cloudinary flagged the content as inappropriate, return an error
+      if (cloudinaryResponse.error) {
+        return res.status(400).json({ error: "Inappropriate image or video detected. Please upload a valid proof." });
+      }
+
+      proofUrl = cloudinaryResponse.secure_url;
+    }
+
+    // Create a new cheating record
     const newRecord = new CheatingRecord({
       student: student._id,
       reason,
       reportedBy: req.user._id, // Faculty ID
       examName,
       registrationNumber,
+      proofUrl, // Store Cloudinary image URL
     });
 
-    console.log(newRecord);
-    
-
     await newRecord.save();
-    
+
     res.status(201).json({ message: "Cheating record added successfully", record: newRecord });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
 
 // Get all cheating records (Public for all students & faculty)
 export const getCheatingRecords = async (req, res) => {
