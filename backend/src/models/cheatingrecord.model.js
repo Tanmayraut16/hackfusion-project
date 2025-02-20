@@ -20,7 +20,9 @@ const cheatingRecordSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    
+    proofUrl: {
+      type: String,
+    },
     registrationNumber: { 
         type: String,
         required: true,

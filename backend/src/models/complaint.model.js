@@ -8,6 +8,7 @@ const complaintSchema = new mongoose.Schema(
       ref: "Student",
       required: true,
     },
+    proofUrl: { type: String },
     isAnonymous: { type: Boolean, default: true },
     isApprovedForReveal: { type: Boolean, default: false },
     votesForReveal: { type: Number, default: 0 },

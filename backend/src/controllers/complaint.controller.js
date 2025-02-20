@@ -1,5 +1,6 @@
 import {Filter} from "bad-words";
 import Complaint from "../models/complaint.model.js";
+import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
 const filter = new Filter();
 
@@ -15,12 +16,31 @@ export const submitComplaint = async (req, res) => {
     if (filter.isProfane(content)) {
       return res.status(400).json({ message: "Inappropriate language is not allowed" });
     }
+
+    let proofUrl = "";
+
+    // Check if a file was uploaded
+    if (req.file) {
+      const cloudinaryResponse = await uploadOnCloudinary(req.file.path);
+
+      if (!cloudinaryResponse) {
+        return res.status(500).json({ error: "File upload failed. Please try again." });
+      }
+
+      // If Cloudinary flagged the content as inappropriate, return an error
+      if (cloudinaryResponse.error) {
+        return res.status(400).json({ error: "Inappropriate image or video detected. Please upload a valid proof." });
+      }
+
+      proofUrl = cloudinaryResponse.secure_url;
+    }
     
         
     const complaint = new Complaint({
       content,
       submittedBy: req.user._id,
       isAnonymous,
+      proofUrl,
     });
 
     await complaint.save();
