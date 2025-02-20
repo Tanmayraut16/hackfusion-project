@@ -1,6 +1,8 @@
 import Budget from "../models/budget.model.js";
 import ExpenseLog from "../models/expenseLog.model.js";
 
+import { uploadOnCloudinary } from "../utils/cloudinary.js";
+
 /**
  * Create a new budget allocation.
  * Expected req.body:
@@ -73,7 +75,7 @@ export const getBudgetById = async (req, res) => {
 export const createExpenseLog = async (req, res) => {
   try {
     const { id } = req.params; // Budget ID
-    const { description, amount_spent, proof_url } = req.body;
+    const { description, amount_spent } = req.body;
 
     // Fetch the budget document from the Budget schema
     const budget = await Budget.findById(id);
@@ -92,6 +94,25 @@ export const createExpenseLog = async (req, res) => {
         success: false,
         error: "Expense amount exceeds allocated budget",
       });
+    }
+
+
+    let proof_url = "";
+
+    // Check if a file was uploaded
+    if (req.file) {
+      const cloudinaryResponse = await uploadOnCloudinary(req.file.path);
+
+      if (!cloudinaryResponse) {
+        return res.status(500).json({ error: "File upload failed. Please try again." });
+      }
+
+      // If Cloudinary flagged the content as inappropriate, return an error
+      if (cloudinaryResponse.error) {
+        return res.status(400).json({ error: "Inappropriate image or video detected. Please upload a valid proof." });
+      }
+
+      proof_url = cloudinaryResponse.secure_url;
     }
 
     // Check if a duplicate expense log already exists for the same budget
