@@ -25,6 +25,7 @@ export const verifyToken = async (req, res, next, allowedRoles) => {
 
     if (allowedRoles.includes("student"))
       user = await Student.findById(decoded.studentId);
+
     if (allowedRoles.includes("faculty") && !user)
       user = await Faculty.findById(decoded.id);
     if (allowedRoles.includes("admin") && !user)

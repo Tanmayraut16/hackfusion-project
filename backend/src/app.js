@@ -8,11 +8,13 @@ import doctorRouter from "../src/routes/doctor.routes.js";
 
 import votingRouter from "../src/routes/election.routes.js";
 
-import cheatingRouter from '../src/routes/cheating.routes.js'
+import cheatingRouter from "../src/routes/cheating.routes.js";
 
-import bookingRouter from '../src/routes/booking.routes.js'
-import facilityRoutes from '../src/routes/facility.routes.js';
+import bookingRouter from "../src/routes/booking.routes.js";
+import facilityRoutes from "../src/routes/facility.routes.js";
 
+import applicationRoutes from "./routes/application.routes.js";
+import budgetRoutes from "./routes/budget.routes.js";
 
 const app = express();
 
@@ -33,12 +35,11 @@ app.use("/api/student-login", studentRouter);
 app.use("/api/faculty-login", facultyRouter);
 app.use("/api/admin", adminRouter);
 app.use("/api/doctor", doctorRouter);
-
 app.use("/api/election", votingRouter);
-
-
-app.use("/api/cheating",cheatingRouter);
-
+app.use("/api/cheating", cheatingRouter);
 app.use("/api/booking", bookingRouter);
-app.use('/api/facilities', facilityRoutes);
+app.use("/api/facilities", facilityRoutes);
+app.use("/api/applications", applicationRoutes);
+app.use("/api/budgets", budgetRoutes);
+
 export { app };
