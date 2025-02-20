@@ -1,35 +1,75 @@
 import { Link, useNavigate } from "react-router-dom";
-import { PieChart, Vote, BookOpen, ClipboardList, Users, Settings, HelpCircle, LogOut } from "lucide-react";
-
+import {
+  PieChart,
+  Vote,
+  BookOpen,
+  ClipboardList,
+  Users,
+  Settings,
+  HelpCircle,
+  LogOut,
+} from "lucide-react";
 
 const menuItems = {
   Student: [
     { name: "Dashboard", path: "/student/dashboard", icon: "PieChart" },
     { name: "Elections", path: "/student/elections", icon: "Vote" },
-    { name: "Report Cheating", path: "/student/report-cheating", icon: "ClipboardList" },
+    {
+      name: "Report Cheating",
+      path: "/student/report-cheating",
+      icon: "ClipboardList",
+    },
     { name: "Facility Booking", path: "/student/booking", icon: "BookOpen" },
     { name: "Complaints", path: "/student/complaints", icon: "ClipboardList" },
   ],
   Faculty: [
     { name: "Dashboard", path: "/faculty/dashboard", icon: "PieChart" },
-    { name: "Review Complaints", path: "/faculty/complaints", icon: "ClipboardList" },
-    { name: "Report Cheating", path: "/faculty/report-cheating", icon: "ClipboardList" },
-    { name: "Manage Facility Booking", path: "/faculty/booking", icon: "BookOpen" },
+    {
+      name: "Review Complaints",
+      path: "/faculty/complaints",
+      icon: "ClipboardList",
+    },
+    {
+      name: "Report Cheating",
+      path: "/faculty/report-cheating",
+      icon: "ClipboardList",
+    },
+    {
+      name: "Manage Facility Booking",
+      path: "/faculty/booking",
+      icon: "BookOpen",
+    },
   ],
   Admin: [
     { name: "Dashboard", path: "/admin/dashboard", icon: "PieChart" },
     { name: "Manage Users", path: "/admin/users", icon: "Users" },
     { name: "Manage Elections", path: "/admin/elections", icon: "Vote" },
-    { name: "Manage Approvals", path: "/admin/approvals", icon: "ClipboardList" },
+    { name: "Manage Booking", path: "/admin/bookings", icon: "BookOpen" },
+    {
+      name: "Manage Approvals",
+      path: "/admin/approvals",
+      icon: "ClipboardList",
+    },
     { name: "Settings", path: "/admin/settings", icon: "Settings" },
   ],
   Doctor: [
     { name: "Dashboard", path: "/doctor/dashboard", icon: "PieChart" },
-    { name: "Leave Application", path: "/doctor/leave-application", icon: "Users" },
+    {
+      name: "Leave Application",
+      path: "/doctor/leave-application",
+      icon: "Users",
+    },
   ],
 };
 
-const iconComponents = { PieChart, Vote, BookOpen, ClipboardList, Users, Settings };
+const iconComponents = {
+  PieChart,
+  Vote,
+  BookOpen,
+  ClipboardList,
+  Users,
+  Settings,
+};
 
 const Sidebar = ({ role, isOpen }) => {
   const items = menuItems[role] || [];
@@ -42,7 +82,11 @@ const Sidebar = ({ role, isOpen }) => {
   };
 
   return (
-    <aside className={`${isOpen ? 'w-64' : 'w-20'} bg-white border-r border-gray-100 shadow-soft pb-20 h-screen fixed left-0 top-16 transition-all duration-300 ease-in-out flex flex-col justify-between`}>
+    <aside
+      className={`${
+        isOpen ? "w-64" : "w-20"
+      } bg-white border-r border-gray-100 shadow-soft pb-20 h-screen fixed left-0 top-16 transition-all duration-300 ease-in-out flex flex-col justify-between`}
+    >
       <nav className="p-4">
         {items.map((item) => {
           const Icon = iconComponents[item.icon];
@@ -54,7 +98,9 @@ const Sidebar = ({ role, isOpen }) => {
             >
               <Icon className="w-6 h-6 group-hover:text-blue-500 transition-all duration-300" />
               {isOpen && (
-                <span className="font-medium group-hover:text-blue-500 transition-all duration-300">{item.name}</span>
+                <span className="font-medium group-hover:text-blue-500 transition-all duration-300">
+                  {item.name}
+                </span>
               )}
             </Link>
           );
