@@ -35,7 +35,7 @@ function StudentHome() {
   }
 
   return (
-    <div className="flex h-screen">
+    <div className="flex min-h-screen">
       {/* Sidebar for Students */}
       <Sidebar role="Student" isOpen={isSidebarOpen} />
 

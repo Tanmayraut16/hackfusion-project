@@ -7,6 +7,7 @@ import AdminUsers from "../../components/Admin-Comp/AdminUsers";
 import AdminElections from "../../components/Admin-Comp/AdminElections";
 import AdminApprovals from "../../components/Admin-Comp/AdminApprovals";
 import AdminSettings from "../../components/Admin-Comp/AdminSettings";
+import AdminManageBookings from "../../components/Admin-Comp/AdminManageBookings";
 
 function AdminHome() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -24,6 +25,9 @@ function AdminHome() {
     case "elections":
       ContentComponent = <AdminElections />;
       break;
+    case "bookings":
+      ContentComponent = <AdminManageBookings />;
+      break;
     case "approvals":
       ContentComponent = <AdminApprovals />;
       break;
@@ -35,31 +39,29 @@ function AdminHome() {
   }
 
   return (
-    <div className="flex h-screen">
+    <div className="flex min-h-screen">
       {/* Sidebar for Admin */}
-      <Sidebar 
-        role="Admin"
-        isOpen={isSidebarOpen}
-      />
+      <Sidebar role="Admin" isOpen={isSidebarOpen} />
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col bg-gradient-to-r from-blue-50 via-blue-30 to-blue-20"
+      <div
+        className="flex-1 flex flex-col bg-gradient-to-r from-blue-50 via-blue-30 to-blue-20"
         style={{
-          marginLeft: isSidebarOpen ? '250px' : '0px',
-          width: `calc(100% - ${isSidebarOpen ? '250px' : '0px'})`
+          marginLeft: isSidebarOpen ? "250px" : "0px",
+          width: `calc(100% - ${isSidebarOpen ? "250px" : "0px"})`,
         }}
       >
         {/* Navbar */}
-        <Navbar 
-          toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} 
+        <Navbar
+          toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
           userName="Admin"
         />
-        
+
         {/* Main Section with Dynamic Content */}
-        <div 
+        <div
           className="flex-1 bg-gradient-to-br from-blue-50 to-blue-100 px-4 py-8"
           style={{
-            height: `calc(100vh - 60px)`
+            height: `calc(100vh - 60px)`,
           }}
         >
           <div className="container mx-auto px-20 py-10">
