@@ -1,67 +1,70 @@
-import cron from 'node-cron';
-import Application from './models/application.model.js';
-import Booking from './models/booking.model.js';
-import Facility from './models/facility.model.js';
+import cron from "node-cron";
+import Application from "./models/application.model.js";
+import Booking from "./models/booking.model.js";
+import Facility from "./models/facility.model.js";
 
 // Scheduler for Application Priority Escalation
-cron.schedule('* * * * *', async () => {
+cron.schedule("* * * * *", async () => {
   try {
-    console.log('Priority escalation task running at', new Date().toISOString());
+    console.log(
+      "Priority escalation task running at",
+      new Date().toISOString()
+    );
     const ESCALATION_THRESHOLD_MS = 60 * 60 * 1000; // 1 hour
     const thresholdTime = new Date(Date.now() - ESCALATION_THRESHOLD_MS);
-    
-    // Find pending applications created before the threshold time
+
     const applications = await Application.find({
-      status: 'pending',
-      created_at: { $lte: thresholdTime }
+      status: "pending",
+      created_at: { $lte: thresholdTime },
     });
 
     if (applications.length > 0) {
       for (const app of applications) {
-        app.priority += 1;
+        app.priority = (app.priority || 0) + 1; // Ensure priority exists
         await app.save();
       }
-      console.log(`Priority escalated for ${applications.length} application(s).`);
+      console.log(
+        `Priority escalated for ${applications.length} application(s).`
+      );
     } else {
-      console.log('No applications found for priority escalation.');
+      console.log("No applications found for priority escalation.");
     }
   } catch (error) {
-    console.error('Error during priority escalation:', error);
+    console.error("Error during priority escalation:", error);
   }
 });
 
 // Scheduler for updating facility status for expired bookings
-cron.schedule('* * * * *', async () => {
-
-
-// This cron job runs every minute.
 cron.schedule("* * * * *", async () => {
   try {
     const now = new Date();
 
-    // Find approved bookings that have passed their end_time
+    // Find and update expired bookings in bulk
     const expiredBookings = await Booking.find({
       end_time: { $lte: now },
       approval_status: "approved",
     });
 
-    for (const booking of expiredBookings) {
-      // Update the facility's status to 'available'
+    if (expiredBookings.length > 0) {
+      const facilityIds = expiredBookings.map((booking) => booking.facility);
 
-      await Facility.findByIdAndUpdate(booking.facility, {
-        status: "available",
-      });
+      // Bulk update facilities to 'available'
+      await Facility.updateMany(
+        { _id: { $in: facilityIds } },
+        { status: "available" }
+      );
 
-      // Optionally, update the booking to mark it as processed
-      // e.g., set approval_status to 'completed' or archive it.
-
+      console.log(
+        `Facility status updated for ${expiredBookings.length} expired bookings.`
+      );
+    } else {
+      console.log("No expired bookings found.");
     }
-    console.log('Facility status updated for expired bookings.');
   } catch (error) {
     console.error("Error updating facility status:", error);
   }
 });
 
-
-console.log('Scheduler started: checking for priority escalation and expired bookings every minute.');
-console.log("Scheduler started: checking for expired bookings every minute.");
+console.log(
+  "Scheduler started: checking for priority escalation and expired bookings every minute."
+);
