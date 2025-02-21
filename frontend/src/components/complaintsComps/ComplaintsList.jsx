@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { ThumbsUp, Eye, Clock, CheckCircle, XCircle } from "lucide-react";
 
 export function ComplaintsList({
@@ -7,6 +7,14 @@ export function ComplaintsList({
   currentUser,
   isLoading,
 }) {
+  const [statusFilter, setStatusFilter] = useState("all");
+
+  // Filter complaints based on the selected filter (case-insensitive)
+  const filteredComplaints = complaints.filter((complaint) => {
+    if (statusFilter === "all") return true;
+    return complaint.status.toLowerCase() === statusFilter;
+  });
+
   const canVoteToReveal =
     currentUser.role === "faculty" || currentUser.role === "admin";
 
@@ -34,7 +42,25 @@ export function ComplaintsList({
 
   return (
     <div className="space-y-4">
-      {complaints.map((complaint) => (
+      {/* Dropdown for filtering complaints by status */}
+      <div className="flex items-center space-x-4 bg-white p-4 rounded-lg shadow-sm">
+        <label htmlFor="statusFilter" className="text-gray-600 text-sm">
+          Filter by status:
+        </label>
+        <select
+          id="statusFilter"
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="block w-40 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+        >
+          <option value="all">All Status</option>
+          <option value="pending">Pending</option>
+          <option value="approved">Approved</option>
+          <option value="rejected">Rejected</option>
+        </select>
+      </div>
+
+      {filteredComplaints.map((complaint) => (
         <div key={complaint._id} className="bg-white p-6 rounded-lg shadow-md">
           <div className="flex items-start justify-between">
             <div className="flex-1">
@@ -78,7 +104,7 @@ export function ComplaintsList({
                 <button
                   onClick={() => onVoteToReveal(complaint._id)}
                   className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                  disabled={complaint.hasVoted} // Optionally disable after voting
+                  disabled={complaint.hasVoted}
                 >
                   <ThumbsUp className="h-4 w-4 mr-1" />
                   Vote to Reveal ({complaint.votesForReveal || 0})
