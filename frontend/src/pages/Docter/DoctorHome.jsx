@@ -8,7 +8,11 @@ import LeaveApplication from "./LeaveApplication";
 function DoctorHome() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const location = useLocation();
-  const lastPart = location.pathname.split("/").pop();
+  let lastPart = location.pathname.split("/").pop();
+  // logic for not giving an page not found after reaching at home
+  if (lastPart == "") {
+    lastPart = "dashboard";
+  }
 
   let ContentComponent;
   switch (lastPart) {
@@ -19,7 +23,9 @@ function DoctorHome() {
       ContentComponent = <LeaveApplication />;
       break;
     default:
-      ContentComponent = <p className="text-center text-gray-600">Page not found</p>;
+      ContentComponent = (
+        <p className="text-center text-gray-600">Page not found</p>
+      );
       break;
   }
 
@@ -37,9 +43,9 @@ function DoctorHome() {
         }}
       >
         {/* Navbar */}
-        <Navbar 
-          toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} 
-          userName="Doctor" 
+        <Navbar
+          toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+          userName="Doctor"
         />
 
         {/* Main Section with Dynamic Content */}
@@ -47,7 +53,9 @@ function DoctorHome() {
           className="flex-1 bg-gradient-to-br from-green-50 to-green-100 px-4 py-8"
           style={{ height: "calc(100vh - 60px)" }}
         >
-          <div className="container mx-auto px-20 py-10">{ContentComponent}</div>
+          <div className="container mx-auto px-20 py-10">
+            {ContentComponent}
+          </div>
         </div>
       </div>
     </div>
