@@ -6,6 +6,7 @@ import FacultyDashboard from "../../components/Faculty-Comp/FacultyDashboard";
 import FacultyComplaints from "../../components/Faculty-Comp/FacultyComplaints";
 import FacultyFacilityBooking from "../../components/Faculty-Comp/FacultyFacilityBooking";
 import ReportCheating from "../../components/ReportCheating";
+import ManageApplication from "../../components/ManageApplication";
 
 function FacultyHome() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -25,6 +26,9 @@ function FacultyHome() {
       break;
     case "booking":
       ContentComponent = <FacultyFacilityBooking />;
+      break;
+    case "application":
+      ContentComponent = <ManageApplication />;
       break;
     default:
       ContentComponent = <FacultyDashboard />;
