@@ -7,61 +7,14 @@ import {
   PenTool as Tools,
   Filter,
 } from "lucide-react";
-
-// const initialFacilities = [
-//   {
-//     id: "1",
-//     name: "Tennis Court",
-//     location: "Sports Complex, North Wing",
-//     description:
-//       "Professional-grade tennis court with night lighting facilities",
-//     status: "available",
-//     imageUrl:
-//       "https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?auto=format&fit=crop&q=80&w=800",
-//   },
-//   {
-//     id: "2",
-//     name: "Main Auditorium",
-//     location: "Academic Block A",
-//     description: "State-of-the-art auditorium with 500 seating capacity",
-//     status: "booked",
-//     imageUrl:
-//       "https://images.unsplash.com/photo-1571624436279-b272aff752b5?auto=format&fit=crop&q=80&w=800",
-//   },
-//   {
-//     id: "3",
-//     name: "Conference Room",
-//     location: "Administrative Block, 2nd Floor",
-//     description: "Modern conference room with AV equipment",
-//     status: "available",
-//     imageUrl:
-//       "https://images.unsplash.com/photo-1517502884422-41eaead166d4?auto=format&fit=crop&q=80&w=800",
-//   },
-//   {
-//     id: "4",
-//     name: "Basketball Court",
-//     location: "Sports Complex, East Wing",
-//     description: "Indoor basketball court with spectator seating",
-//     status: "under_maintenance",
-//     imageUrl:
-//       "https://images.unsplash.com/photo-1505666287802-931dc83948e9?auto=format&fit=crop&q=80&w=800",
-//   },
-//   {
-//     id: "5",
-//     name: "Computer Lab",
-//     location: "Technology Block, Ground Floor",
-//     description: "50-station computer lab with high-speed internet",
-//     status: "available",
-//     imageUrl:
-//       "https://images.unsplash.com/photo-1598004514854-20aa5c9e9be3?auto=format&fit=crop&q=80&w=800",
-//   },
-// ];
+import BookNow from "./BookNow";
 
 const StudentFacilityBooking = () => {
   const [facilities, setFacilities] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [bookingMessage, setBookingMessage] = useState("");
+  const [selectedFacility, setSelectedFacility] = useState(null);
 
   useEffect(() => {
     fetch("http://localhost:3000/api/facilities")
@@ -71,8 +24,8 @@ const StudentFacilityBooking = () => {
   }, []);
 
   const handleBooking = (facility) => {
-    setBookingMessage(`You have successfully booked ${facility.name}!`);
-    setTimeout(() => setBookingMessage(""), 3000);
+    console.log(facility);
+    setSelectedFacility(facility);
   };
 
   const filteredFacilities = facilities.filter((facility) => {
@@ -105,6 +58,7 @@ const StudentFacilityBooking = () => {
   return (
     <div className="min-h-screen">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Search and Filter Section */}
         <div className="mb-8 space-y-4 sm:space-y-0 sm:flex sm:items-center sm:justify-between">
           <div className="relative flex-1 max-w-md">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -118,7 +72,7 @@ const StudentFacilityBooking = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-
+  
           <div className="flex items-center space-x-4">
             <Filter className="h-5 w-5 text-gray-400" />
             <select
@@ -133,25 +87,23 @@ const StudentFacilityBooking = () => {
             </select>
           </div>
         </div>
-
+  
+        {/* Booking Message */}
         {bookingMessage && (
           <div className="mb-6 p-4 bg-green-100 rounded-md">
             <p className="text-green-700">{bookingMessage}</p>
           </div>
         )}
-
+  
+        {/* Facilities List */}
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredFacilities.map((facility) => (
+          {filteredFacilities.map((facility, index) => (
             <div
-              key={facility.id}
+              key={facility.id || `facility-${index}`} // Ensures a unique key
               className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
             >
-              <img
-                src={facility.imageUrl}
-                alt={facility.name}
-                className="w-full h-48 object-cover"
-              />
               <div className="p-6">
+                {/* Facility Name & Status */}
                 <div className="flex justify-between items-start mb-4">
                   <h3 className="text-xl font-semibold text-gray-900">
                     {facility.name}
@@ -171,33 +123,41 @@ const StudentFacilityBooking = () => {
                     </span>
                   </div>
                 </div>
+  
+                {/* Location */}
                 <div className="flex items-center text-gray-500 mb-4">
                   <MapPin className="h-5 w-5 mr-2" />
                   <p className="text-sm">{facility.location}</p>
                 </div>
+  
+                {/* Description */}
                 <p className="text-gray-600 mb-6">{facility.description}</p>
+  
+                {/* Booking Button */}
                 <button
-                  onClick={() =>
-                    facility.status === "available" && handleBooking(facility)
-                  }
-                  disabled={facility.status !== "available"}
-                  className={`w-full px-4 py-2 rounded-md text-sm font-medium ${
-                    facility.status === "available"
-                      ? "bg-blue-600 text-white hover:bg-blue-700"
-                      : "bg-gray-100 text-gray-400 cursor-not-allowed"
-                  }`}
-                >
-                  {facility.status === "available"
-                    ? "Book Now"
-                    : "Not Available"}
-                </button>
+                onClick={() => facility.status === "available" && handleBooking(facility)}
+                disabled={facility.status !== "available"}
+                className={`w-full px-4 py-2 rounded-md ${
+                  facility.status === "available"
+                    ? "bg-blue-600 text-white hover:bg-blue-700"
+                    : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                }`}
+              >
+                {facility.status === "available" ? "Book Now" : "Not Available"}
+              </button>
               </div>
             </div>
           ))}
         </div>
       </main>
+      {selectedFacility && (
+      <BookNow
+        facility={selectedFacility}
+        onClose={() => setSelectedFacility(null)} // Close function
+      />
+    )}
     </div>
-  );
+  );  
 };
 
 export default StudentFacilityBooking;

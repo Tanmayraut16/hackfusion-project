@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Building2,
   Bell,
@@ -16,6 +16,20 @@ const AdminManageBookings = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [showAddSuccess, setShowAddSuccess] = useState(false);
 
+  // Function to fetch facilities
+  const fetchFacilities = async () => {
+    try {
+      const response = await axios.get("http://localhost:3000/api/facilities");
+      setFacilities(response.data);
+    } catch (error) {
+      console.error("Error fetching facilities:", error);
+    }
+  };
+
+  // Fetch facilities on mount
+  useEffect(() => {
+    fetchFacilities();
+  }, []);
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -56,7 +70,7 @@ const AdminManageBookings = () => {
     statusFilter === "all" ? true : facility.status === statusFilter
   );
 
-  const getStatusColor = () => {
+  const getStatusColor = (status) => {
     switch (status) {
       case "available":
         return "bg-green-100 text-green-800";
@@ -66,19 +80,6 @@ const AdminManageBookings = () => {
         return "bg-yellow-100 text-yellow-800";
       default:
         return "bg-gray-100 text-gray-800";
-    }
-  };
-
-  const getNotificationIcon = (type) => {
-    switch (type) {
-      case "info":
-        return <CheckCircle2 className="w-5 h-5 text-blue-500" />;
-      case "warning":
-        return <AlertCircle className="w-5 h-5 text-yellow-500" />;
-      case "request":
-        return <Clock className="w-5 h-5 text-purple-500" />;
-      default:
-        return null;
     }
   };
 
