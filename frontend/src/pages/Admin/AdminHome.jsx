@@ -4,7 +4,7 @@ import Sidebar from "../../components/Sidebar";
 import Navbar from "../../components/Navbar";
 import AdminDashboard from "../../components/Admin-Comp/AdminDashboard";
 import AdminUsers from "../../components/Admin-Comp/AdminUsers";
-import AdminElections from "../../components/Admin-Comp/AdminElections";
+import AdminElectionsManage from "./AdminElectionManage";
 import AdminApprovals from "../../components/Admin-Comp/AdminApprovals";
 import AdminSettings from "../../components/Admin-Comp/AdminSettings";
 import AdminManageBookings from "../../components/Admin-Comp/AdminManageBookings";
@@ -23,7 +23,7 @@ function AdminHome() {
       ContentComponent = <AdminUsers />;
       break;
     case "elections":
-      ContentComponent = <AdminElections />;
+      ContentComponent = <AdminElectionsManage />;
       break;
     case "bookings":
       ContentComponent = <AdminManageBookings />;

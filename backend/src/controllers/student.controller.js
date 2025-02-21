@@ -67,4 +67,25 @@ const loginStudent = async (req, res) => {
   }
 };
 
-export { loginStudent, registerStudent }; // Corrected export
+// GET student details by ID
+const getStudentById = async (req, res) => {
+  try {
+    const { studentId } = req.params; // Extract studentId from URL params
+    const student = await Student.findById(studentId);
+
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    res.json({
+      studentId: student._id,
+      name: student.name,
+      email: student.email
+    });
+  } catch (error) {
+    console.error("Error fetching student details:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export { loginStudent, registerStudent, getStudentById }; // Corrected export
