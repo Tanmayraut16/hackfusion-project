@@ -9,7 +9,6 @@ import StudentComplaints from "../../components/Student-Comp/StudentComplaints";
 import ReportCheating from "../../components/ReportCheating";
 import ApplicationsPage from "../../components/Student-Comp/StudentApplication";
 
-
 function StudentHome() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const location = useLocation();
@@ -35,7 +34,6 @@ function StudentHome() {
     case "application":
       ContentComponent=<ApplicationsPage/>
       break;
-    
     default:
       ContentComponent = <StudentDashboard />;
   }

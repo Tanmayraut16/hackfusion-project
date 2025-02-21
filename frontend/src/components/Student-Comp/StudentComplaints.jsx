@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { ComplaintForm } from '../complaintsComps/ComplaintForm';
 import { ComplaintsList } from '../complaintsComps/ComplaintsList';
 import { MessageSquare, ListFilter } from 'lucide-react';
@@ -6,34 +7,58 @@ import { MessageSquare, ListFilter } from 'lucide-react';
 function StudentComplaints() {
   const currentUser = { name: 'John Doe', role: 'student' };
 
-  const [complaints, setComplaints] = useState([
-    { id: '1', content: 'Broken chair in library', status: 'pending', isAnonymous: false, submitterName: 'John Doe', createdAt: '2025-02-20', votes: 0 },
-    { id: '2', content: 'Wi-Fi issues in hostel', status: 'approved', isAnonymous: true, submitterName: 'Anonymous', createdAt: '2025-02-18', votes: 5 }
-  ]);
-
+  const [complaints, setComplaints] = useState([]);
   const [activeTab, setActiveTab] = useState('all');
-  const [statusFilter, setStatusFilter] = useState('all');
+
+  // Fetch complaints data from the backend when the component mounts
+  useEffect(() => {
+    axios
+      .get('http://localhost:3000/api/complaint/all')
+      .then(response => {
+        setComplaints(response.data);
+      })
+      .catch(error => {
+        console.error('Error fetching complaints:', error);
+      });
+  }, []);
 
   const handleSubmitComplaint = (data) => {
-    const newComplaint = {
-      id: String(complaints.length + 1),
-      content: data.content,
-      status: 'pending',
-      isAnonymous: data.isAnonymous,
-      submitterName: data.isAnonymous ? 'Anonymous' : currentUser.name,
-      createdAt: new Date().toISOString(),
-      votes: 0
-    };
+    const formData = new FormData();
+    formData.append('content', data.content);
+    formData.append('isAnonymous', data.isAnonymous);
 
-    setComplaints([newComplaint, ...complaints]);
+    if (data.imageFile) {
+      formData.append('proof', data.imageFile);
+    }
+
+    // (Optional) Debug: Log the formData keys/values
+    for (let pair of formData.entries()) {
+      console.log(pair[0] + ':', pair[1]);
+    }
+
+    const token = localStorage.getItem('token');
+
+    axios
+      .post('http://localhost:3000/api/complaint/submit', formData, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      })
+      .then((response) => {
+        const createdComplaint = response.data.complaint;
+        setComplaints((prevComplaints) => [createdComplaint, ...prevComplaints]);
+        setActiveTab('all');
+      })
+      .catch((error) => {
+        console.error('Error submitting complaint:', error);
+      });
   };
 
+  // Filter complaints to show only the current user's complaints when the "My Complaints" tab is active
   const filteredComplaints = complaints.filter((complaint) => {
+    console.log(complaint);
     const isMyComplaint = !complaint.isAnonymous && complaint.submitterName === currentUser.name;
-    const matchesStatus = statusFilter === 'all' || complaint.status === statusFilter;
-
-    if (activeTab === 'my') return isMyComplaint && matchesStatus;
-    return matchesStatus;
+    return activeTab === 'my' ? isMyComplaint : true;
   });
 
   return (
@@ -42,7 +67,9 @@ function StudentComplaints() {
         <button
           onClick={() => setActiveTab('submit')}
           className={`inline-flex items-center px-4 py-2 rounded-md ${
-            activeTab === 'submit' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'
+            activeTab === 'submit'
+              ? 'bg-indigo-600 text-white'
+              : 'bg-white text-gray-700 hover:bg-gray-50'
           }`}
         >
           <MessageSquare className="h-5 w-5 mr-2" />
@@ -51,7 +78,9 @@ function StudentComplaints() {
         <button
           onClick={() => setActiveTab('all')}
           className={`inline-flex items-center px-4 py-2 rounded-md ${
-            activeTab === 'all' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'
+            activeTab === 'all'
+              ? 'bg-indigo-600 text-white'
+              : 'bg-white text-gray-700 hover:bg-gray-50'
           }`}
         >
           <ListFilter className="h-5 w-5 mr-2" />
@@ -60,7 +89,9 @@ function StudentComplaints() {
         <button
           onClick={() => setActiveTab('my')}
           className={`inline-flex items-center px-4 py-2 rounded-md ${
-            activeTab === 'my' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'
+            activeTab === 'my'
+              ? 'bg-indigo-600 text-white'
+              : 'bg-white text-gray-700 hover:bg-gray-50'
           }`}
         >
           <MessageSquare className="h-5 w-5 mr-2" />
@@ -75,25 +106,9 @@ function StudentComplaints() {
         </div>
       ) : (
         <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-semibold text-gray-900">
-              {activeTab === 'my' ? 'My Complaints' : 'All Complaints'}
-            </h2>
-            <div className="flex items-center space-x-3">
-              <span className="text-sm text-gray-600">Filter by status:</span>
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="block rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-              >
-                <option value="all">All Status</option>
-                <option value="pending">Pending</option>
-                <option value="approved">Approved</option>
-                <option value="rejected">Rejected</option>
-              </select>
-            </div>
-          </div>
-
+          <h2 className="text-2xl font-semibold text-gray-900">
+            {activeTab === 'my' ? 'My Complaints' : 'All Complaints'}
+          </h2>
           <ComplaintsList
             complaints={filteredComplaints}
             currentUser={currentUser}
