@@ -50,7 +50,7 @@ export const loginFaculty = async (req, res) => {
       { expiresIn: "12h" }
     );
 
-    res.json({ token, faculty });
+    res.json({ token, faculty, redirect: "/faculty/dashboard" });
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
   }
@@ -58,11 +58,32 @@ export const loginFaculty = async (req, res) => {
 
 export const getFaculty = async (req, res) => {
   try {
-    const faculty = await Faculty.findById(req.params.id).select("-password");
-    if (!faculty) return res.status(404).json({ message: "Faculty not found" });
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
 
-    res.json(faculty);
+    const faculty = await Faculty.find().skip(skip).limit(limit);
+    const totalFaculty = await Faculty.countDocuments();
+
+    res.status(200).json({
+      data: faculty,
+      currentPage: page,
+      totalPages: Math.ceil(totalFaculty / limit),
+    });
   } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
+    res.status(500).json({ message: "Error retrieving faculty", error });
+  }
+};
+
+export const deleteFaculty = async (req, res) => {
+  try {
+    const facultyId = req.params.id;
+    const deletedFaculty = await Faculty.findByIdAndDelete(facultyId);
+    if (!deletedFaculty) {
+      return res.status(404).json({ message: "Faculty not found" });
+    }
+    res.status(200).json({ message: "Faculty removed successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Error removing faculty", error });
   }
 };

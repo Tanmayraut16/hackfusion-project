@@ -10,6 +10,8 @@ import AdminSettings from "../../components/Admin-Comp/AdminSettings";
 import AdminManageBookings from "../../components/Admin-Comp/AdminManageBookings";
 import AdminComplaints from "../../components/Admin-Comp/AdminComplaints"
 
+import ManageApplication from "../../components/ManageApplication";
+
 function AdminHome() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const location = useLocation();
@@ -34,6 +36,9 @@ function AdminHome() {
       break;
     case "approvals":
       ContentComponent = <AdminApprovals />;
+      break;
+    case "application":
+      ContentComponent = <ManageApplication />;
       break;
     case "settings":
       ContentComponent = <AdminSettings />;

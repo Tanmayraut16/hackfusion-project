@@ -7,6 +7,8 @@ import StudentElections from "../../components/Student-Comp/StudentElections";
 import StudentFacilityBooking from "../../components/Student-Comp/StudentFacilityBooking";
 import StudentComplaints from "../../components/Student-Comp/StudentComplaints";
 import ReportCheating from "../../components/ReportCheating";
+import ApplicationsPage from "../../components/Student-Comp/StudentApplication";
+
 
 function StudentHome() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -30,6 +32,10 @@ function StudentHome() {
     case "complaints":
       ContentComponent = <StudentComplaints />;
       break;
+    case "application":
+      ContentComponent=<ApplicationsPage/>
+      break;
+    
     default:
       ContentComponent = <StudentDashboard />;
   }
