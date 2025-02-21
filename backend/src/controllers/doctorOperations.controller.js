@@ -103,3 +103,13 @@ export const allocateLeave = async (req, res) => {
     res.status(500).json({ error: "Server error. Please try again later." });
   }
 };
+
+export const medicalDetailsRoute = async (req, res) => {
+  try {
+    const details = await MedicalDetails.find({});
+    return res.status(200).json({ success: true, data: details });
+  } catch (error) {
+    console.error("Error fetching medical details:", error);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};

@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import {
   createColumnHelper,
   flexRender,
   getCoreRowModel,
   useReactTable,
   getSortedRowModel,
-  //   SortingState,
   getFilteredRowModel,
   getPaginationRowModel,
 } from "@tanstack/react-table";
@@ -27,40 +27,7 @@ import {
 import Sidebar from "../../components/Sidebar";
 import Navbar from "../../components/Navbar";
 
-const mockData = Array.from({ length: 50 }, (_, i) => ({
-  id: `${i + 1}`,
-  registrationNo: `2021CS${String(i + 1).padStart(3, "0")}`,
-  department: [
-    "Computer Science",
-    "Electrical Engineering",
-    "Mechanical Engineering",
-  ][Math.floor(Math.random() * 3)],
-  year: Math.floor(Math.random() * 4) + 1,
-  parentEmail: `parent${i + 1}@example.com`,
-  appointmentDate: new Date(
-    2024,
-    Math.floor(Math.random() * 12),
-    Math.floor(Math.random() * 28) + 1
-  ),
-  allottedLeaves: Array.from(
-    { length: Math.floor(Math.random() * 3) + 1 },
-    () => ({
-      fromDate: new Date(
-        2024,
-        Math.floor(Math.random() * 12),
-        Math.floor(Math.random() * 28) + 1
-      ),
-      toDate: new Date(
-        2024,
-        Math.floor(Math.random() * 12),
-        Math.floor(Math.random() * 28) + 1
-      ),
-      reason: ["Fever", "Flu", "Injury", "Medical Check-up"][
-        Math.floor(Math.random() * 4)
-      ],
-    })
-  ),
-}));
+// Removed mockData as data will now be fetched from the API
 
 const columnHelper = createColumnHelper();
 
@@ -69,11 +36,11 @@ const columns = [
     header: "Registration No",
     cell: (info) => info.getValue(),
   }),
-  columnHelper.accessor("department", {
+  columnHelper.accessor("studentDepartment", {
     header: "Department",
     cell: (info) => info.getValue(),
   }),
-  columnHelper.accessor("year", {
+  columnHelper.accessor("studentYear", {
     header: "Year",
     cell: (info) => `Year ${info.getValue()}`,
   }),
@@ -81,13 +48,14 @@ const columns = [
     header: "Parent Email",
     cell: (info) => info.getValue(),
   }),
-  columnHelper.accessor("appointmentDate", {
+  columnHelper.accessor("yourAppointment", {
     header: "Appointment Date",
-    cell: (info) => format(info.getValue(), "MMM d, yyyy"),
+    cell: (info) =>
+      info.getValue() ? format(new Date(info.getValue()), "MMM d, yyyy") : "",
   }),
   columnHelper.accessor("allottedLeaves", {
     header: "Leaves",
-    cell: (info) => info.getValue().length,
+    cell: (info) => (info.getValue() ? info.getValue().length : 0),
   }),
 ];
 
@@ -123,7 +91,9 @@ const DetailModal = ({ student, onClose }) => (
                 <FileText className="h-4 w-4" />
                 <span className="text-sm">Department</span>
               </div>
-              <p className="text-gray-900 font-medium">{student.department}</p>
+              <p className="text-gray-900 font-medium">
+                {student.studentDepartment}
+              </p>
             </div>
             <div>
               <div className="flex items-center gap-2 text-gray-500 mb-1">
@@ -138,7 +108,9 @@ const DetailModal = ({ student, onClose }) => (
                 <span className="text-sm">Latest Appointment</span>
               </div>
               <p className="text-gray-900 font-medium">
-                {format(student.appointmentDate, "MMM d, yyyy")}
+                {student.yourAppointment
+                  ? format(new Date(student.yourAppointment), "MMM d, yyyy")
+                  : ""}
               </p>
             </div>
           </div>
@@ -154,13 +126,13 @@ const DetailModal = ({ student, onClose }) => (
                     <div>
                       <span className="text-sm text-gray-500">From</span>
                       <p className="font-medium text-gray-900">
-                        {format(leave.fromDate, "MMM d, yyyy")}
+                        {format(new Date(leave.fromDate), "MMM d, yyyy")}
                       </p>
                     </div>
                     <div>
                       <span className="text-sm text-gray-500">To</span>
                       <p className="font-medium text-gray-900">
-                        {format(leave.toDate, "MMM d, yyyy")}
+                        {format(new Date(leave.toDate), "MMM d, yyyy")}
                       </p>
                     </div>
                   </div>
@@ -184,8 +156,27 @@ const DoctorDashboard = () => {
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
+  // State for fetched data
+  const [data, setData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(null);
+
+  useEffect(() => {
+    axios
+      .get("http://localhost:3000/api/doctor/medicaldetails")
+      .then((response) => {
+        // Assuming API response format: { success: true, data: [...] }
+        setData(response.data.data);
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        setFetchError(error.message || "Failed to fetch data");
+        setIsLoading(false);
+      });
+  }, []);
+
   const table = useReactTable({
-    data: mockData,
+    data: data,
     columns,
     state: {
       sorting,
@@ -199,19 +190,31 @@ const DoctorDashboard = () => {
     getPaginationRowModel: getPaginationRowModel(),
   });
 
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div>Loading...</div>
+      </div>
+    );
+  }
+
+  if (fetchError) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div>Error: {fetchError}</div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-screen">
-      {/* Sidebar for Students */}
-      <Sidebar 
-        role="Docter"
-        isOpen={isSidebarOpen}
-      />
+      {/* Sidebar */}
+      <Sidebar role="Docter" isOpen={isSidebarOpen} />
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col bg-gradient-to-r from-blue-50 via-blue-30 to-blue-20">
-        {/* Navbar */}
-        <Navbar 
-          toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} 
+        <Navbar
+          toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
           userName="Docter"
         />
         <div className="max-w-7xl m-auto px-4 sm:px-6 lg:px-8">

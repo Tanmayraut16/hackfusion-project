@@ -56,15 +56,20 @@ const Login = () => {
 
       // Store user role and token in localStorage
       localStorage.setItem("token", token);
-      localStorage.setItem("role", email === "doctor@sggs.ac.in" ? "doctor" : role);
+      localStorage.setItem(
+        "role",
+        email === "doctor@sggs.ac.in" ? "doctor" : role
+      );
 
       toast.success("Login successful");
-      console.log("Redirecting to:", `/${email === "doctor@sggs.ac.in" ? "doctor" : role}`);
+      console.log(
+        "Redirecting to:",
+        `/${email === "doctor@sggs.ac.in" ? "doctor" : role}`
+      );
 
       setTimeout(() => {
         navigate(`/${email === "doctor@sggs.ac.in" ? "doctor" : role}/`);
       }, 1000);
-      
     } catch (error) {
       toast.error(error.response?.data?.message || "Login failed");
     } finally {

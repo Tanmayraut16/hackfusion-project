@@ -50,7 +50,7 @@ export const loginFaculty = async (req, res) => {
       { expiresIn: "12h" }
     );
 
-    res.json({ token, faculty });
+    res.json({ token, faculty, redirect: "/faculty/dashboard" });
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
   }
