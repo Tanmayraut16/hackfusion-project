@@ -32,8 +32,8 @@ function AdminHome() {
     case "approvals":
       ContentComponent = <AdminApprovals />;
       break;
-    case 'application':
-      ContentComponent=<ManageApplication/>
+    case "application":
+      ContentComponent = <ManageApplication />;
       break;
     case "settings":
       ContentComponent = <AdminSettings />;
