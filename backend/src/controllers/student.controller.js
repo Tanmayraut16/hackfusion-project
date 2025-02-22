@@ -122,4 +122,4 @@ const getStudentById = async (req, res) => {
   }
 };
 
-export { loginStudent, registerStudent, getStudentById, getStudents }; // Corrected export
+export { loginStudent, registerStudent, getStudentById }; // Corrected export
