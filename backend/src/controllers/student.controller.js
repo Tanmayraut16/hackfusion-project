@@ -67,4 +67,38 @@ const loginStudent = async (req, res) => {
   }
 };
 
+export const getStudents = async (req, res) => {
+  console.log("i am in students");
+
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const students = await Student.find().skip(skip).limit(limit);
+    const totalStudents = await Student.countDocuments();
+
+    res.status(200).json({
+      data: students,
+      currentPage: page,
+      totalPages: Math.ceil(totalStudents / limit),
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error retrieving students", error });
+  }
+};
+
+export const deleteStudent = async (req, res) => {
+  try {
+    const studentId = req.params.id;
+    const deletedStudent = await Student.findByIdAndDelete(studentId);
+    if (!deletedStudent) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+    res.status(200).json({ message: "Student removed successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Error removing student", error });
+  }
+};
+
 export { loginStudent, registerStudent }; // Corrected export

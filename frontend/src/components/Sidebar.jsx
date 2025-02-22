@@ -58,6 +58,11 @@ const menuItems = {
       path: "/admin/approvals",
       icon: "ClipboardList",
     },
+    {
+      name: "Review Complaints",
+      path: "/admin/complaints",
+      icon: "ClipboardList",
+    },
     { name: "Settings", path: "/admin/settings", icon: "Settings" },
     {
       name: "Manage Application",

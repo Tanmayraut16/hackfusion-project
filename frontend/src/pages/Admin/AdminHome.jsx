@@ -8,6 +8,8 @@ import AdminElections from "../../components/Admin-Comp/AdminElections";
 import AdminApprovals from "../../components/Admin-Comp/AdminApprovals";
 import AdminSettings from "../../components/Admin-Comp/AdminSettings";
 import AdminManageBookings from "../../components/Admin-Comp/AdminManageBookings";
+import AdminComplaints from "../../components/Admin-Comp/AdminComplaints";
+
 import ManageApplication from "../../components/ManageApplication";
 import BudgetComponent from "../../components/Budget";
 
@@ -21,6 +23,9 @@ function AdminHome() {
     case "dashboard":
       ContentComponent = <AdminDashboard />;
       break;
+    case "complaints":
+      ContentComponent = <AdminComplaints />;
+      break;
     case "users":
       ContentComponent = <AdminUsers />;
       break;
@@ -33,8 +38,8 @@ function AdminHome() {
     case "approvals":
       ContentComponent = <AdminApprovals />;
       break;
-    case 'application':
-      ContentComponent=<ManageApplication/>
+    case "application":
+      ContentComponent = <ManageApplication />;
       break;
      case "budget":
         ContentComponent=<BudgetComponent/>

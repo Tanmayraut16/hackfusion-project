@@ -22,7 +22,11 @@ export const loginAdmin = async (req, res) => {
       { expiresIn: "1h" }
     );
 
-    res.json({ token, admin: { name: admin.name, email: admin.email } });
+    res.json({
+      token,
+      admin: { name: admin.name, email: admin.email },
+      redirect: "/admin/dashboard", // Send redirect path as a response field
+    });
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
   }

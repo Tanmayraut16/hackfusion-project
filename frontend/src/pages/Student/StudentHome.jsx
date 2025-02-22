@@ -3,13 +3,12 @@ import { useLocation } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
 import Navbar from "../../components/Navbar";
 import StudentDashboard from "../../components/Student-Comp/StudentDashboard";
-import StudentElections from "../../components/Student-Comp/StudentElections";
+import StudentElections from "./StudentElections";
 import StudentFacilityBooking from "../../components/Student-Comp/StudentFacilityBooking";
 import StudentComplaints from "../../components/Student-Comp/StudentComplaints";
 import ReportCheating from "../../components/ReportCheating";
 import ApplicationsPage from "../../components/Student-Comp/StudentApplication";
 import BudgetComponent from "../../components/Student-Comp/StudentBudget";
-
 
 function StudentHome() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -39,7 +38,7 @@ function StudentHome() {
     case "budget":
       ContentComponent=<BudgetComponent/>
       break;
-    
+
     default:
       ContentComponent = <StudentDashboard />;
   }

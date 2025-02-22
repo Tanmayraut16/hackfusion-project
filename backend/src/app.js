@@ -5,15 +5,14 @@ import studentRouter from "../src/routes/student.routes.js";
 import facultyRouter from "../src/routes/faculty.routes.js";
 import adminRouter from "../src/routes/admin.routes.js";
 import doctorRouter from "../src/routes/doctor.routes.js";
-
+import userDetailRouter from "../src/routes/userDetail.routes.js";
 import votingRouter from "../src/routes/election.routes.js";
 
 import cheatingRouter from "../src/routes/cheating.routes.js";
 
-import bookingRouter from '../src/routes/booking.routes.js'
-import facilityRoutes from '../src/routes/facility.routes.js';
-import complaintRouter from '../src/routes/complaint.routes.js'
-
+import bookingRouter from "../src/routes/booking.routes.js";
+import facilityRoutes from "../src/routes/facility.routes.js";
+import complaintRouter from "../src/routes/complaint.routes.js";
 
 import applicationRoutes from "./routes/application.routes.js";
 import budgetRoutes from "./routes/budget.routes.js";
@@ -35,13 +34,14 @@ app.use(cookieParser());
 // routes
 app.use("/api/student-login", studentRouter);
 app.use("/api/faculty-login", facultyRouter);
+app.use("/api/details", userDetailRouter);
+
 app.use("/api/admin", adminRouter);
 app.use("/api/doctor", doctorRouter);
 app.use("/api/election", votingRouter);
 
-app.use("/api/cheating",cheatingRouter);
-app.use("/api/complaint",complaintRouter);
-
+app.use("/api/cheating", cheatingRouter);
+app.use("/api/complaint", complaintRouter);
 
 app.use("/api/booking", bookingRouter);
 app.use("/api/facilities", facilityRoutes);
