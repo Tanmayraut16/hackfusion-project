@@ -1,15 +1,9 @@
-import React, { useState } from "react";
-import { Dialog } from "@headlessui/react";
+import React from "react";
 import { useForm } from "react-hook-form";
-import clsx from "clsx";
-import axios from "axios";
-import toast from "react-hot-toast";
+import { CalendarIcon, Clock } from "lucide-react";
+import { format } from "date-fns";
 
 const BookNow = ({ facility, onClose }) => {
-  const [isOpen, setIsOpen] = useState(true);
-  console.log(facility)
-  const facilityName = facility.name;
-  // console.log(facilityName)
   const {
     register,
     handleSubmit,
@@ -17,161 +11,169 @@ const BookNow = ({ facility, onClose }) => {
     reset,
   } = useForm({
     defaultValues: {
-      facilityName, // Set the default facility name
+      facilityName: facility.name,
     },
   });
 
   const onSubmit = async (data) => {
-    console.log(data);
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.post(
+      const response = await fetch(
         "http://localhost:3000/api/booking/bookings",
-        data,
         {
-          headers: { Authorization: `"Bearer ${token}` },
-          withCredentials: true,
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify(data),
         }
       );
 
-      console.log("Booking submitted:", response.data);
-      toast.success("Booking request sent");
-      setIsOpen(false);
+      if (!response.ok) {
+        throw new Error("Booking failed");
+      }
+
+      const result = await response.json();
+      console.log("Booking submitted:", result);
+      alert("Booking request sent successfully");
       reset();
-      onClose(); // Close the modal properly
+      onClose();
     } catch (error) {
-      console.error("Booking failed:", error.response?.data || error.message);
-      toast.error(error.response?.data?.message || "Booking failed. Try again.");
+      console.error("Booking failed:", error);
+      alert(error.message || "Failed to submit booking. Please try again.");
     }
   };
 
-  const handleCancel = () => {
-    setIsOpen(false);
-    reset();
-    onClose(); // Ensure modal closes
-  };
-
   return (
-    <Dialog open={isOpen} onClose={handleCancel} className="relative z-50">
-      <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
-      <div className="fixed inset-0 flex items-center justify-center p-4">
-        <Dialog.Panel className="mx-auto max-w-lg rounded-xl bg-white p-6 shadow-xl">
-          <Dialog.Title className="text-xl font-semibold mb-4">
-            Book Facility
-          </Dialog.Title>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-[500px] overflow-hidden">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
+          <div className="flex items-center gap-3">
+            <CalendarIcon className="h-7 w-7 text-white" />
+            <h2 className="text-2xl font-semibold text-white">Book Facility</h2>
+          </div>
+        </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            {/* Facility Name */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Facility Name
-              </label>
-              <input
-                type="text"
-                {...register("facilityName")}
-                readOnly
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              />
-            </div>
+        <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6">
+          {/* Facility Name */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Facility Name
+            </label>
+            <input
+              type="text"
+              {...register("facilityName")}
+              readOnly
+              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
 
-            {/* Start Time */}
+          {/* Time Selection */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Start Time
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-gray-500" />
+                  Start Time
+                </div>
               </label>
               <input
                 type="datetime-local"
-                {...register("startTime", { required: "Start time is required" })}
-                className={clsx(
-                  "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500",
-                  errors.startTime && "border-red-500"
-                )}
-                min={new Date().toISOString().slice(0, 16)} // Corrected min value
+                {...register("startTime", {
+                  required: "Start time is required",
+                })}
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                min={format(new Date(), "yyyy-MM-dd'T'HH:mm")}
               />
               {errors.startTime && (
-                <p className="mt-1 text-sm text-red-600">{errors.startTime.message}</p>
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.startTime.message}
+                </p>
               )}
             </div>
 
-            {/* End Time */}
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                End Time
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-gray-500" />
+                  End Time
+                </div>
               </label>
               <input
                 type="datetime-local"
                 {...register("endTime", { required: "End time is required" })}
-                className={clsx(
-                  "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500",
-                  errors.endTime && "border-red-500"
-                )}
-                min={new Date().toISOString().slice(0, 16)}
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                min={format(new Date(), "yyyy-MM-dd'T'HH:mm")}
               />
               {errors.endTime && (
-                <p className="mt-1 text-sm text-red-600">{errors.endTime.message}</p>
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.endTime.message}
+                </p>
               )}
             </div>
+          </div>
 
-            {/* Reason for Booking */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Reason for Booking
-              </label>
-              <textarea
-                {...register("reason", { required: "Reason is required" })}
-                className={clsx(
-                  "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500",
-                  errors.reason && "border-red-500"
-                )}
-                rows={3}
-              />
-              {errors.reason && (
-                <p className="mt-1 text-sm text-red-600">{errors.reason.message}</p>
-              )}
-            </div>
+          {/* User Type */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              User Type
+            </label>
+            <select
+              {...register("userType", { required: "User type is required" })}
+              className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+            >
+              <option value="">Select user type</option>
+              <option value="Student">Student</option>
+              <option value="Faculty">Faculty</option>
+              <option value="Staff">Staff</option>
+            </select>
+            {errors.userType && (
+              <p className="mt-1 text-sm text-red-600">
+                {errors.userType.message}
+              </p>
+            )}
+          </div>
 
-            {/* User Type */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                User Type
-              </label>
-              <select
-                {...register("userType", { required: "User type is required" })}
-                className={clsx(
-                  "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500",
-                  errors.userType && "border-red-500"
-                )}
-              >
-                <option value="">Select user type</option>
-                <option value="Student">Student</option>
-                <option value="Faculty">Faculty</option>
-                <option value="Staff">Staff</option>
-              </select>
-              {errors.userType && (
-                <p className="mt-1 text-sm text-red-600">{errors.userType.message}</p>
-              )}
-            </div>
+          {/* Reason */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Reason for Booking
+            </label>
+            <textarea
+              {...register("reason", { required: "Reason is required" })}
+              rows={4}
+              className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+              placeholder="Please provide a reason for your booking..."
+            />
+            {errors.reason && (
+              <p className="mt-1 text-sm text-red-600">
+                {errors.reason.message}
+              </p>
+            )}
+          </div>
 
-            {/* Buttons */}
-            <div className="mt-6 flex justify-end space-x-3">
-              <button
-                type="button"
-                onClick={handleCancel}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                Submit Booking
-              </button>
-            </div>
-          </form>
-        </Dialog.Panel>
+          {/* Actions */}
+          <div className="flex justify-end gap-3 pt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-5 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-5 py-2.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            >
+              Submit Booking
+            </button>
+          </div>
+        </form>
       </div>
-    </Dialog>
+    </div>
   );
 };
 
