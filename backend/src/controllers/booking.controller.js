@@ -4,10 +4,12 @@ import Facility from '../models/facility.model.js';
 // Create a new booking (for Faculty or Student)
 export const createBooking = async (req, res) => {
   try {
-    const { facility, start_time, end_time, reason, userType } = req.body;
-
+    const { facilityName, start_time, end_time, reason, userType } = req.body;
+    const temp = req.body;
+    console.log(temp)
     // Verify that the facility exists
-    const facilityObj = await Facility.findById(facility);
+    const facilityObj = await Facility.findOne({name: facilityName});
+    
     if (!facilityObj) {
       return res.status(404).json({ message: 'Facility not found' });
     }
@@ -18,7 +20,7 @@ export const createBooking = async (req, res) => {
     const booking = await Booking.create({
       user: req.user._id,
       userType, // Must be either 'Faculty' or 'Student'
-      facility,
+      facilityName,
       start_time,
       end_time,
       reason,
