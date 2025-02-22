@@ -4,6 +4,7 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
 
   useEffect(() => {
     // Load token and role from localStorage
@@ -13,6 +14,8 @@ export const AuthProvider = ({ children }) => {
     if (token && role) {
       setUser({ role, token });
     }
+    // Indicate that auth loading is complete
+    setAuthLoading(false);
   }, []);
 
   const login = (userData) => {
@@ -28,7 +31,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, authLoading }}>
       {children}
     </AuthContext.Provider>
   );
