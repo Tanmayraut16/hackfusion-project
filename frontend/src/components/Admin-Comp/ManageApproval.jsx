@@ -142,7 +142,7 @@ export default function ManageBudget() {
                     <td className="p-2 border capitalize">{budget.category}</td>
                     <td className={`p-2 border font-semibold ${budget.amount >= 100000 ? "text-red-500" : ""}`}>
                       ₹{budget.amount.toLocaleString()}
-                      
+
                     </td>
                     <td className="p-2 border">{`${budget.allocatedByModel} -(${budget.allocated_by.name})`}</td>
                     <td className="p-2 border">
