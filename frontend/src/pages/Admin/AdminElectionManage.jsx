@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { PlusCircle, Edit, Trash2, UserPlus, Calendar } from "lucide-react";
 import axios from "axios";
-
-
+import StudentDropdown from "../../components/Admin-Comp/AdminStudentDropdown";
 
 function AdminElectionManage() {
   const [showNewElectionModal, setShowNewElectionModal] = useState(false);
@@ -22,6 +21,8 @@ function AdminElectionManage() {
   const [successMessage, setSuccessMessage] = useState(null);
   const [elections, setElections] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [students, setStudents] = useState([]);
+
   const [candidateForm, setCandidateForm] = useState({
     name: "",
     department: "",
@@ -29,6 +30,38 @@ function AdminElectionManage() {
     photo_url: "",
     student: "",
   });
+
+  console.log(candidateForm);
+
+  // Fetch students when component mounts
+  useEffect(() => {
+    const fetchStudents = async () => {
+      try {
+        const token = localStorage.getItem("token"); // Retrieve token from localStorage
+
+        if (!token) {
+          console.error("No token found. Authentication required.");
+          return;
+        }
+
+        const response = await axios.get(
+          "http://localhost:3000/api/details/allStudents",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`, // Attach token in Authorization header
+            },
+          }
+        );
+        console.log(response.data.data);
+
+        setStudents(response.data.data);
+      } catch (error) {
+        console.error("Error fetching students:", error);
+      }
+    };
+
+    fetchStudents();
+  }, []);
 
   // Fetch all elections when component mounts
   useEffect(() => {
@@ -125,6 +158,16 @@ function AdminElectionManage() {
 
     if (!selectedPosition) return;
 
+    // Check if candidate with the same student ID already exists in the selected position
+    const candidateExists = selectedPosition.candidates?.some(
+      (candidate) => candidate.student === candidateForm.student
+    );
+
+    if (candidateExists) {
+      alert("This student is already added as a candidate for this position.");
+      return;
+    }
+
     const updatedPositions = pendingElection.positions.map((pos) => {
       if (pos.id === selectedPosition.id) {
         return {
@@ -152,6 +195,7 @@ function AdminElectionManage() {
       department: "",
       bio: "",
       photo_url: "",
+      student: "",
     });
     setShowCandidateModal(false);
   };
@@ -183,9 +227,10 @@ function AdminElectionManage() {
         })),
       };
 
-      await axios.post("http://localhost:3000/api/election", formattedData, {
+      console.log(formattedData);
+      await axios.post("http://localhost:3000/api/election/", formattedData, {
         headers: {
-          "Content-Type": "application/json",
+          // "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
       });
@@ -621,16 +666,24 @@ function AdminElectionManage() {
                   htmlFor="student"
                   className="block text-sm font-medium text-gray-700"
                 >
-                  Student ID
+                  Student
                 </label>
-                <input
-                  type="text"
-                  id="student"
+                <StudentDropdown
+                  students={students}
                   value={candidateForm.student}
-                  onChange={handleCandidateInputChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="Enter student ID"
-                  required
+                  onChange={(studentId) => {
+                    // Use _id to find the selected student
+                    const selectedStudent = students.find(
+                      (s) => s._id === studentId
+                    );
+                    console.log(students);
+                    setCandidateForm((prev) => ({
+                      ...prev,
+                      student: studentId,
+                      name: selectedStudent?.name || "",
+                      department: selectedStudent?.department || "",
+                    }));
+                  }}
                 />
               </div>
 
