@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import axios from "axios";
 import {
   Calendar,
   Mail,
@@ -55,23 +56,44 @@ const LeaveApplication = () => {
     setLoading(true);
 
     try {
-      // Simulated API call - replace with actual endpoint
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      setSuccess(true);
-      // Reset form
-      setFormData({
-        studentEmail: "",
-        registrationNumber: "",
-        studentYear: "",
-        parentEmail: "",
-        fromDate: "",
-        toDate: "",
-        reason: "",
-        reportedByDoctor: true,
-        leftCampus: true,
-      });
+      const response = await axios.post(
+        "http://localhost:3000/api/doctor/allocateleave",
+        {
+          email: formData.studentEmail,
+          registrationNo: formData.registrationNumber,
+          studentYear: formData.studentYear,
+          parentEmail: formData.parentEmail,
+          fromDate: formData.fromDate,
+          toDate: formData.toDate,
+          reason: formData.reason,
+          reportedByDoctor: formData.reportedByDoctor,
+          leftCampus: formData.leftCampus,
+        }
+      );
+
+      if (response.status === 200) {
+        setSuccess(true);
+
+        // Reset form
+        setFormData({
+          studentEmail: "",
+          registrationNumber: "",
+          studentYear: "",
+          parentEmail: "",
+          fromDate: "",
+          toDate: "",
+          reason: "",
+          reportedByDoctor: true,
+          leftCampus: true,
+        });
+      } else {
+        throw new Error("Failed to allocate leave. Please try again.");
+      }
     } catch (err) {
-      setError("Failed to allocate leave. Please try again.");
+      setError(
+        err.response?.data?.message ||
+          "Failed to allocate leave. Please try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -88,16 +110,13 @@ const LeaveApplication = () => {
   return (
     <div className="flex h-screen">
       {/* Sidebar for Students */}
-      <Sidebar 
-        role="Docter"
-        isOpen={isSidebarOpen}
-      />
+      <Sidebar role="Docter" isOpen={isSidebarOpen} />
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col bg-gradient-to-r from-blue-50 via-blue-30 to-blue-20">
         {/* Navbar */}
-        <Navbar 
-          toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} 
+        <Navbar
+          toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
           userName="Docter"
         />
         <div className="max-w-4xl m-auto px-4 sm:px-6 lg:px-8">

@@ -1,4 +1,4 @@
-import {Filter} from "bad-words";
+import { Filter } from "bad-words";
 import Complaint from "../models/complaint.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
@@ -14,7 +14,9 @@ export const submitComplaint = async (req, res) => {
 
     // Check for vulgar words
     if (filter.isProfane(content)) {
-      return res.status(400).json({ message: "Inappropriate language is not allowed" });
+      return res
+        .status(400)
+        .json({ message: "Inappropriate language is not allowed" });
     }
 
     let proofUrl = "";
@@ -24,18 +26,22 @@ export const submitComplaint = async (req, res) => {
       const cloudinaryResponse = await uploadOnCloudinary(req.file.path);
 
       if (!cloudinaryResponse) {
-        return res.status(500).json({ error: "File upload failed. Please try again." });
+        return res
+          .status(500)
+          .json({ error: "File upload failed. Please try again." });
       }
 
       // If Cloudinary flagged the content as inappropriate, return an error
       if (cloudinaryResponse.error) {
-        return res.status(400).json({ error: "Inappropriate image or video detected. Please upload a valid proof." });
+        return res.status(400).json({
+          error:
+            "Inappropriate image or video detected. Please upload a valid proof.",
+        });
       }
 
       proofUrl = cloudinaryResponse.secure_url;
     }
-    
-        
+
     const complaint = new Complaint({
       content,
       submittedBy: req.user._id,
@@ -44,37 +50,40 @@ export const submitComplaint = async (req, res) => {
     });
 
     await complaint.save();
-    res.status(201).json({ message: "Complaint submitted successfully", complaint });
+    res
+      .status(201)
+      .json({ message: "Complaint submitted successfully", complaint });
   } catch (error) {
-    res.status(500).json({ message: "Failed to submit complaint", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Failed to submit complaint", error: error.message });
   }
 };
-
-
 
 // Get all complaints
 
 export const getAllComplaints = async (req, res) => {
-    try {
-      const complaints = await Complaint.find().populate("submittedBy", "name");
-  
-      // Modify complaints to hide submittedBy unless isApprovedForReveal is true
-      const modifiedComplaints = complaints.map((complaint) => {
-        if (!complaint.isApprovedForReveal) {
-          return { 
-            ...complaint.toObject(), 
-            submittedBy: undefined // Hide submittedBy if not revealed
-          };
-        }
-        return complaint;
-      });
-  
-      res.status(200).json(modifiedComplaints);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch complaints", error: error.message });
-    }
-  };
-  
+  try {
+    const complaints = await Complaint.find().populate("submittedBy", "name");
+
+    // Modify complaints to hide submittedBy unless isApprovedForReveal is true
+    const modifiedComplaints = complaints.map((complaint) => {
+      if (!complaint.isApprovedForReveal) {
+        return {
+          ...complaint.toObject(),
+          submittedBy: undefined, // Hide submittedBy if not revealed
+        };
+      }
+      return complaint;
+    });
+
+    res.status(200).json(modifiedComplaints);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Failed to fetch complaints", error: error.message });
+  }
+};
 
 // Vote to reveal identity
 export const voteForReveal = async (req, res) => {
@@ -85,10 +94,24 @@ export const voteForReveal = async (req, res) => {
       return res.status(404).json({ message: "Complaint not found" });
     }
 
-    complaint.votesForReveal += 1;
+    // Ensure the 'votedBy' array exists on the complaint
+    if (!complaint.votedBy) {
+      complaint.votedBy = [];
+    }
 
-    // If votes exceed a threshold (e.g., 3), reveal identity
-    if (complaint.votesForReveal >= 1) {
+    // Check if the current user has already voted
+    if (complaint.votedBy.includes(req.user.id)) {
+      return res.status(400).json({ message: "You have already voted" });
+    }
+
+    // Register the vote by adding the user's id to the 'votedBy' array
+    complaint.votedBy.push(req.user.id);
+
+    // Update the vote count based on the unique votes
+    complaint.votesForReveal = complaint.votedBy.length;
+
+    // Reveal identity if votes reach or exceed 10
+    if (complaint.votesForReveal >= 10) {
       complaint.isApprovedForReveal = true;
     }
 
@@ -100,21 +123,32 @@ export const voteForReveal = async (req, res) => {
 };
 
 // Moderate complaints (only faculty)
+// Only faculty can moderate
 export const moderateComplaint = async (req, res) => {
   try {
     const complaint = await Complaint.findById(req.params.id);
-
     if (!complaint) {
       return res.status(404).json({ message: "Complaint not found" });
     }
 
-    complaint.status = req.body.status; // "Approved" or "Rejected"
-    await complaint.save();
+    // Use req.body.action to set complaint.status
+    if (req.body.action === "approve") {
+      complaint.status = "Approved";
+    } else if (req.body.action === "reject") {
+      complaint.status = "Rejected";
+    } else {
+      return res
+        .status(400)
+        .json({ message: "Invalid action (use 'approve' or 'reject')" });
+    }
 
-    res.status(200).json({ message: `Complaint ${complaint.status}`, complaint });
+    await complaint.save();
+    res
+      .status(200)
+      .json({ message: `Complaint ${complaint.status}`, complaint });
   } catch (error) {
-    res.status(500).json({ message: "Failed to moderate", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Failed to moderate", error: error.message });
   }
 };
-
-

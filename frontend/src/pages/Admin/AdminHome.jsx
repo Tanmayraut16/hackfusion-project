@@ -8,6 +8,9 @@ import AdminElectionsManage from "./AdminElectionManage";
 import AdminApprovals from "../../components/Admin-Comp/AdminApprovals";
 import AdminSettings from "../../components/Admin-Comp/AdminSettings";
 import AdminManageBookings from "../../components/Admin-Comp/AdminManageBookings";
+import AdminComplaints from "../../components/Admin-Comp/AdminComplaints";
+
+import ManageApplication from "../../components/ManageApplication";
 
 function AdminHome() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -18,6 +21,9 @@ function AdminHome() {
   switch (lastPart) {
     case "dashboard":
       ContentComponent = <AdminDashboard />;
+      break;
+    case "complaints":
+      ContentComponent = <AdminComplaints />;
       break;
     case "users":
       ContentComponent = <AdminUsers />;
@@ -30,6 +36,9 @@ function AdminHome() {
       break;
     case "approvals":
       ContentComponent = <AdminApprovals />;
+      break;
+    case "application":
+      ContentComponent = <ManageApplication />;
       break;
     case "settings":
       ContentComponent = <AdminSettings />;

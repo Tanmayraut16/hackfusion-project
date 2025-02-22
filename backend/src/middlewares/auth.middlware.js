@@ -8,20 +8,15 @@ import Doctor from "../models/doctor.model.js";
 export const verifyToken = async (req, res, next, allowedRoles) => {
   try {
     const token = req.headers.authorization?.split(" ")[1];
-   
+
     if (!token)
       return res
         .status(401)
         .json({ message: "Access Denied. No token provided." });
 
-
-
-    
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    
-    let user = null;
-    
 
+    let user = null;
 
     if (allowedRoles.includes("student"))
       user = await Student.findById(decoded.studentId);
@@ -40,12 +35,11 @@ export const verifyToken = async (req, res, next, allowedRoles) => {
     }
 
     req.user = user;
-    next();
+    return next();
   } catch (err) {
     res.status(400).json({ message: "Invalid Token." });
   }
 };
-
 
 // Middleware for each role
 export const verifyStudent = (req, res, next) =>

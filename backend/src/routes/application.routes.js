@@ -21,7 +21,7 @@ const verifyStudentFacultyAdmin = (req, res, next) =>
 
 // GET /applications
 // Accessible to students, faculty, and admin
-router.get("/", verifyStudentFacultyAdmin, getApplications);
+router.get("/all", verifyStudentFacultyAdmin, getApplications);
 
 // GET /applications/:id
 // Accessible to students, faculty, and admin
@@ -29,7 +29,7 @@ router.get("/:id", verifyStudentFacultyAdmin, getApplicationById);
 
 // POST /applications
 // Only students and faculty can create applications
-router.post("/", verifyStudentOrFaculty, createApplication);
+router.post("/add", verifyStudentOrFaculty, createApplication);
 
 // POST /applications/:id/approve
 // Only faculty and admin can approve an application

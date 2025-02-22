@@ -21,6 +21,7 @@ const menuItems = {
     },
     { name: "Facility Booking", path: "/student/booking", icon: "BookOpen" },
     { name: "Complaints", path: "/student/complaints", icon: "ClipboardList" },
+    { name: "Applications",path: "/student/application", icon: "ClipboardList" },
   ],
   Faculty: [
     { name: "Dashboard", path: "/faculty/dashboard", icon: "PieChart" },
@@ -39,6 +40,11 @@ const menuItems = {
       path: "/faculty/booking",
       icon: "BookOpen",
     },
+    {
+      name: "Manage Application",
+      path: "/faculty/application",
+      icon: "ClipboardList",
+    },
   ],
   Admin: [
     { name: "Dashboard", path: "/admin/dashboard", icon: "PieChart" },
@@ -50,7 +56,17 @@ const menuItems = {
       path: "/admin/approvals",
       icon: "ClipboardList",
     },
+    {
+      name: "Review Complaints",
+      path: "/admin/complaints",
+      icon: "ClipboardList",
+    },
     { name: "Settings", path: "/admin/settings", icon: "Settings" },
+    {
+      name: "Manage Application",
+      path: "/admin/application",
+      icon: "ClipboardList",
+    },
   ],
   Doctor: [
     { name: "Dashboard", path: "/doctor/dashboard", icon: "PieChart" },
