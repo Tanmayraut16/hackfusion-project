@@ -17,11 +17,14 @@ import {
 
 import { upload } from "../middlewares/multer.middlware.js";
 
+
 const router = express.Router();
 
 // Inline middleware to allow student, faculty, and admin to view budgets
 const verifyStudentFacultyAdmin = (req, res, next) =>
   verifyToken(req, res, next, ["student", "faculty", "admin"]);
+
+router.post("/:id", verifyFacultyOrAdmin,upload.single("file"), createExpenseLog);
 
 // GET /budgets
 // Accessible to students, faculty, and admin
@@ -38,7 +41,7 @@ router.post("/add", verifyStudentOrFaculty, createBudget);
 // POST /budgets/:id/expenses
 // Only faculty and admin can add expense logs
 // router.post("/:id", verifyFacultyOrAdmin,upload.single("proof"), createExpenseLog);
-router.post("/:id", verifyFacultyOrAdmin, createExpenseLog);
+// router.post("/:id", verifyFacultyOrAdmin, createExpenseLog);
 
 
 // GET /budgets/:id/expenses

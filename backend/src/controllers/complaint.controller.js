@@ -39,7 +39,7 @@ export const submitComplaint = async (req, res) => {
         });
       }
 
-      proofUrl = cloudinaryResponse.secure_url;
+      proofUrl = cloudinaryResponse.url;
     }
 
     const complaint = new Complaint({

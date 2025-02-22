@@ -116,36 +116,61 @@ export const createExpenseLog = async (req, res) => {
     const { id } = req.params; // Budget ID
     const { description, amount_spent } = req.body;
 
-    // Fetch the budget document from the Budget schema
+    const file = req.file;
+    
+
+    // Validate amount_spent
+    if (isNaN(amount_spent) || amount_spent <= 0) {
+      return res.status(400).json({ success: false, error: "Invalid expense amount" });
+    }
+
+    // Validate file upload
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: "Proof file is required" });
+    }
+
+    // const fileBuffer = getDataUri(req.file);
+    const result = await uploadOnCloudinary(req.file.path);
+
+    // Handle Cloudinary upload failure
+    if (!result || !result.secure_url) {
+      return res.status(500).json({ success: false, error: "File upload failed" });
+    }
+
+    // Fetch the budget document
     const budget = await Budget.findById(id);
     if (!budget) {
       return res.status(404).json({ success: false, error: "Budget not found" });
     }
 
-    // Retrieve the allocated amount from the budget schema
-    const allocatedAmount = budget.amount;
-
-    // Validate that the expense does not exceed the allocated budget
-    if (amount_spent > allocatedAmount) {
+    // Validate expense limit
+    if (amount_spent > budget.amount) {
       return res.status(400).json({
         success: false,
         error: "Expense amount exceeds allocated budget",
       });
     }
 
-    // Create the expense log using the provided data
+    
+
+    // Create and save the expense log
     const expenseLog = new Expense({
       budget: id,
       description,
       amount_spent,
+      proof_url: result.url,
     });
+
+    console.log(expenseLog);
     await expenseLog.save();
 
-    // (Optional) Update the budget's remaining amount if needed
-    // budget.amount = allocatedAmount - amount_spent;
-    // await budget.save();
+    // Update the budget amount 
+    budget.amount -= amount_spent;
+    await budget.save();
 
+  
     return res.status(201).json({ success: true, data: expenseLog });
+
   } catch (error) {
     console.error("Error in createExpenseLog:", error);
     return res.status(500).json({ success: false, error: "Server error" });
