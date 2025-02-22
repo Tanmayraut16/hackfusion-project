@@ -1,3 +1,4 @@
+import axios from "axios";
 import React, { useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
 
@@ -35,7 +36,7 @@ const VotingModal = ({ election, position, onClose }) => {
     }
   };
 
-  console.log(election._id);
+  // console.log(election._id);
 
   const handleVote = async () => {
     if (!selectedCandidate) {

@@ -10,6 +10,7 @@ import {
   getAllElections,
   getElectionById,
   verifyVoterOTP,
+  getVoters,
 } from "../controllers/election.controller.js";
 import {
   verifyToken,
@@ -41,5 +42,7 @@ router.get("/elections", getAllElections);
 
 // Route to get election by ID
 router.get("/elections/:id", getElectionById);
+
+router.get("/voters/:id", verifyStudent, getVoters);
 
 export default router;
