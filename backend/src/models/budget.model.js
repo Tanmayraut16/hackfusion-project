@@ -23,12 +23,12 @@ const budgetSchema = new Schema(
       required: true,
       enum: ["Faculty", "Student"],
     },
-    allocated_at: {
-      type: Date,
-      default: Date.now,
-    },
+    // allocated_at: {
+    //   type: Date,
+    //   default: Date.now,
+    // },
   },
-  { timestamps: false }
+  { timestamps: true }
 );
 
 export default model("Budget", budgetSchema);
