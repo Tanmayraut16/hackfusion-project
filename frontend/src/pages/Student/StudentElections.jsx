@@ -54,15 +54,26 @@ const StudentElections = () => {
     setLoading(true);
     setError("");
     try {
-      const response = await fetch(
-        `http://localhost:3000/api/election/elections/${id}`
+      const token = localStorage.getItem("token");
+      const response = await axios.get(
+        `http://localhost:3000/api/election/elections/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
-      if (!response.ok) throw new Error("Failed to fetch election details");
 
-      const data = await response.json();
-      setSelectedElection(data);
+      console.log("Fetched election data:", response.data);
+      setSelectedElection(response.data);
+
+      // Fetch voting status immediately after getting election details
+      await handleVoteRender(id);
     } catch (error) {
-      setError(error.message);
+      console.error("Error fetching election:", error);
+      setError(
+        error.response?.data?.message || "Failed to fetch election details"
+      );
     } finally {
       setLoading(false);
     }
@@ -74,8 +85,8 @@ const StudentElections = () => {
   };
 
   const handleVoteRender = async (electionID) => {
-    const token = localStorage.getItem("token");
     try {
+      const token = localStorage.getItem("token");
       const response = await axios.get(
         `http://localhost:3000/api/election/voters/${electionID}`,
         {
@@ -95,7 +106,7 @@ const StudentElections = () => {
 
       setPositionVotingStatus(votingStatus);
     } catch (err) {
-      console.error(err);
+      console.error("Error getting voting status:", err);
     }
   };
 
@@ -119,7 +130,8 @@ const StudentElections = () => {
           {positionVotingStatus[position._id]?.votedCandidate && (
             <p className="text-gray-600 mt-1">
               Voted for:{" "}
-              {positionVotingStatus[position._id].votedCandidate.student.name}
+              {positionVotingStatus[position._id]?.votedCandidate?.student
+                ?.name || "Unknown"}
             </p>
           )}
         </div>
@@ -138,11 +150,14 @@ const StudentElections = () => {
         <div>
           <div className="mb-4">
             <p className="text-gray-700 font-medium mb-2">Candidates:</p>
-            <ul className="space-y-1">
-              {console.log(position.candidates)}
+            <ul className="space-y-2">
               {position.candidates.map((candidate) => (
                 <li key={candidate._id} className="text-gray-600">
-                  {candidate.student?.name || "Unnamed Candidate"}
+                  <div className="flex flex-col">
+                    <span className="font-medium">
+                      {candidate.student?.name || "Unnamed Candidate"}
+                    </span>
+                  </div>
                 </li>
               ))}
             </ul>
