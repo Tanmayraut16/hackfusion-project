@@ -94,6 +94,13 @@ export const voteForReveal = async (req, res) => {
       return res.status(404).json({ message: "Complaint not found" });
     }
 
+    // Only allow voting if the complaint is still pending
+    if (complaint.status !== "Pending") {
+      return res
+        .status(400)
+        .json({ message: "Cannot vote on a moderated complaint" });
+    }
+
     // Ensure the 'votedBy' array exists on the complaint
     if (!complaint.votedBy) {
       complaint.votedBy = [];

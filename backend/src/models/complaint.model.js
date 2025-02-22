@@ -12,6 +12,7 @@ const complaintSchema = new mongoose.Schema(
     isAnonymous: { type: Boolean, default: true },
     isApprovedForReveal: { type: Boolean, default: false },
     votesForReveal: { type: Number, default: 0 },
+    votedBy: { type: [mongoose.Schema.Types.ObjectId], default: [] }, // Added field
     status: {
       type: String,
       enum: ["Pending", "Approved", "Rejected"],
