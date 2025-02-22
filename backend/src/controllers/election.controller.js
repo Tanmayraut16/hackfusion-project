@@ -329,7 +329,9 @@ export const getCandidateVotes = async (req, res) => {
 // Get all elections
 export const getAllElections = async (req, res) => {
   try {
-    const elections = await Election.find();
+    const elections = await Election.find().populate(
+      "positions.candidates.student"
+    );
     res.status(200).json(elections);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch elections" });
