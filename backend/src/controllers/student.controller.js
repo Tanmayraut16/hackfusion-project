@@ -88,6 +88,15 @@ export const getStudents = async (req, res) => {
   }
 };
 
+export const getAllStudents = async (_req, res) => {
+  try {
+    const students = await Student.find();
+    res.status(200).json({ data: students });
+  } catch (error) {
+    res.status(500).json({ message: "Error retrieving all students", error });
+  }
+};
+
 export const deleteStudent = async (req, res) => {
   try {
     const studentId = req.params.id;
