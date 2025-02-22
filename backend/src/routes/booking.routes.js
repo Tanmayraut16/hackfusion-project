@@ -29,4 +29,7 @@ router.put('/:id/approve', verifyFacultyOrAdmin, approveBooking);
 // Admin-only route to reject a booking
 router.put('/bookings/:id/reject', verifyStudentOrFaculty, rejectBooking);
 
+
+
+
 export default router;
