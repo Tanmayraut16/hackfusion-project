@@ -8,6 +8,8 @@ export const submitComplaint = async (req, res) => {
   try {
     const { content, isAnonymous } = req.body;
 
+    const file = req.file;
+
     if (!content) {
       return res.status(400).json({ message: "Content is required" });
     }
@@ -19,34 +21,25 @@ export const submitComplaint = async (req, res) => {
         .json({ message: "Inappropriate language is not allowed" });
     }
 
-    let proofUrl = "";
-
-    // Check if a file was uploaded
-    if (req.file) {
-      const cloudinaryResponse = await uploadOnCloudinary(req.file.path);
-
-      if (!cloudinaryResponse) {
-        return res
-          .status(500)
-          .json({ error: "File upload failed. Please try again." });
-      }
-
-      // If Cloudinary flagged the content as inappropriate, return an error
-      if (cloudinaryResponse.error) {
-        return res.status(400).json({
-          error:
-            "Inappropriate image or video detected. Please upload a valid proof.",
-        });
-      }
-
-      proofUrl = cloudinaryResponse.url;
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: "Proof file is required" });
     }
+
+    // const fileBuffer = getDataUri(req.file);
+    const result = await uploadOnCloudinary(req.file.path);
+
+    // Handle Cloudinary upload failure
+    if (!result || !result.secure_url) {
+      return res.status(500).json({ success: false, error: "File upload failed" });
+    }
+
+    
 
     const complaint = new Complaint({
       content,
       submittedBy: req.user._id,
       isAnonymous,
-      proofUrl,
+      proofUrl:result.url,
     });
 
     await complaint.save();
