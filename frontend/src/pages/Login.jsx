@@ -4,6 +4,7 @@ import { toast } from "react-hot-toast";
 import axios from "axios";
 import { AuthLayout } from "../components/AuthLayout.jsx";
 import { Input } from "../components/Input.jsx";
+import { useAuth } from "../context/AuthContext"; // Import the useAuth hook
 
 const Login = () => {
   const [role, setRole] = useState("");
@@ -12,6 +13,7 @@ const Login = () => {
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth(); // Get login function from context
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -28,7 +30,6 @@ const Login = () => {
       const credentials = { email, password };
       let endpoint = "";
 
-      // Use switch case for role-based API endpoint selection
       switch (role) {
         case "student":
           endpoint = "http://localhost:3000/api/student-login/login";
@@ -37,39 +38,28 @@ const Login = () => {
           endpoint = "http://localhost:3000/api/faculty-login/login";
           break;
         case "admin":
-          if (email === "doctor@sggs.ac.in") {
-            endpoint = "http://localhost:3000/api/doctor/login";
-          } else {
-            endpoint = "http://localhost:3000/api/admin/login";
-          }
+          endpoint = email === "doctor@sggs.ac.in"
+            ? "http://localhost:3000/api/doctor/login"
+            : "http://localhost:3000/api/admin/login";
           break;
         default:
           toast.error("Invalid role selected");
           setIsLoading(false);
           return;
       }
+
       const response = await axios.post(endpoint, credentials, {
         headers: { "Content-Type": "application/json" },
       });
 
       const { user, token } = response.data;
+      const userRole = email === "doctor@sggs.ac.in" ? "doctor" : role;
 
-      // Store user role and token in localStorage
-      localStorage.setItem("token", token);
-      localStorage.setItem(
-        "role",
-        email === "doctor@sggs.ac.in" ? "doctor" : role
-      );
+      // Use AuthContext's login to update state and localStorage
+      login({ token, role: userRole });
 
       toast.success("Login successful");
-      console.log(
-        "Redirecting to:",
-        `/${email === "doctor@sggs.ac.in" ? "doctor" : role}`
-      );
-
-      setTimeout(() => {
-        navigate(`/${email === "doctor@sggs.ac.in" ? "doctor" : role}/`);
-      }, 1000);
+      navigate(`/${userRole}/`);
     } catch (error) {
       toast.error(error.response?.data?.message || "Login failed");
     } finally {
@@ -108,7 +98,6 @@ const Login = () => {
           <p className="text-center text-sm text-gray-600">
             Logging in as <strong>{role.toUpperCase()}</strong>
           </p>
-
           <Input
             label="Email"
             type="email"
@@ -118,7 +107,6 @@ const Login = () => {
             error={errors.email}
             required
           />
-
           <Input
             label="Password"
             type="password"
@@ -127,7 +115,6 @@ const Login = () => {
             error={errors.password}
             required
           />
-
           <button
             type="submit"
             disabled={isLoading}
@@ -135,7 +122,6 @@ const Login = () => {
           >
             {isLoading ? "Signing in..." : "Sign In"}
           </button>
-
           <p className="text-center text-sm text-gray-600">
             Don't have an account?{" "}
             <Link

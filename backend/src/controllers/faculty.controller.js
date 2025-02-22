@@ -87,3 +87,26 @@ export const deleteFaculty = async (req, res) => {
     res.status(500).json({ message: "Error removing faculty", error });
   }
 };
+
+// GET faculty details by ID
+export const getFacultyById = async (req, res) => {
+  try {
+    const { facultyId } = req.params; // Extract studentId from URL params
+    const faculty = await Faculty.findById(facultyId);
+
+    if (!faculty) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    res.json({
+      facultyId: faculty._id,
+      name: faculty.name,
+      email: faculty.email,
+      role: "Faculty",
+      department: faculty.department,
+    });
+  } catch (error) {
+    console.error("Error fetching faculty details:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};

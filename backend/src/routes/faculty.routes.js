@@ -3,6 +3,7 @@ import {
   registerFaculty,
   loginFaculty,
   getFaculty,
+  getFacultyById,
 } from "../controllers/faculty.controller.js";
 import {
   verifyFaculty,
@@ -19,6 +20,8 @@ router.post("/login", loginFaculty);
 router.get("/profile", verifyFaculty, (req, res) => {
   res.json({ faculty: req.user });
 });
+
+router.get("/profile/:facultyId", getFacultyById);
 
 // Only Faculty or Admin can access this route
 router.get("/all", verifyFacultyOrAdmin, async (req, res) => {

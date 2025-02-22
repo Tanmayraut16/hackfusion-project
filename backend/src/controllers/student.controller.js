@@ -114,7 +114,9 @@ const getStudentById = async (req, res) => {
     res.json({
       studentId: student._id,
       name: student.name,
-      email: student.email
+      email: student.email,
+      role: "Student",
+      department: student.department,
     });
   } catch (error) {
     console.error("Error fetching student details:", error);
