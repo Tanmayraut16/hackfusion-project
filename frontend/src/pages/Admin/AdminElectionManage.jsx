@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { PlusCircle, Edit, Trash2, UserPlus, Calendar } from "lucide-react";
 import axios from "axios";
 
+
+
 function AdminElectionManage() {
   const [showNewElectionModal, setShowNewElectionModal] = useState(false);
   const [showCandidateModal, setShowCandidateModal] = useState(false);

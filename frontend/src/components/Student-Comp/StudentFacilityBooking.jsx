@@ -97,7 +97,7 @@ const StudentFacilityBooking = () => {
   
         {/* Facilities List */}
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredFacilities.map((facility, index) => (
+        
           {filteredFacilities.map((facility, index) => (
             <div
               key={facility.id || `facility-${index}`} // Ensures a unique key
