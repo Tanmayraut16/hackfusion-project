@@ -100,12 +100,12 @@ export const voteForReveal = async (req, res) => {
     }
 
     // Check if the current user has already voted
-    if (complaint.votedBy.includes(req.user.id)) {
+    if (complaint.votedBy.includes(req.user._id)) {
       return res.status(400).json({ message: "You have already voted" });
     }
 
     // Register the vote by adding the user's id to the 'votedBy' array
-    complaint.votedBy.push(req.user.id);
+    complaint.votedBy.push(req.user._id);
 
     // Update the vote count based on the unique votes
     complaint.votesForReveal = complaint.votedBy.length;
