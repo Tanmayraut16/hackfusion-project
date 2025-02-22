@@ -22,39 +22,70 @@ function StudentComplaints() {
       });
   }, []);
 
-  const handleSubmitComplaint = (data) => {
-    const formData = new FormData();
-    formData.append('content', data.content);
-    formData.append('isAnonymous', data.isAnonymous);
+  // const handleSubmitComplaint = (data) => {
 
-    if (data.imageFile) {
-      formData.append('proof', data.imageFile);
-    }
+  //   const formData = new FormData();
+  //   formData.append('content', data.content);
+  //   formData.append('isAnonymous', data.isAnonymous);
 
-    // (Optional) Debug: Log the formData keys/values
-    for (let pair of formData.entries()) {
-      console.log(pair[0] + ':', pair[1]);
-    }
+  //   if (data.imageFile) {
+  //     formData.append('proof', data.imageFile);
+  //   }
 
-    const token = localStorage.getItem('token');
+  //   // (Optional) Debug: Log the formData keys/values
+  //   for (let pair of formData.entries()) {
+  //     console.log(pair[0] + ':', pair[1]);
+  //   }
 
-    axios
-      .post('http://localhost:3000/api/complaint/submit', formData, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      })
-      .then((response) => {
-        const createdComplaint = response.data.complaint;
-        setComplaints((prevComplaints) => [createdComplaint, ...prevComplaints]);
-        setActiveTab('all');
-      })
-      .catch((error) => {
-        console.error('Error submitting complaint:', error);
-      });
-  };
+  //   const token = localStorage.getItem('token');
+
+  //   axios
+  //     .post('http://localhost:3000/api/complaint/submit', formData, {
+  //       headers: {
+  //         'Authorization': `Bearer ${token}`,
+  //       },
+  //     })
+  //     .then((response) => {
+  //       const createdComplaint = response.data.complaint;
+  //       setComplaints((prevComplaints) => [createdComplaint, ...prevComplaints]);
+  //       setActiveTab('all');
+  //     })
+  //     .catch((error) => {
+  //       console.error('Error submitting complaint:', error);
+  //     });
+  // };
 
   // Filter complaints to show only the current user's complaints when the "My Complaints" tab is active
+
+
+  const handleSubmitComplaint = async (formData) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error("Authentication token not found");
+  
+      const response = await axios.post(
+        'http://localhost:3000/api/complaint/submit',
+        formData,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+  
+      if (response.data.complaint) {
+        setComplaints((prevComplaints) => [response.data.complaint, ...prevComplaints]);
+        setActiveTab('all');
+      } else {
+        throw new Error(response.data.message || "Failed to submit complaint");
+      }
+    } catch (error) {
+      console.error('Error submitting complaint:', error);
+      throw error; // Propagate error to form component
+    }
+  };
+  
   const filteredComplaints = complaints.filter((complaint) => {
     console.log(complaint);
     const isMyComplaint = !complaint.isAnonymous && complaint.submitterName === currentUser.name;

@@ -52,9 +52,9 @@ export function ModerationPanel({ complaints, onApprove, onReject }) {
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <p className="text-gray-900">{complaint.content}</p>
-                {complaint.proof && (
+                {complaint.proofUrl && (
                   <img
-                    src={complaint.proof}
+                    src={complaint.proofUrl}
                     alt="Complaint proof"
                     className="mt-4 rounded-lg max-h-48 object-cover"
                   />

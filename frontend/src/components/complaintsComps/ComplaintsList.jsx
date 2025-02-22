@@ -40,6 +40,8 @@ export function ComplaintsList({
     );
   }
 
+  console.log(complaints);
+
   return (
     <div className="space-y-4">
       {/* Dropdown for filtering complaints by status */}
@@ -65,9 +67,9 @@ export function ComplaintsList({
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <p className="text-gray-900">{complaint.content}</p>
-              {complaint.proof && (
+              {complaint.proofUrl && (
                 <img
-                  src={complaint.proof}
+                  src={complaint.proofUrl}
                   alt="Complaint proof"
                   className="mt-4 rounded-lg max-h-48 object-cover"
                 />
