@@ -1,5 +1,6 @@
+import mongoose from "mongoose";
 import Budget from "../models/budget.model.js";
-import ExpenseLog from "../models/expenseLog.model.js";
+import Expense from "../models/expenseLog.model.js";
 
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
@@ -15,19 +16,35 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
  */
 export const createBudget = async (req, res) => {
   try {
-    const { category, amount, allocated_by, allocatedByModel } = req.body;
+    if (!req.user) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Unauthorized: User not found" });
+    }
+
+    const userId = req.user._id; // Ensure req.user is properly set
+    console.log("Authenticated User ID:", userId);
+
+    const { category, amount, allocatedByModel } = req.body;
+
+    if (!category || !amount || !allocatedByModel) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Missing required fields" });
+    }
 
     const budget = new Budget({
       category,
       amount,
-      allocated_by,
+      allocated_by: userId,
       allocatedByModel,
     });
+
     await budget.save();
     return res.status(201).json({ success: true, data: budget });
   } catch (error) {
     console.error("Error in createBudget:", error);
-    return res.status(500).json({ success: false, error: "Server error" });
+    return res.status(500).json({ success: false, error: error.message });
   }
 };
 
@@ -49,17 +66,38 @@ export const getBudgets = async (req, res) => {
  */
 export const getBudgetById = async (req, res) => {
   try {
-    const { id } = req.params;
-    const budget = await Budget.findById(id).populate("allocated_by");
+    const budgetId = req.params.id;
+    console.log(budgetId);
+    // Ensure ID format is valid
+    if (!mongoose.Types.ObjectId.isValid(budgetId)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid Budget ID" });
+    }
+
+    // Fetch budget
+    const budget = await Budget.findById(budgetId);
+    // console.log(budget);
     if (!budget) {
       return res
         .status(404)
-        .json({ success: false, error: "Budget not found" });
+        .json({ success: false, message: "Budget not found" });
     }
-    return res.status(200).json({ success: true, data: budget });
+
+    // Fetch related expenses
+    const expenses = await Expense.find({ budget: budgetId });
+    console.log(expenses);
+    // Return data
+    res.json({
+      success: true,
+      data: {
+        ...budget.toObject(),
+        expenses,
+      },
+    });
   } catch (error) {
-    console.error("Error in getBudgetById:", error);
-    return res.status(500).json({ success: false, error: "Server error" });
+    console.error("Error fetching budget:", error.message); // Log the error
+    res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
 
@@ -80,9 +118,7 @@ export const createExpenseLog = async (req, res) => {
     // Fetch the budget document from the Budget schema
     const budget = await Budget.findById(id);
     if (!budget) {
-      return res
-        .status(404)
-        .json({ success: false, error: "Budget not found" });
+      return res.status(404).json({ success: false, error: "Budget not found" });
     }
 
     // Retrieve the allocated amount from the budget schema
@@ -96,50 +132,15 @@ export const createExpenseLog = async (req, res) => {
       });
     }
 
-
-    let proof_url = "";
-
-    // Check if a file was uploaded
-    if (req.file) {
-      const cloudinaryResponse = await uploadOnCloudinary(req.file.path);
-
-      if (!cloudinaryResponse) {
-        return res.status(500).json({ error: "File upload failed. Please try again." });
-      }
-
-      // If Cloudinary flagged the content as inappropriate, return an error
-      if (cloudinaryResponse.error) {
-        return res.status(400).json({ error: "Inappropriate image or video detected. Please upload a valid proof." });
-      }
-
-      proof_url = cloudinaryResponse.secure_url;
-    }
-
-    // Check if a duplicate expense log already exists for the same budget
-    const existingExpense = await ExpenseLog.findOne({
-      budget: id,
-      description,
-      amount_spent,
-      proof_url,
-    });
-    if (existingExpense) {
-      return res.status(400).json({
-        success: false,
-        error: "Duplicate expense log exists for this budget",
-      });
-    }
-
     // Create the expense log using the provided data
-    const expenseLog = new ExpenseLog({
+    const expenseLog = new Expense({
       budget: id,
       description,
       amount_spent,
-      proof_url,
     });
     await expenseLog.save();
 
-    // (Optional) Update the budget's remaining amount if you want to track expenses
-    // For example:
+    // (Optional) Update the budget's remaining amount if needed
     // budget.amount = allocatedAmount - amount_spent;
     // await budget.save();
 
@@ -149,6 +150,7 @@ export const createExpenseLog = async (req, res) => {
     return res.status(500).json({ success: false, error: "Server error" });
   }
 };
+
 
 /**
  * Get all expense logs for a specific budget.

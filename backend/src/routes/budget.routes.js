@@ -23,7 +23,7 @@ const verifyStudentFacultyAdmin = (req, res, next) =>
 
 // GET /budgets
 // Accessible to students, faculty, and admin
-router.get("/", verifyStudentFacultyAdmin, getBudgets);
+router.get("/all", verifyStudentFacultyAdmin, getBudgets);
 
 // GET /budgets/:id
 // Accessible to students, faculty, and admin
@@ -31,11 +31,13 @@ router.get("/:id", verifyStudentFacultyAdmin, getBudgetById);
 
 // POST /budgets
 // Only faculty and admin can create a budget allocation
-router.post("/", verifyStudentOrFaculty, createBudget);
+router.post("/add", verifyStudentOrFaculty, createBudget);
 
 // POST /budgets/:id/expenses
 // Only faculty and admin can add expense logs
-router.post("/:id/expenses", verifyFacultyOrAdmin,upload.single("proof"), createExpenseLog);
+// router.post("/:id", verifyFacultyOrAdmin,upload.single("proof"), createExpenseLog);
+router.post("/:id", verifyFacultyOrAdmin, createExpenseLog);
+
 
 // GET /budgets/:id/expenses
 // Accessible to students, faculty, and admin

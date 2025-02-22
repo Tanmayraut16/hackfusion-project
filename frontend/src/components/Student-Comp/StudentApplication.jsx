@@ -3,14 +3,8 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useEffect } from "react";
 
-
-
 const API_URL = "http://localhost:3000/api/applications/all";
 const API_URL2 = "http://localhost:3000/api/applications/add";
-
-
-
-
 
 const statusColors = {
   pending: "bg-yellow-500",
@@ -23,43 +17,36 @@ export default function ApplicationsPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [isModalOpen, setIsModalOpen] = useState(false);
-
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState(null);
-
   const [formData, setFormData] = useState({
     category: "",
     description: "",
     priority: "3",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   const [data, setdata] = useState([]);
   
   useEffect(() => {
     const fetchApplications = async () => { 
-      const token = localStorage.getItem("token"); // Assuming you store JWT in localStorage
-      const { data } = await axios.get(API_URL, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      
-      setdata(data.data);
+      try {
+        const token = localStorage.getItem("token");
+        const { data } = await axios.get(API_URL, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setdata(data.data || []);
+      } catch (error) {
+        console.error("Error fetching applications:", error);
+        setdata([]);
+      }
     };
     fetchApplications();  
   }, []);
 
-
-  console.log(data);
-  
-
-
-  
-  
-
   const filteredApplications = data.filter((app) => {
     const matchesSearch =
-      app.user.name.toLowerCase().includes(search.toLowerCase()) ||
-      app.description.toLowerCase().includes(search.toLowerCase());
+      (app.user?.name?.toLowerCase().includes(search.toLowerCase()) || false) ||
+      (app.description?.toLowerCase().includes(search.toLowerCase()) || false);
     const matchesStatus = statusFilter === "all" || app.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -86,7 +73,7 @@ export default function ApplicationsPage() {
     setIsSubmitting(true);
   
     try {
-      const token = localStorage.getItem("token"); // Retrieve token for authentication
+      const token = localStorage.getItem("token");
       const response = await axios.post(
         API_URL2,
         {
@@ -104,11 +91,10 @@ export default function ApplicationsPage() {
         setIsModalOpen(false);
         setFormData({ category: "", description: "", priority: "3" });
   
-        // Refresh the application list
         const { data } = await axios.get(API_URL, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setdata(data.data);
+        setdata(data.data || []);
       } else {
         alert("Failed to submit application.");
       }
@@ -119,7 +105,6 @@ export default function ApplicationsPage() {
       setIsSubmitting(false);
     }
   }
-  
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -168,17 +153,17 @@ export default function ApplicationsPage() {
           <tbody>
             {filteredApplications.map((application) => (
               <tr key={application._id} className="border-t">
-                <td className="p-3 font-medium">{application.user.name}</td>
-                <td className="p-3 capitalize">{application.category}</td>
-                <td className="p-3">{application.priority}</td>
+                <td className="p-3 font-medium">{application.user?.name || 'N/A'}</td>
+                <td className="p-3 capitalize">{application.category || 'N/A'}</td>
+                <td className="p-3">{application.priority || 'N/A'}</td>
                 <td className="p-3">
-                  <span className={`px-2 py-1 rounded-lg text-white ${statusColors[application.status]}`}>
-                    {application.status}
+                  <span className={`px-2 py-1 rounded-lg text-white ${statusColors[application.status] || 'bg-gray-500'}`}>
+                    {application.status || 'Unknown'}
                   </span>
                 </td>
-                <td className="p-3">{new Date(application.createdAt).toLocaleDateString()}</td>
+                <td className="p-3">{application.createdAt ? new Date(application.createdAt).toLocaleDateString() : 'N/A'}</td>
                 <td className="p-3">
-                <button
+                  <button
                     onClick={() => handleViewDetails(application._id)}
                     className="text-blue-600 hover:underline"
                   >
@@ -189,53 +174,48 @@ export default function ApplicationsPage() {
             ))}
           </tbody>
         </table>
+
         {isDetailModalOpen && selectedApplication && (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center transition-opacity duration-300">
-    <div className="bg-white p-6 rounded-xl shadow-xl w-[400px] transform scale-95 animate-fadeIn">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold text-gray-800">Application Details</h2>
-        <button
-          onClick={() => setIsDetailModalOpen(false)}
-          className="text-gray-500 hover:text-gray-700"
-        >
-          ✖
-        </button>
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center transition-opacity duration-300">
+            <div className="bg-white p-6 rounded-xl shadow-xl w-[400px] transform scale-95 animate-fadeIn">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-bold text-gray-800">Application Details</h2>
+                <button
+                  onClick={() => setIsDetailModalOpen(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  ✖
+                </button>
+              </div>
+
+              <div className="space-y-3 text-gray-700">
+                <p><strong>Applicant:</strong> {selectedApplication.user?.name || 'N/A'}</p>
+                <p><strong>Category:</strong> {selectedApplication.category || 'N/A'}</p>
+                <p>
+                  <strong>Status:</strong>{" "}
+                  <span
+                    className={`px-3 py-1 rounded-full text-white ${
+                      statusColors[selectedApplication.status] || 'bg-gray-500'
+                    }`}
+                  >
+                    {selectedApplication.status || 'Unknown'}
+                  </span>
+                </p>
+                <p><strong>Description:</strong> {selectedApplication.description || 'N/A'}</p>
+                <p><strong>Submitted On:</strong> {selectedApplication.createdAt ? new Date(selectedApplication.createdAt).toLocaleDateString() : 'N/A'}</p>
+              </div>
+
+              <button
+                onClick={() => setIsDetailModalOpen(false)}
+                className="mt-5 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
-      <div className="space-y-3 text-gray-700">
-        <p><strong>Applicant:</strong> {selectedApplication.user.name}</p>
-        <p><strong>Category:</strong> {selectedApplication.category}</p>
-        <p>
-          <strong>Status:</strong>{" "}
-          <span
-            className={`px-3 py-1 rounded-full text-white ${
-              selectedApplication.status === "pending"
-                ? "bg-yellow-500"
-                : selectedApplication.status === "approved"
-                ? "bg-green-500"
-                : "bg-red-500"
-            }`}
-          >
-            {selectedApplication.status}
-          </span>
-        </p>
-        <p><strong>Description:</strong> {selectedApplication.description}</p>
-        <p><strong>Submitted On:</strong> {new Date(selectedApplication.createdAt).toLocaleDateString()}</p>
-      </div>
-
-      <button
-        onClick={() => setIsDetailModalOpen(false)}
-        className="mt-5 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
-      >
-        Close
-      </button>
-    </div>
-  </div>
-)}
-
-      </div>
-
-      {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center">
           <div className="bg-white p-6 rounded-lg w-96">

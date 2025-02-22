@@ -7,6 +7,7 @@ import FacultyComplaints from "../../components/Faculty-Comp/FacultyComplaints";
 import FacultyFacilityBooking from "../../components/Faculty-Comp/FacultyFacilityBooking";
 import ReportCheating from "../../components/ReportCheating";
 import ManageApplication from "../../components/ManageApplication";
+import BudgetComponent from "../../components/Budget";
 
 function FacultyHome() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -27,6 +28,9 @@ function FacultyHome() {
     case "booking":
       ContentComponent = <FacultyFacilityBooking />;
       break;
+     case "budget":
+        ContentComponent=<BudgetComponent/>
+        break;
     case "application":
       ContentComponent = <ManageApplication />;
       break;
