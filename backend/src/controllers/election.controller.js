@@ -7,9 +7,10 @@ import { verifyOTP, sendOTPEmail } from "../utils/emailServiceOTP.js";
 export const createElection = async (req, res) => {
   try {
     const { title, startDate, endDate, positions } = req.body;
-
+    console.log(req.body);
     // Check if election already exists
     const existingElection = await Election.findOne({ title });
+    console.log(existingElection);
     if (existingElection) {
       return res.status(400).json({ message: "Election already exists" });
     }
@@ -20,11 +21,13 @@ export const createElection = async (req, res) => {
       endDate,
       positions,
     });
+    console.log(`this is new election: ${newElection}`);
 
     await newElection.save();
-
+    console.log("hleo blekjfa");
     // Encode the electionId using Base64 URL encoding
     const encodedElectionId = base64url(newElection._id.toString());
+    console.log(encodedElectionId);
 
     return res.status(201).json({
       message: "Election created successfully",
@@ -168,6 +171,8 @@ export const castVote = async (req, res) => {
       "positions.candidates.student"
     );
     // console.log("Election after population:", election);
+
+    // return res.status(200).json({ election });
 
     if (!election || !election.isActive) {
       return res

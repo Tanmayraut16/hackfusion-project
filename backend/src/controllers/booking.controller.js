@@ -144,3 +144,26 @@ export const listFacilities = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+export const updateFacilityStatus = async (req, res) => {
+  try {
+    const { status } = req.body;
+    const { id } = req.params;
+
+    console.log("Received request to update status:", { id, status });
+
+    if (!["available", "booked", "under_maintenance"].includes(status)) {
+      return res.status(400).json({ error: "Invalid status value" });
+    }
+
+    const facility = await Facility.findByIdAndUpdate(id, { status }, { new: true });
+
+    if (!facility) return res.status(404).json({ error: "Facility not found" });
+
+    res.status(200).json({ message: "Facility status updated", facility });
+  } catch (error) {
+    console.error("Error updating facility status:", error); // Log full error
+    res.status(500).json({ error: "Internal server error", details: error.message });
+  }
+};
+
