@@ -33,6 +33,10 @@ app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.use(express.static("public"));
 app.use(cookieParser());
 
+//image
+app.use("/public", express.static("public"));
+
+
 // routes
 app.use("/api/student-login", studentRouter);
 app.use("/api/faculty-login", facultyRouter);
@@ -49,5 +53,7 @@ app.use("/api/booking", bookingRouter);
 app.use("/api/facilities", facilityRoutes);
 app.use("/api/applications", applicationRoutes);
 app.use("/api/budgets", budgetRoutes);
+
+
 
 export { app };

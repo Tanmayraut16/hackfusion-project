@@ -241,34 +241,15 @@ function ExpenseTable({ expenses, isLoading, error }) {
                 </td>
                 
                 <td className="border p-2">
-                  {expense.proofUrl ? (
+                  {expense.proof_url ? (
                     <a
-                      href={expense.proofUrl}
-                      className="text-blue-600 hover:underline flex items-center justify-center"
+                      href={expense.proof_url}
+                      className="text-blue-600 hover:underline flex items-center justify-center cursor-pointer"
                       target="_blank"
                       rel="noopener noreferrer"
+                      
                     >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5 mr-1"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                        />
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                        />
-                      </svg>
-                      View
+                      View recepit
                     </a>
                   ) : (
                     <span className="text-gray-400">No proof</span>
@@ -349,8 +330,6 @@ export default function BudgetComponent() {
           timeout: 5000,
         });
 
-        console.log("API Full Response:", response.data);
-
         const expensesData = response.data?.data?.expenses;
         if (!Array.isArray(expensesData)) {
           throw new Error("Expenses not found in response");
@@ -374,6 +353,7 @@ export default function BudgetComponent() {
         setIsLoadingExpenses(false);
       }
     }
+
 
     if (selectedBudget?._id) {
       fetchExpenses(selectedBudget._id);
@@ -399,7 +379,6 @@ export default function BudgetComponent() {
 
   if (isLoading) return <LoadingSpinner />;
   if (error) return <ErrorMessage message={error} />;
-
 
 
 
@@ -492,27 +471,32 @@ export default function BudgetComponent() {
 
 
 
-function ExpenseForm({ budget, onClose, onSubmit }) {
+ function ExpenseForm({ budget, onClose, onSubmit }) {
   const [formData, setFormData] = useState({
     description: "",
     amount_spent: "",
+    file: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
+
+  const handleFileChange = (e) => {
+    setFormData({ ...formData, file: e.target.files[0] });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     setError(null);
 
-    if (!formData.description || !formData.amount_spent) {
-      setError("Description and amount spent are required");
+    if (!formData.description || !formData.amount_spent || !formData.file) {
+      setError("All fields, including proof file, are required.");
       setIsSubmitting(false);
       return;
     }
 
     if (Number(formData.amount_spent) > budget.amount) {
-      setError("Expense amount cannot exceed the allocated budget");
+      setError("Expense amount cannot exceed the allocated budget.");
       setIsSubmitting(false);
       return;
     }
@@ -521,15 +505,25 @@ function ExpenseForm({ budget, onClose, onSubmit }) {
       const token = localStorage.getItem("token");
       if (!token) throw new Error("Authentication token not found");
 
+      const formDataToSend = new FormData();
+      formDataToSend.append("description", formData.description);
+      formDataToSend.append("amount_spent", formData.amount_spent);
+      formDataToSend.append("file", formData.file);
+
       const response = await axios.post(
         `http://localhost:3000/api/budgets/${budget._id}`,
-        formData,
-        { headers: { Authorization: `Bearer ${token}` } }
+        formDataToSend,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
       );
 
       if (response.data.success) {
         onSubmit(response.data.data);
-        setFormData({ description: "", amount_spent: "" });
+        setFormData({ description: "", amount_spent: "", file: "" });
         onClose();
       } else {
         throw new Error(response.data.message || "Failed to add expense");
@@ -572,6 +566,17 @@ function ExpenseForm({ budget, onClose, onSubmit }) {
               required
               min="0"
               max={budget.amount}
+              disabled={isSubmitting}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Upload Proof*</label>
+            <input
+              type="file"
+              className="w-full p-2 border rounded"
+              onChange={handleFileChange}
+              required
               disabled={isSubmitting}
             />
           </div>
