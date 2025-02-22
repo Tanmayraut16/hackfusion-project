@@ -98,8 +98,7 @@ export function ComplaintsList({
               </span>
             </div>
 
-            {complaint.status === "Pending" &&
-              complaint.isAnonymous &&
+            {complaint.isAnonymous &&
               !complaint.isApprovedForReveal &&
               canVoteToReveal && (
                 <button
