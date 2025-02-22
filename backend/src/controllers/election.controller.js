@@ -7,9 +7,10 @@ import { verifyOTP, sendOTPEmail } from "../utils/emailServiceOTP.js";
 export const createElection = async (req, res) => {
   try {
     const { title, startDate, endDate, positions } = req.body;
-
+    console.log(req.body);
     // Check if election already exists
     const existingElection = await Election.findOne({ title });
+    console.log(existingElection);
     if (existingElection) {
       return res.status(400).json({ message: "Election already exists" });
     }
@@ -20,11 +21,13 @@ export const createElection = async (req, res) => {
       endDate,
       positions,
     });
+    console.log(`this is new election: ${newElection}`);
 
     await newElection.save();
-
+    console.log("hleo blekjfa");
     // Encode the electionId using Base64 URL encoding
     const encodedElectionId = base64url(newElection._id.toString());
+    console.log(encodedElectionId);
 
     return res.status(201).json({
       message: "Election created successfully",
@@ -125,7 +128,6 @@ export const verifyVoterOTP = (req, res) => {
   }
 };
 
-
 export const castVote = async (req, res) => {
   try {
     console.log("Received request body:", req.body);
@@ -134,14 +136,18 @@ export const castVote = async (req, res) => {
 
     // Validate required fields
     if (!electionId || !positionName || !candidateName) {
-      return res.status(400).json({ message: "Missing required fields", receivedData: req.body });
+      return res
+        .status(400)
+        .json({ message: "Missing required fields", receivedData: req.body });
     }
 
     const voterEmail = req.user?.email;
     console.log("Voter email:", voterEmail);
 
     if (!voterEmail || !voterEmail.endsWith("@sggs.ac.in")) {
-      return res.status(403).json({ message: "Only college-authenticated users can vote" });
+      return res
+        .status(403)
+        .json({ message: "Only college-authenticated users can vote" });
     }
 
     const voter = await Student.findOne({ email: voterEmail });
@@ -153,7 +159,7 @@ export const castVote = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(electionId)) {
       return res.status(400).json({ message: "Invalid election ID format" });
     }
-    
+
     let election = await Election.findById(electionId);
     if (!election) {
       console.log("Election not found:", electionId);
@@ -161,7 +167,9 @@ export const castVote = async (req, res) => {
     }
 
     console.log("Election before population:", election);
-    election = await Election.findById(electionId).populate("positions.candidates.student");
+    election = await Election.findById(electionId).populate(
+      "positions.candidates.student"
+    );
     console.log("Election after population:", election);
 
     return res.status(200).json({ election });
@@ -201,7 +209,6 @@ export const castVote = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
-
 
 /**
  * Get live results for an election.

@@ -15,6 +15,7 @@ const AdminManageBookings = () => {
   const [notifications] = useState([]);
   const [statusFilter, setStatusFilter] = useState("all");
   const [showAddSuccess, setShowAddSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   // Function to fetch facilities
   const fetchFacilities = async () => {
@@ -30,9 +31,10 @@ const AdminManageBookings = () => {
   useEffect(() => {
     fetchFacilities();
   }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
+    const formData = new FormData(e.currentTarget); // Convert form element to FormData object
 
     const newFacility = {
       name: formData.get("name"),
@@ -42,27 +44,22 @@ const AdminManageBookings = () => {
     };
 
     try {
-      const token = localStorage.getItem("token"); // Retrieve stored JWT token
+      const token = localStorage.getItem("token");
+      await axios.post("http://localhost:3000/api/facilities", newFacility, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
 
-      const response = await axios.post(
-        "http://localhost:3000/api/facilities",
-        newFacility,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`, // Include token in request
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      setFacilities([...facilities, response.data]);
-
+      fetchFacilities(); // Re-fetch after adding
       setShowAddSuccess(true);
-      e.currentTarget.reset();
+      e.target.reset(); // Reset form
+
       setTimeout(() => setShowAddSuccess(false), 3000);
     } catch (error) {
       console.error("Error adding facility:", error);
-      alert("Failed to add facility. Please check your permissions.");
+      setErrorMessage("Failed to add facility. Please check your permissions.");
     }
   };
 
@@ -152,18 +149,30 @@ const AdminManageBookings = () => {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Add Facility Form */}
-            <div className="bg-white rounded-lg shadow p-4">
-              <div className="flex items-center gap-2 mb-4">
-                <Plus className="w-5 h-5 text-indigo-600" />
-                <h2 className="text-lg font-semibold">Add New Facility</h2>
+            <div className="bg-white rounded-2xl shadow-lg p-6 max-w-lg mx-auto">
+              <div className="flex items-center gap-3 mb-6">
+                <Plus className="w-6 h-6 text-indigo-600" />
+                <h2 className="text-xl font-semibold text-gray-900">
+                  Add New Facility
+                </h2>
               </div>
+
               {showAddSuccess && (
-                <div className="mb-4 p-3 bg-green-100 text-green-700 rounded-md flex items-center gap-2">
-                  <CheckCircle2 className="w-5 h-5" />
-                  Facility added successfully!
+                <div className="mb-4 p-4 bg-green-100 text-green-800 rounded-md flex items-center justify-between transition-opacity duration-300">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-5 h-5" />
+                    <span>Facility added successfully!</span>
+                  </div>
+                  <button
+                    onClick={() => setShowAddSuccess(false)}
+                    className="text-green-600 hover:text-green-800 transition"
+                  >
+                    ✖
+                  </button>
                 </div>
               )}
-              <form onSubmit={handleSubmit} className="space-y-4">
+
+              <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
                   <label
                     htmlFor="name"
@@ -176,9 +185,10 @@ const AdminManageBookings = () => {
                     name="name"
                     id="name"
                     required
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    className="mt-2 block w-full rounded-lg border border-gray-300 px-4 py-2 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-400 transition-all sm:text-sm"
                   />
                 </div>
+
                 <div>
                   <label
                     htmlFor="location"
@@ -191,9 +201,10 @@ const AdminManageBookings = () => {
                     name="location"
                     id="location"
                     required
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    className="mt-2 block w-full rounded-lg border border-gray-300 px-4 py-2 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-400 transition-all sm:text-sm"
                   />
                 </div>
+
                 <div>
                   <label
                     htmlFor="description"
@@ -205,9 +216,10 @@ const AdminManageBookings = () => {
                     name="description"
                     id="description"
                     rows={3}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    className="mt-2 block w-full rounded-lg border border-gray-300 px-4 py-2 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-400 transition-all sm:text-sm resize-none"
                   ></textarea>
                 </div>
+
                 <div>
                   <label
                     htmlFor="status"
@@ -219,18 +231,19 @@ const AdminManageBookings = () => {
                     name="status"
                     id="status"
                     required
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    className="mt-2 block w-full rounded-lg border border-gray-300 px-4 py-2 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-400 transition-all sm:text-sm cursor-pointer"
                   >
                     <option value="available">Available</option>
                     <option value="booked">Booked</option>
                     <option value="under_maintenance">Under Maintenance</option>
                   </select>
                 </div>
+
                 <button
                   type="submit"
-                  className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                  className="w-full bg-indigo-600 text-white py-3 px-4 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition transform hover:scale-105"
                 >
-                  Add Facility
+                  + Add Facility
                 </button>
               </form>
             </div>

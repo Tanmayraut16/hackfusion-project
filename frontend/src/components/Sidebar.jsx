@@ -52,7 +52,7 @@ const menuItems = {
     { name: "Dashboard", path: "/admin/dashboard", icon: "PieChart" },
     { name: "Manage Users", path: "/admin/users", icon: "Users" },
     { name: "Manage Elections", path: "/admin/elections", icon: "Vote" },
-    { name: "Manage Booking", path: "/admin/bookings", icon: "BookOpen" },
+    { name: "Manage Facility", path: "/admin/bookings", icon: "BookOpen" },
     {
       name: "Manage Approvals",
       path: "/admin/approvals",
@@ -63,14 +63,14 @@ const menuItems = {
       path: "/admin/complaints",
       icon: "ClipboardList",
     },
-    { name: "Settings", path: "/admin/settings", icon: "Settings" },
     {
       name: "Manage Application",
       path: "/admin/application",
       icon: "ClipboardList",
     },
-
-    { name :"Budget" ,path :"/admin/budget", icon:"BookOpen"}
+    
+    { name :"Budget" ,path :"/admin/budget", icon:"BookOpen"},
+    { name: "Settings", path: "/admin/settings", icon: "Settings" },
   
     
   ],
