@@ -27,7 +27,7 @@ function LoadingSpinner() {
 
 function BudgetForm({ onClose, onSubmit }) {
   const [formData, setFormData] = useState({
-    title:"To ",
+    title: "To ",
     category: "event",
     amount: "",
     allocated_by: {
@@ -41,29 +41,29 @@ function BudgetForm({ onClose, onSubmit }) {
     e.preventDefault();
     setIsSubmitting(true);
     setError(null);
-  
+
     try {
       const token = localStorage.getItem("token");
       if (!token) {
         throw new Error("Authentication token not found");
       }
-  
+
       const decodedToken = jwtDecode(token);
       console.log("Decoded Token:", decodedToken); // Debugging step
-  
-      const userId = decodedToken?.studentId;  // Extracting correct field
+
+      const userId = decodedToken?.studentId; // Extracting correct field
       if (!userId) {
         throw new Error("User ID not found in token");
       }
-  
+
       const submitData = {
-        title:formData.title,
+        title: formData.title,
         category: formData.category,
         amount: Number(formData.amount),
-        allocated_by: userId, 
+        allocated_by: userId,
         allocatedByModel: formData.allocated_by.model,
       };
-  
+
       const response = await axios.post(API_URL_ADD, submitData, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -71,11 +71,11 @@ function BudgetForm({ onClose, onSubmit }) {
         },
         timeout: 5000,
       });
-  
+
       if (response.data.success) {
         onSubmit(response.data.data);
         setFormData({
-          title:"To",
+          title: "To",
           category: "event",
           amount: "",
           allocated_by: { model: "Faculty" },
@@ -85,12 +85,13 @@ function BudgetForm({ onClose, onSubmit }) {
         throw new Error(response.data.message || "Failed to create budget");
       }
     } catch (error) {
-      setError(error.response?.data?.message || error.message || "An error occurred");
+      setError(
+        error.response?.data?.message || error.message || "An error occurred"
+      );
     } finally {
       setIsSubmitting(false);
     }
   };
-  
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
@@ -99,7 +100,7 @@ function BudgetForm({ onClose, onSubmit }) {
         {error && <ErrorMessage message={error} />}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
               Title
             </label>
             <input
@@ -107,8 +108,6 @@ function BudgetForm({ onClose, onSubmit }) {
               className="w-full p-2 border rounded"
               placeholder="Enter Title"
               value={formData.title}
-          
-              
               disabled={isSubmitting}
               onChange={(e) =>
                 setFormData({ ...formData, title: e.target.value })
@@ -154,7 +153,7 @@ function BudgetForm({ onClose, onSubmit }) {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Allocated By
+              Created By
             </label>
             <select
               className="w-full p-2 border rounded"
@@ -231,7 +230,7 @@ function ExpenseTable({ expenses, isLoading, error }) {
                     ? expense.amount_spent.toFixed(2)
                     : "0.00"}
                 </td>
-                
+
                 <td className="border p-2">
                   {expense.proof_url ? (
                     <a
@@ -371,30 +370,59 @@ export default function BudgetComponent() {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
         {budgets.length === 0 ? (
-          <p className="text-gray-500">No budgets found.</p>
+          <p className="text-gray-500 text-center col-span-full">
+            No budgets found.
+          </p>
         ) : (
           budgets.map((budget) => (
             <div
               key={budget._id}
-              className={`bg-white p-4 rounded-lg shadow hover:shadow-lg transition cursor-pointer ${
-                selectedBudget?._id === budget._id
-                  ? "border-2 border-blue-500"
-                  : ""
-              }`}
+              className={`bg-white p-5 rounded-xl shadow-md hover:shadow-xl transition-all cursor-pointer border 
+                ${
+                  selectedBudget?._id === budget._id
+                    ? "border-blue-500 ring-2 ring-blue-300"
+                    : "border-gray-200"
+                }`}
               onClick={() => setSelectedBudget(budget)}
             >
-              <p>Title: {budget.title}</p>
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {budget.title}
+                </h3>
+                <span
+                  className={`px-3 py-1 text-xs font-medium rounded-full 
+                    ${
+                      budget.status === "approved"
+                        ? "bg-green-100 text-green-700"
+                        : budget.status === "pending"
+                        ? "bg-yellow-100 text-yellow-700"
+                        : "bg-red-100 text-red-700"
+                    }`}
+                >
+                  {budget.status}
+                </span>
+              </div>
               <p className="text-sm text-gray-600">
-                Category: {budget.category}
+                Category:{" "}
+                <span className="font-medium text-gray-800">
+                  {budget.category}
+                </span>
               </p>
-              <p className="text-sm text-gray-600">Amount: ${budget.amount}</p>
-              <p className="text-xs text-gray-500">
-                Allocated by:{" "}
-                {budget.allocated_by?.name ||
-                  budget.allocated_by?.model ||
-                  "Unknown"}
+              <p className="text-sm text-gray-600">
+                Amount:{" "}
+                <span className="font-medium text-gray-800">
+                  ${budget.amount}
+                </span>
+              </p>
+              <p className="text-xs text-gray-500 mt-2">
+                Created by:{" "}
+                <span className="font-medium">
+                  {budget.allocated_by?.name ||
+                    budget.allocated_by?.model ||
+                    "Unknown"}
+                </span>
               </p>
             </div>
           ))
