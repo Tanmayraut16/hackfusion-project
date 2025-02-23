@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { PlusCircle, Edit, Trash2, UserPlus, Calendar } from "lucide-react";
 import axios from "axios";
-
-
+import StudentDropdown from "../../components/Admin-Comp/AdminStudentDropdown";
 
 function AdminElectionManage() {
   const [showNewElectionModal, setShowNewElectionModal] = useState(false);
@@ -22,6 +21,8 @@ function AdminElectionManage() {
   const [successMessage, setSuccessMessage] = useState(null);
   const [elections, setElections] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [students, setStudents] = useState([]);
+
   const [candidateForm, setCandidateForm] = useState({
     name: "",
     department: "",
@@ -29,6 +30,38 @@ function AdminElectionManage() {
     photo_url: "",
     student: "",
   });
+
+  // console.log(candidateForm);
+
+  // Fetch students when component mounts
+  useEffect(() => {
+    const fetchStudents = async () => {
+      try {
+        const token = localStorage.getItem("token"); // Retrieve token from localStorage
+
+        if (!token) {
+          console.error("No token found. Authentication required.");
+          return;
+        }
+
+        const response = await axios.get(
+          "http://localhost:3000/api/details/allStudents",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`, // Attach token in Authorization
+            },
+          }
+        );
+        // console.log(response.data.data);
+
+        setStudents(response.data.data);
+      } catch (error) {
+        console.error("Error fetching students:", error);
+      }
+    };
+
+    fetchStudents();
+  }, []);
 
   // Fetch all elections when component mounts
   useEffect(() => {
@@ -125,6 +158,16 @@ function AdminElectionManage() {
 
     if (!selectedPosition) return;
 
+    // Check if candidate with the same student ID already exists in the selected position
+    const candidateExists = selectedPosition.candidates?.some(
+      (candidate) => candidate.student === candidateForm.student
+    );
+
+    if (candidateExists) {
+      alert("This student is already added as a candidate for this position.");
+      return;
+    }
+
     const updatedPositions = pendingElection.positions.map((pos) => {
       if (pos.id === selectedPosition.id) {
         return {
@@ -152,6 +195,7 @@ function AdminElectionManage() {
       department: "",
       bio: "",
       photo_url: "",
+      student: "",
     });
     setShowCandidateModal(false);
   };
@@ -183,7 +227,8 @@ function AdminElectionManage() {
         })),
       };
 
-      await axios.post("http://localhost:3000/api/election", formattedData, {
+      console.log(formattedData);
+      await axios.post("http://localhost:3000/api/election/", formattedData, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
@@ -295,7 +340,9 @@ function AdminElectionManage() {
                           </p>
                         </div>
                       </div>
-                      <div className="mt-4 flex-shrink-0 sm:mt-0 sm:ml-5">
+
+                      {/* icons are commentout for now */}
+                      {/* <div className="mt-4 flex-shrink-0 sm:mt-0 sm:ml-5">
                         <div className="flex space-x-4">
                           <button className="text-indigo-600 hover:text-indigo-900">
                             <Edit className="h-5 w-5" />
@@ -304,17 +351,17 @@ function AdminElectionManage() {
                             <Trash2 className="h-5 w-5" />
                           </button>
                         </div>
-                      </div>
+                      </div> */}
                     </div>
 
-                    {/* Display Positions and Candidates */}
+                    {/* Positions and Candidates Display */}
                     <div className="mt-4">
                       <h4 className="text-sm font-medium text-gray-500">
                         Positions
                       </h4>
                       <div className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                         {election.positions.map((position) => (
-                          <div key={position._id}>
+                          <div key={position._id || position.name}>
                             <div
                               onClick={() => handlePositionClick(position)}
                               className={`border rounded-lg p-4 cursor-pointer transition-colors ${
@@ -327,7 +374,6 @@ function AdminElectionManage() {
                                 {position.name}
                               </h5>
 
-                              {/* Expandable candidates section */}
                               {selectedPositionDetails?.name ===
                                 position.name && (
                                 <div className="mt-4 space-y-3">
@@ -338,23 +384,30 @@ function AdminElectionManage() {
                                   position.candidates.length > 0 ? (
                                     position.candidates.map((candidate) => (
                                       <div
-                                        key={candidate._id}
+                                        key={
+                                          candidate._id || candidate.student._id
+                                        }
                                         className="bg-white p-3 rounded-md shadow-sm border border-gray-100"
                                       >
                                         <div className="flex items-center space-x-3">
                                           {candidate.photo_url && (
                                             <img
                                               src={candidate.photo_url}
-                                              alt={candidate.name}
+                                              alt={
+                                                candidate.student?.name ||
+                                                candidate.name
+                                              }
                                               className="h-10 w-10 rounded-full object-cover"
                                             />
                                           )}
                                           <div>
                                             <p className="text-sm font-medium text-gray-900">
-                                              {candidate.name}
+                                              {candidate.student?.name ||
+                                                candidate.name}
                                             </p>
                                             <p className="text-xs text-gray-500">
-                                              {candidate.department}
+                                              {candidate.student?.department ||
+                                                candidate.department}
                                             </p>
                                             {candidate.bio && (
                                               <p className="text-xs text-gray-600 mt-1">
@@ -621,55 +674,26 @@ function AdminElectionManage() {
                   htmlFor="student"
                   className="block text-sm font-medium text-gray-700"
                 >
-                  Student ID
+                  Student
                 </label>
-                <input
-                  type="text"
-                  id="student"
+                <StudentDropdown
+                  students={students}
                   value={candidateForm.student}
-                  onChange={handleCandidateInputChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="Enter student ID"
-                  required
+                  onChange={(studentId) => {
+                    const selectedStudent = students.find(
+                      (s) => s._id === studentId
+                    );
+                    setCandidateForm((prev) => ({
+                      ...prev,
+                      student: studentId,
+                      name: selectedStudent?.name || "",
+                      department: selectedStudent?.department || "",
+                    }));
+                  }}
                 />
               </div>
 
-              <div>
-                <label
-                  htmlFor="name"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Full Name
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  value={candidateForm.name}
-                  onChange={handleCandidateInputChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="Enter candidate's full name"
-                  required
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="department"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Department
-                </label>
-                <input
-                  type="text"
-                  id="department"
-                  value={candidateForm.department}
-                  onChange={handleCandidateInputChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="e.g., Computer Science"
-                  required
-                />
-              </div>
-
+              {/* Rest of the form fields */}
               <div>
                 <label
                   htmlFor="bio"
@@ -680,9 +704,14 @@ function AdminElectionManage() {
                 <textarea
                   id="bio"
                   value={candidateForm.bio}
-                  onChange={handleCandidateInputChange}
+                  onChange={(e) =>
+                    setCandidateForm((prev) => ({
+                      ...prev,
+                      bio: e.target.value,
+                    }))
+                  }
                   rows={3}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3"
                   placeholder="Brief description of the candidate"
                 />
               </div>
@@ -698,8 +727,13 @@ function AdminElectionManage() {
                   type="url"
                   id="photo_url"
                   value={candidateForm.photo_url}
-                  onChange={handleCandidateInputChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                  onChange={(e) =>
+                    setCandidateForm((prev) => ({
+                      ...prev,
+                      photo_url: e.target.value,
+                    }))
+                  }
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3"
                   placeholder="Enter photo URL"
                 />
               </div>
@@ -714,7 +748,7 @@ function AdminElectionManage() {
                       department: "",
                       bio: "",
                       photo_url: "",
-                      student: "", // Reset student field
+                      student: "",
                     });
                   }}
                   className="px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
@@ -723,7 +757,7 @@ function AdminElectionManage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
                 >
                   Add Candidate
                 </button>

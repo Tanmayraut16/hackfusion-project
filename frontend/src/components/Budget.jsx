@@ -161,7 +161,7 @@ function BudgetForm({ onClose, onSubmit }) {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Allocated By
+              Created By
             </label>
             <select
               className="w-full p-2 border rounded"
@@ -240,34 +240,17 @@ function ExpenseTable({ expenses, isLoading, error }) {
                 </td>
 
                 <td className="border p-2">
+
                   {<expense className="proof_url"></expense> ? (
                     <a
                       href={expense.proof_url}
                       className="text-blue-600 hover:underline flex items-center justify-center"
+
                       target="_blank"
                       rel="noopener noreferrer"
+                      
                     >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5 mr-1"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                        />
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                        />
-                      </svg>
-                      View
+                      View recepit
                     </a>
                   ) : (
                     <span className="text-gray-400">No proof</span>
@@ -347,8 +330,6 @@ export default function BudgetComponent() {
           timeout: 5000,
         });
 
-        console.log("API Full Response:", response.data);
-
         const expensesData = response.data?.data?.expenses;
         if (!Array.isArray(expensesData)) {
           throw new Error("Expenses not found in response");
@@ -372,6 +353,7 @@ export default function BudgetComponent() {
         setIsLoadingExpenses(false);
       }
     }
+
 
     if (selectedBudget?._id) {
       fetchExpenses(selectedBudget._id);
@@ -398,6 +380,7 @@ export default function BudgetComponent() {
   if (isLoading) return <LoadingSpinner />;
   if (error) return <ErrorMessage message={error} />;
 
+
   return (
     <div className="p-6 max-w-4xl mx-auto">
       <div className="flex justify-between items-center mb-4">
@@ -410,7 +393,7 @@ export default function BudgetComponent() {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {budgets.length === 0 ? (
           <p className="text-gray-500">No budgets found.</p>
         ) : (
@@ -434,6 +417,64 @@ export default function BudgetComponent() {
                 {budget.allocated_by?.name ||
                   budget.allocated_by?.model ||
                   "Unknown"}
+              </p>
+            </div>
+          ))
+        )}
+      </div> */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
+        {budgets.length === 0 ? (
+          <p className="text-gray-500 text-center col-span-full">
+            No budgets found.
+          </p>
+        ) : (
+          budgets.map((budget) => (
+            <div
+              key={budget._id}
+              className={`bg-white p-5 rounded-xl shadow-md hover:shadow-xl transition-all cursor-pointer border 
+                ${
+                  selectedBudget?._id === budget._id
+                    ? "border-blue-500 ring-2 ring-blue-300"
+                    : "border-gray-200"
+                }`}
+              onClick={() => setSelectedBudget(budget)}
+            >
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {budget.title}
+                </h3>
+                <span
+                  className={`px-3 py-1 text-xs font-medium rounded-full 
+                    ${
+                      budget.status === "approved"
+                        ? "bg-green-100 text-green-700"
+                        : budget.status === "pending"
+                        ? "bg-yellow-100 text-yellow-700"
+                        : "bg-red-100 text-red-700"
+                    }`}
+                >
+                  {budget.status}
+                </span>
+              </div>
+              <p className="text-sm text-gray-600">
+                Category:{" "}
+                <span className="font-medium text-gray-800">
+                  {budget.category}
+                </span>
+              </p>
+              <p className="text-sm text-gray-600">
+                Amount:{" "}
+                <span className="font-medium text-gray-800">
+                  ${budget.amount}
+                </span>
+              </p>
+              <p className="text-xs text-gray-500 mt-2">
+                Created by:{" "}
+                <span className="font-medium">
+                  {budget.allocated_by?.name ||
+                    budget.allocated_by?.model ||
+                    "Unknown"}
+                </span>
               </p>
             </div>
           ))
@@ -594,7 +635,7 @@ export default function BudgetComponent() {
 //   );
 // }
 
-function ExpenseForm({ budget, onClose, onSubmit }) {
+ function ExpenseForm({ budget, onClose, onSubmit }) {
   const [formData, setFormData] = useState({
     description: "",
     amount_spent: "",
@@ -606,6 +647,8 @@ function ExpenseForm({ budget, onClose, onSubmit }) {
   
   const handleFileChange = (e) => {
     console.log(e.target.files[0])
+
+
     setFormData({ ...formData, file: e.target.files[0] });
   };
 

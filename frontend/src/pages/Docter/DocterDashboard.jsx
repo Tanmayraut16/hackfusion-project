@@ -26,8 +26,6 @@ import {
   Loader2,
   AlertCircle,
 } from "lucide-react";
-import Sidebar from "../../components/Sidebar";
-import Navbar from "../../components/Navbar";
 
 const columnHelper = createColumnHelper();
 
@@ -48,9 +46,7 @@ const columns = [
   }),
   columnHelper.accessor("studentYear", {
     header: "Year",
-    cell: (info) => (
-      <div className="text-gray-700">Year {info.getValue()}</div>
-    ),
+    cell: (info) => <div className="text-gray-700">Year {info.getValue()}</div>,
   }),
   columnHelper.accessor("parentEmail", {
     header: "Parent Email",
@@ -67,7 +63,9 @@ const columns = [
       <div className="flex items-center">
         <Calendar className="h-4 w-4 text-gray-400 mr-2" />
         <span className="text-gray-600">
-          {info.getValue() ? format(new Date(info.getValue()), "MMM d, yyyy") : "-"}
+          {info.getValue()
+            ? format(new Date(info.getValue()), "MMM d, yyyy")
+            : "-"}
         </span>
       </div>
     ),
@@ -105,9 +103,7 @@ const DetailModal = ({ student, onClose }) => (
                 <User className="h-5 w-5" />
                 <span className="font-medium">Registration Number</span>
               </div>
-              <p className="text-gray-900 text-lg">
-                {student.registrationNo}
-              </p>
+              <p className="text-gray-900 text-lg">{student.registrationNo}</p>
             </div>
             <div className="bg-gray-50 p-4 rounded-lg">
               <div className="flex items-center gap-2 text-gray-500 mb-2">
@@ -145,23 +141,32 @@ const DetailModal = ({ student, onClose }) => (
             <div className="space-y-4">
               {student.allottedLeaves && student.allottedLeaves.length > 0 ? (
                 student.allottedLeaves.map((leave, index) => (
-                  <div key={index} className="bg-white border border-gray-200 p-4 rounded-lg shadow-sm">
+                  <div
+                    key={index}
+                    className="bg-white border border-gray-200 p-4 rounded-lg shadow-sm"
+                  >
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
                       <div className="bg-blue-50 p-3 rounded-lg">
-                        <span className="text-sm text-blue-600 font-medium">From</span>
+                        <span className="text-sm text-blue-600 font-medium">
+                          From
+                        </span>
                         <p className="text-gray-900 font-semibold mt-1">
                           {format(new Date(leave.fromDate), "MMMM d, yyyy")}
                         </p>
                       </div>
                       <div className="bg-blue-50 p-3 rounded-lg">
-                        <span className="text-sm text-blue-600 font-medium">To</span>
+                        <span className="text-sm text-blue-600 font-medium">
+                          To
+                        </span>
                         <p className="text-gray-900 font-semibold mt-1">
                           {format(new Date(leave.toDate), "MMMM d, yyyy")}
                         </p>
                       </div>
                     </div>
                     <div className="bg-gray-50 p-3 rounded-lg">
-                      <span className="text-sm text-gray-600 font-medium">Reason</span>
+                      <span className="text-sm text-gray-600 font-medium">
+                        Reason
+                      </span>
                       <p className="text-gray-900 mt-1">{leave.reason}</p>
                     </div>
                   </div>
@@ -201,7 +206,7 @@ const DoctorDashboard = () => {
   const [sorting, setSorting] = useState([]);
   const [globalFilter, setGlobalFilter] = useState("");
   const [selectedStudent, setSelectedStudent] = useState(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [fetchError, setFetchError] = useState(null);
@@ -209,7 +214,9 @@ const DoctorDashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/doctor/medicaldetails");
+        const response = await axios.get(
+          "http://localhost:3000/api/doctor/medicaldetails"
+        );
         setData(response.data.data);
         setIsLoading(false);
       } catch (error) {
@@ -241,14 +248,7 @@ const DoctorDashboard = () => {
 
   return (
     <div className="flex h-screen overflow-hidden">
-      <Sidebar role="Doctor" isOpen={isSidebarOpen} />
-
-      <div className="flex-1 flex flex-col overflow-hidden bg-gradient-to-br from-blue-50 via-white to-blue-50">
-        <Navbar
-          toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
-          userName="Doctor"
-        />
-        
+      <div className="flex-1 flex flex-col overflow-hidden">
         <div className="flex-1 overflow-auto">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
             <div className="sm:flex sm:items-center sm:justify-between mb-8">
@@ -301,8 +301,12 @@ const DoctorDashboard = () => {
                                 className="p-1 hover:bg-gray-100 rounded"
                               >
                                 {{
-                                  asc: <SortAsc className="h-4 w-4 text-blue-600" />,
-                                  desc: <SortDesc className="h-4 w-4 text-blue-600" />,
+                                  asc: (
+                                    <SortAsc className="h-4 w-4 text-blue-600" />
+                                  ),
+                                  desc: (
+                                    <SortDesc className="h-4 w-4 text-blue-600" />
+                                  ),
                                 }[header.column.getIsSorted()] ?? (
                                   <SortAsc className="h-4 w-4 text-gray-400" />
                                 )}
@@ -388,7 +392,8 @@ const DoctorDashboard = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-gray-700">
-                    Showing {table.getState().pagination.pageSize} records per page
+                    Showing {table.getState().pagination.pageSize} records per
+                    page
                   </span>
                 </div>
               </div>

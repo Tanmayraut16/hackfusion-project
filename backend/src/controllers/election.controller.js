@@ -7,29 +7,35 @@ import { verifyOTP, sendOTPEmail } from "../utils/emailServiceOTP.js";
 export const createElection = async (req, res) => {
   try {
     const { title, startDate, endDate, positions } = req.body;
-
+    console.log(req.body);
     // Check if election already exists
     const existingElection = await Election.findOne({ title });
+    console.log(existingElection);
     if (existingElection) {
       return res.status(400).json({ message: "Election already exists" });
     }
 
-    const newElection = new Election({
-      title,
-      startDate,
-      endDate,
-      positions,
-    });
+    try {
+      const newElection = await Election.create({
+        title,
+        startDate,
+        endDate,
+        positions,
+      });
+      console.log("this is new election:", newElection);
+    } catch (error) {
+      console.error("Error creating election:", error);
+    }
 
-    await newElection.save();
-
+    console.log("hleo blekjfa");
     // Encode the electionId using Base64 URL encoding
-    const encodedElectionId = base64url(newElection._id.toString());
+    // const encodedElectionId = base64url(newElection._id.toString());
+    // console.log(encodedElectionId);
 
     return res.status(201).json({
       message: "Election created successfully",
       election: newElection,
-      electionId: encodedElectionId, // Obfuscated ID
+      //electionId: encodedElectionId, // Obfuscated ID
     });
   } catch (error) {
     return res.status(500).json({ message: error.message });
@@ -125,7 +131,6 @@ export const verifyVoterOTP = (req, res) => {
   }
 };
 
-
 export const castVote = async (req, res) => {
   try {
     console.log("Received request body:", req.body);
@@ -134,14 +139,18 @@ export const castVote = async (req, res) => {
 
     // Validate required fields
     if (!electionId || !positionName || !candidateName) {
-      return res.status(400).json({ message: "Missing required fields", receivedData: req.body });
+      return res
+        .status(400)
+        .json({ message: "Missing required fields", receivedData: req.body });
     }
 
     const voterEmail = req.user?.email;
-    console.log("Voter email:", voterEmail);
+    // console.log("Voter email:", voterEmail);
 
     if (!voterEmail || !voterEmail.endsWith("@sggs.ac.in")) {
-      return res.status(403).json({ message: "Only college-authenticated users can vote" });
+      return res
+        .status(403)
+        .json({ message: "Only college-authenticated users can vote" });
     }
 
     const voter = await Student.findOne({ email: voterEmail });
@@ -153,55 +162,64 @@ export const castVote = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(electionId)) {
       return res.status(400).json({ message: "Invalid election ID format" });
     }
-    
+
     let election = await Election.findById(electionId);
     if (!election) {
       console.log("Election not found:", electionId);
       return res.status(404).json({ message: "Election not found" });
     }
 
-    console.log("Election before population:", election);
-    election = await Election.findById(electionId).populate("positions.candidates.student");
-    console.log("Election after population:", election);
+    // console.log("Election before population:", election);
+    election = await Election.findById(electionId).populate(
+      "positions.candidates.student"
+    );
+    // console.log("Election after population:", election);
 
-    return res.status(200).json({ election });
+    // return res.status(200).json({ election });
 
-    // const election = await Election.findById(electionId).populate("positions.candidates.student");
-    // console.log(election);
-    // if (!election || !election.isActive) {
-    //   return res.status(400).json({ message: "Election not found or not active" });
-    // }
+    if (!election || !election.isActive) {
+      return res
+        .status(400)
+        .json({ message: "Election not found or not active" });
+    }
 
-    // const position = election.positions.find((pos) => pos.name === positionName);
-    // if (!position) {
-    //   return res.status(404).json({ message: "Position not found" });
-    // }
+    const position = election.positions.find(
+      (pos) => pos.name === positionName
+    );
+    if (!position) {
+      return res.status(404).json({ message: "Position not found" });
+    }
 
-    // const normalizedCandidateName = candidateName.trim().toLowerCase();
-    // const candidate = position.candidates.find((cand) => {
-    //   return cand.student?.name?.trim().toLowerCase() === normalizedCandidateName;
-    // });
+    const normalizedCandidateName = candidateName.trim().toLowerCase();
+    const candidate = position.candidates.find((cand) => {
+      return (
+        cand.student?.name?.trim().toLowerCase() === normalizedCandidateName
+      );
+    });
 
-    // if (!candidate) {
-    //   return res.status(404).json({ message: "Candidate not found" });
-    // }
+    if (!candidate) {
+      return res.status(404).json({ message: "Candidate not found" });
+    }
 
-    // const alreadyVoted = position.candidates.some((cand) => cand.voters.includes(voter._id));
-    // if (alreadyVoted) {
-    //   return res.status(400).json({ message: "You have already voted for this position" });
-    // }
+    const alreadyVoted = position.candidates.some((cand) =>
+      cand.voters.includes(voter._id)
+    );
+    if (alreadyVoted) {
+      return res
+        .status(422)
+        .json({ message: "You have already voted for this position" });
+    }
 
-    // candidate.votes += 1;
-    // candidate.voters.push(voter._id);
+    candidate.votes += 1;
+    candidate.voters.push(voter._id);
 
-    // await election.save();
-    // return res.status(200).json({ message: "Vote cast successfully" });
+    await election.save();
+    return res.status(200).json({ message: "Vote cast successfully" });
   } catch (error) {
     console.error("Vote Error:", error);
     return res.status(500).json({ message: error.message });
   }
 };
-
 
 /**
  * Get live results for an election.
@@ -314,7 +332,9 @@ export const getCandidateVotes = async (req, res) => {
 // Get all elections
 export const getAllElections = async (req, res) => {
   try {
-    const elections = await Election.find();
+    const elections = await Election.find().populate(
+      "positions.candidates.student"
+    );
     res.status(200).json(elections);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch elections" });
@@ -325,7 +345,11 @@ export const getAllElections = async (req, res) => {
 export const getElectionById = async (req, res) => {
   try {
     const { id } = req.params;
-    const election = await Election.findById(id);
+    const election = await Election.findById(id).populate({
+      path: "positions.candidates.student",
+      model: "Student",
+      select: "name email department", // Select the fields you want to return
+    });
 
     if (!election) {
       return res.status(404).json({ error: "Election not found" });
@@ -333,6 +357,52 @@ export const getElectionById = async (req, res) => {
 
     res.status(200).json(election);
   } catch (error) {
+    console.error("Error in getElectionById:", error);
     res.status(500).json({ error: "Failed to fetch election details" });
+  }
+};
+
+export const getVoters = async (req, res) => {
+  try {
+    // Ensure req.user is set by your auth middleware
+    const userId = req.user._id;
+
+    // Fetch the election and populate the candidate's student field
+    const election = await Election.findById(req.params.id).populate(
+      "positions.candidates.student"
+    );
+
+    if (!election) {
+      return res.status(404).json({ message: "Election not found" });
+    }
+
+    // Convert to plain object so we can modify it
+    const electionObj = election.toObject();
+
+    // For each position, check if the user has voted (i.e. exists in any candidate's voters array)
+    electionObj.positions = electionObj.positions.map((position) => {
+      let hasVoted = false;
+      let votedCandidate = null;
+
+      // For each candidate, add a computed property "hasVoted"
+      position.candidates = position.candidates.map((candidate) => {
+        // Check if current userId exists in the voters array for this candidate
+        const voterIds = candidate.voters.map((v) => v.toString());
+        const candidateHasVoted = voterIds.includes(userId.toString());
+        if (candidateHasVoted) {
+          hasVoted = true;
+          votedCandidate = candidate;
+        }
+        return { ...candidate, hasVoted: candidateHasVoted };
+      });
+
+      return { ...position, hasVoted, votedCandidate };
+    });
+
+    // Return the election with the additional info
+    res.json(electionObj);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
   }
 };

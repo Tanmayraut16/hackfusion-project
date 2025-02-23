@@ -33,10 +33,10 @@ function StudentHome() {
       ContentComponent = <StudentComplaints />;
       break;
     case "application":
-      ContentComponent=<ApplicationsPage/>
+      ContentComponent = <ApplicationsPage />;
       break;
     case "budget":
-      ContentComponent=<BudgetComponent/>
+      ContentComponent = <BudgetComponent />;
       break;
 
     default:
