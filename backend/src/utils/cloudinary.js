@@ -1,12 +1,10 @@
-
 import { v2 as cloudinary } from "cloudinary";
 import fs from "fs";
 
-
-// cloudinary.config({ 
-//   cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
-//   api_key: process.env.CLOUDINARY_API_KEY, 
-//   api_secret: process.env.CLOUDINARY_API_SECRET 
+// cloudinary.config({
+//   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+//   api_key: process.env.CLOUDINARY_API_KEY,
+//   api_secret: process.env.CLOUDINARY_API_SECRET
 // });
 
 // const uploadOnCloudinary = async (localFilePath) => {
@@ -27,51 +25,45 @@ import fs from "fs";
 //     }
 // }
 
-
-
 // export {uploadOnCloudinary}
 
-
-import { v2 as cloudinary } from "cloudinary";
-import fs from "fs";
-
-cloudinary.config({ 
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
-  api_key: process.env.CLOUDINARY_API_KEY, 
-  api_secret: process.env.CLOUDINARY_API_SECRET 
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
 const uploadOnCloudinary = async (localFilePath) => {
-    try {
-        if (!localFilePath) return null;
+  try {
+    if (!localFilePath) return null;
 
-        // Upload the file to Cloudinary with public access
-        const response = await cloudinary.uploader.upload(localFilePath, {
-            resource_type: "auto",  // Ensures it handles images, PDFs, videos, etc.
-            type: "upload",         // Ensures it's publicly accessible
-            access_mode: "public"   // Explicitly set to public
-        });
+    // Upload the file to Cloudinary with public access
+    const response = await cloudinary.uploader.upload(localFilePath, {
+      resource_type: "auto", // Ensures it handles images, PDFs, videos, etc.
+      type: "upload", // Ensures it's publicly accessible
+      access_mode: "public", // Explicitly set to public
+    });
 
-        // Remove the locally saved temporary file
-        fs.unlinkSync(localFilePath);
+    // Remove the locally saved temporary file
+    fs.unlinkSync(localFilePath);
 
-        return response;
-    } catch (error) {
-        fs.unlinkSync(localFilePath); // Remove local file if upload fails
-        console.error("Cloudinary Upload Error:", error);
-        return null;
-    }
+    return response;
+  } catch (error) {
+    fs.unlinkSync(localFilePath); // Remove local file if upload fails
+    console.error("Cloudinary Upload Error:", error);
+    return null;
+  }
 };
 
 const makeFilePublic = async (publicId) => {
-    try {
-        const response = await cloudinary.api.update(publicId, { access_mode: "public" });
-        console.log("File access mode updated to public:", response);
-    } catch (error) {
-        console.error("Error updating file access mode:", error);
-    }
+  try {
+    const response = await cloudinary.api.update(publicId, {
+      access_mode: "public",
+    });
+    console.log("File access mode updated to public:", response);
+  } catch (error) {
+    console.error("Error updating file access mode:", error);
+  }
 };
 
-
 export { uploadOnCloudinary };
-
