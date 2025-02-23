@@ -78,6 +78,12 @@ export const submitComplaint = async (req, res) => {
         .json({ success: false, error: "File upload failed" });
     }
 
+    const complaint = new Complaint({
+      content,
+      submittedBy: req.user._id,
+      isAnonymous,
+      proofUrl: result.url,
+    });
     // Check image content with SafeSearch
     try {
       const annotations = await detectSafeSearchWithApiKey(result.url);

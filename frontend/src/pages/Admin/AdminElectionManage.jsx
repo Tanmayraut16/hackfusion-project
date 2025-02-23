@@ -230,7 +230,7 @@ function AdminElectionManage() {
       console.log(formattedData);
       await axios.post("http://localhost:3000/api/election/", formattedData, {
         headers: {
-          // "Content-Type": "application/json",
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
       });

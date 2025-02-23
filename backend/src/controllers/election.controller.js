@@ -15,24 +15,27 @@ export const createElection = async (req, res) => {
       return res.status(400).json({ message: "Election already exists" });
     }
 
-    const newElection = new Election({
-      title,
-      startDate,
-      endDate,
-      positions,
-    });
-    console.log(`this is new election: ${newElection}`);
+    try {
+      const newElection = await Election.create({
+        title,
+        startDate,
+        endDate,
+        positions,
+      });
+      console.log("this is new election:", newElection);
+    } catch (error) {
+      console.error("Error creating election:", error);
+    }
 
-    await newElection.save();
     console.log("hleo blekjfa");
     // Encode the electionId using Base64 URL encoding
-    const encodedElectionId = base64url(newElection._id.toString());
-    console.log(encodedElectionId);
+    // const encodedElectionId = base64url(newElection._id.toString());
+    // console.log(encodedElectionId);
 
     return res.status(201).json({
       message: "Election created successfully",
       election: newElection,
-      electionId: encodedElectionId, // Obfuscated ID
+      //electionId: encodedElectionId, // Obfuscated ID
     });
   } catch (error) {
     return res.status(500).json({ message: error.message });

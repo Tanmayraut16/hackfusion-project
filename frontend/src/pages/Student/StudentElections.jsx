@@ -3,6 +3,7 @@ import VotingModal from "../../components/Student-Comp/VotingModal";
 import ElectionCard from "../../components/Student-Comp/ElectionCard";
 import OTPModal from "../../components/Student-Comp/OTPModal";
 import axios from "axios";
+import ElectionResults from "../../components/Student-Comp/ElectionResults";
 
 const StudentElections = () => {
   const [selectedElection, setSelectedElection] = useState(null);
@@ -167,6 +168,10 @@ const StudentElections = () => {
           </p>
         </div>
       );
+    }
+
+    {
+      activeTab === "done" && <ElectionResults />;
     }
 
     return <p className="text-gray-600">Election has ended</p>;
