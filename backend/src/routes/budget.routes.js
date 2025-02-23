@@ -38,7 +38,7 @@ router.post("/add", verifyStudentOrFaculty, createBudget);
 // POST /budgets/:id/expenses
 // Only faculty and admin can add expense logs
 // router.post("/:id", verifyFacultyOrAdmin,upload.single("proof"), createExpenseLog);
-router.post("/:id", verifyFacultyOrAdmin, createExpenseLog);
+router.post("/:id", verifyFacultyOrAdmin, upload.single("file"), createExpenseLog);
 
 
 // GET /budgets/:id/expenses
