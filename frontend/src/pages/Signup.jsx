@@ -6,12 +6,11 @@ import {
   School,
   GraduationCap,
   Building2,
-  BookOpen,
+  KeyRound,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import axios from "axios";
-// import { AuthLayout } from "../components/AuthLayout.jsx";
 
 const departments = [
   "Computer Science",
@@ -25,6 +24,16 @@ const departments = [
   "Chemical Engineering",
 ];
 
+const departmentCodes = {
+  "Computer Science": "bcs",
+  "Information Technology": "bit",
+  "Electronics and Telecommunication": "bec",
+  "Mechanical Engineering": "bme",
+  "Civil Engineering": "bce",
+  "Electrical Engineering": "bee",
+  "Instrumentation Engineering": "bin",
+};
+
 function Signup() {
   const navigate = useNavigate();
   const [role, setRole] = useState("");
@@ -36,50 +45,129 @@ function Signup() {
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const [showOTPInput, setShowOTPInput] = useState(false);
+  const [otp, setOTP] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+
+  const validateStudentEmail = (email, department) => {
+    if (role !== "student") return true;
+    const deptCode = departmentCodes[department];
+    if (!deptCode) return false;
+    const emailRegex = new RegExp(`^\\d{4}${deptCode}\\d{3}@sggs\\.ac\\.in$`);
+    return emailRegex.test(email.toLowerCase());
+  };
 
   const handleRoleSelect = (selectedRole) => {
     setRole(selectedRole);
     setErrors({});
-    setFormData({ name: "", email: "", password: "", department: "" }); // Reset form when changing role
+    setFormData({ name: "", email: "", password: "", department: "" });
+    setShowOTPInput(false);
+    setOtpSent(false);
+    setOTP("");
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    if (name === "department" || name === "email") {
+      setErrors((prev) => ({ ...prev, email: "" }));
+    }
+  };
+
+  const handleSendOTP = async () => {
+    if (!formData.email) {
+      toast.error("Please enter your email address");
+      return;
+    }
+
+    if (role === "student") {
+      const isValidEmail = validateStudentEmail(
+        formData.email,
+        formData.department
+      );
+      if (!isValidEmail) {
+        setErrors({
+          email: `Invalid email format. Email should be in the format: ####${
+            departmentCodes[formData.department] || "xxx"
+          }###@sggs.ac.in`,
+        });
+        toast.error("Please use a valid college email address");
+        return;
+      }
+    }
+
+    setIsLoading(true);
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/api/election/vote/request-otp",
+        {
+          email: formData.email,
+        }
+      );
+
+      if (response.data.success) {
+        setOtpSent(true);
+        setShowOTPInput(true);
+        toast.success("OTP sent to your email address");
+      } else {
+        toast.error(response.data.message || "Failed to send OTP");
+      }
+    } catch (error) {
+      console.error("OTP Send Error:", error);
+      toast.error(error.response?.data?.message || "Failed to send OTP");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setErrors({});
+
+    if (!otpSent || !otp) {
+      toast.error("Please verify your email with OTP first");
+      return;
+    }
+
     setIsLoading(true);
-
     try {
-      const endpoint =
-        role === "faculty"
-          ? "http://localhost:3000/api/faculty-login/register"
-          : "http://localhost:3000/api/student-login/register";
-
-      const response = await axios.post(endpoint, formData, {
-        headers: { "Content-Type": "application/json" },
-      });
-
-      toast.success(
-        response.data.message ||
-          "Registration successful. Please wait for admin verification."
+      // First verify OTP
+      const verifyResponse = await axios.post(
+        "http://localhost:3000/api/election/verify-otp",
+        {
+          email: formData.email,
+          otp: otp,
+        }
       );
 
-      // Reset form after successful registration
-      setFormData({ name: "", email: "", password: "", department: "" });
-      setRole("");
+      if (verifyResponse.data.verified) {
+        // If OTP is verified, proceed with registration
+        const endpoint =
+          role === "faculty"
+            ? "http://localhost:3000/api/faculty-login/register"
+            : "http://localhost:3000/api/student-login/register";
 
-      setTimeout(() => {
-        navigate("/login"); // Redirect to login
-      }, 1500);
+        const response = await axios.post(endpoint, formData);
+
+        toast.success("Registration successful!");
+        setFormData({ name: "", email: "", password: "", department: "" });
+        setRole("");
+        setOTP("");
+        setShowOTPInput(false);
+        setOtpSent(false);
+
+        // Redirect to login after successful registration
+        setTimeout(() => {
+          navigate("/login");
+        }, 1500);
+      } else {
+        toast.error(verifyResponse.data.message || "Invalid OTP");
+      }
     } catch (error) {
-      toast.error(
+      console.error("Registration Error:", error);
+      const errorMessage =
         error.response?.data?.message ||
-          "Registration failed. Please try again."
-      );
+        "Registration failed. Please try again.";
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -188,26 +276,71 @@ function Signup() {
                   </div>
                 </div>
 
+                {/* Email verification section */}
                 <div className="space-y-2">
                   <label className="text-white text-sm font-medium block">
                     Email Address
                   </label>
-                  <div className="relative">
-                    <Mail
-                      className="absolute left-4 top-1/2 transform -translate-y-1/2 text-purple-300"
-                      size={20}
-                    />
-                    <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      className="w-full bg-white/5 border border-white/10 text-white pl-12 pr-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent placeholder-white/30"
-                      placeholder="your.email@college.com"
-                      required
-                    />
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <Mail
+                        className="absolute left-4 top-1/2 transform -translate-y-1/2 text-purple-300"
+                        size={20}
+                      />
+                      <input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        className={`w-full bg-white/5 border ${
+                          errors.email ? "border-red-500" : "border-white/10"
+                        } text-white pl-12 pr-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent placeholder-white/30`}
+                        placeholder={
+                          role === "student"
+                            ? "1234bcs123@sggs.ac.in"
+                            : "your.email@sggs.ac.in"
+                        }
+                        required
+                        disabled={otpSent}
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleSendOTP}
+                      disabled={isLoading || otpSent}
+                      className="px-4 py-3 bg-purple-500 text-white rounded-xl hover:bg-purple-600 transition-colors disabled:opacity-50"
+                    >
+                      {otpSent ? "Sent" : "Send OTP"}
+                    </button>
                   </div>
+                  {errors.email && (
+                    <p className="text-red-400 text-sm mt-1">{errors.email}</p>
+                  )}
                 </div>
+
+                {/* OTP Input field */}
+                {showOTPInput && (
+                  <div className="space-y-2">
+                    <label className="text-white text-sm font-medium block">
+                      Enter OTP
+                    </label>
+                    <div className="relative">
+                      <KeyRound
+                        className="absolute left-4 top-1/2 transform -translate-y-1/2 text-purple-300"
+                        size={20}
+                      />
+                      <input
+                        type="text"
+                        value={otp}
+                        onChange={(e) => setOTP(e.target.value)}
+                        className="w-full bg-white/5 border border-white/10 text-white pl-12 pr-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent placeholder-white/30"
+                        placeholder="Enter 6-digit OTP"
+                        maxLength={6}
+                        required
+                      />
+                    </div>
+                  </div>
+                )}
 
                 <div className="space-y-2">
                   <label className="text-white text-sm font-medium block">
@@ -265,7 +398,7 @@ function Signup() {
 
               <button
                 type="submit"
-                disabled={isLoading}
+                disabled={isLoading || !otpSent}
                 className="w-full bg-gradient-to-r from-purple-500 to-purple-700 text-white py-4 px-6 rounded-xl hover:from-purple-600 hover:to-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-slate-900 transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-lg shadow-purple-500/20"
               >
                 {isLoading ? "Creating Account..." : "Create Account"}
@@ -273,6 +406,7 @@ function Signup() {
 
               <div className="text-center">
                 <button
+                  type="button"
                   onClick={() => setRole("")}
                   className="text-purple-300 hover:text-purple-200 font-medium underline underline-offset-4 transition-colors"
                 >

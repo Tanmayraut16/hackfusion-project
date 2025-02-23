@@ -104,30 +104,60 @@ export const requestVoteOTP = async (req, res) => {
   try {
     const { email } = req.body;
 
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+
     if (!email.endsWith("@sggs.ac.in")) {
-      return res
-        .status(403)
-        .json({ message: "Only college-authenticated users can request OTP" });
+      return res.status(403).json({
+        message: "Only college-authenticated users can request OTP",
+      });
     }
 
     await sendOTPEmail(email);
-    return res.status(200).json({ message: "OTP sent successfully" });
+    return res.status(200).json({
+      success: true,
+      message: "OTP sent successfully",
+    });
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    console.error("OTP Request Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to send OTP",
+    });
   }
 };
 
-export const verifyVoterOTP = (req, res) => {
+export const verifyVoterOTP = async (req, res) => {
   try {
     const { email, otp } = req.body;
 
-    if (!verifyOTP(email, otp)) {
-      return res.status(400).json({ message: "Invalid or expired OTP" });
+    if (!email || !otp) {
+      return res.status(400).json({
+        verified: false,
+        message: "Email and OTP are required",
+      });
     }
 
-    return res.status(200).json({ message: "OTP verified successfully" });
+    const isVerified = verifyOTP(email, otp);
+
+    if (isVerified) {
+      return res.json({
+        verified: true,
+        message: "OTP verified successfully",
+      });
+    } else {
+      return res.status(400).json({
+        verified: false,
+        message: "Invalid or expired OTP",
+      });
+    }
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    console.error("OTP Verification Error:", error);
+    return res.status(500).json({
+      verified: false,
+      message: "Failed to verify OTP",
+    });
   }
 };
 
