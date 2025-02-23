@@ -11,7 +11,7 @@ const VotingModal = ({ election, position, onClose }) => {
     const fetchCandidateNames = async () => {
       const updatedCandidates = await Promise.all(
         position.candidates.map(async (candidate) => {
-          const name = await getStudentName(candidate.student);
+          const name = await getStudentName(candidate.student._id);
           return { ...candidate, name };
         })
       );
@@ -28,7 +28,10 @@ const VotingModal = ({ election, position, onClose }) => {
       );
       if (!response.ok) throw new Error("Failed to fetch student profile");
 
+      // console.log(response.json());
+
       const data = await response.json();
+      console.log(data);
       return data.name || "Unknown";
     } catch (error) {
       console.error("Error fetching student name:", error);

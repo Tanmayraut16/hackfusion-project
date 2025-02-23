@@ -11,6 +11,7 @@ import {
   getElectionById,
   verifyVoterOTP,
   getVoters,
+  getPositionResults,
 } from "../controllers/election.controller.js";
 import {
   verifyToken,
@@ -28,6 +29,7 @@ router.post("/vote", verifyStudent, castVote);
 router.get("/:electionId/results", getResults);
 // Route to get real-time votes for all candidates in a specific position
 router.get("/:electionId/positions/:positionName/votes", getPositionVotes);
+router.get("/:electionId/positions/:positionName/results", getPositionResults);
 router.get("/elections", getAllElections); // Fetch all elections
 router.get("/elections/:id", getElectionById); // Fetch a specific election by ID
 

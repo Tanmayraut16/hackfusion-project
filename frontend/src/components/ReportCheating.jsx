@@ -31,13 +31,12 @@ const ReportCheating = () => {
       setRecords(response.data);
     } catch (error) {
       console.error("Error fetching records:", error);
+      setRecords([]); // Set empty array on error
     }
   };
 
   const handleDelete = async () => {
     if (!recordToDelete) return;
-
-    
 
     try {
       const tok = localStorage.getItem("token");
@@ -48,7 +47,7 @@ const ReportCheating = () => {
         }
       );
 
-      await fetchRecords(); // Refetch records to ensure data freshness
+      await fetchRecords();
       setRecordToDelete(null);
     } catch (error) {
       console.error("Error deleting record:", error);
@@ -56,19 +55,24 @@ const ReportCheating = () => {
   };
 
   const uniqueExams = Array.from(
-    new Set(records.map((record) => record.examName))
+    new Set(records.map((record) => record.examName).filter(Boolean))
   );
 
   const filteredData = records
-    .filter(
-      (record) =>
-        (record.student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          record.examName.toLowerCase().includes(searchTerm.toLowerCase())) &&
-        (selectedExam === "" || record.examName === selectedExam)
-    )
+    .filter((record) => {
+      const studentName = record?.student?.name?.toLowerCase() || "";
+      const examName = record?.examName?.toLowerCase() || "";
+      const searchTermLower = searchTerm.toLowerCase();
+
+      return (
+        (studentName.includes(searchTermLower) ||
+          examName.includes(searchTermLower)) &&
+        (selectedExam === "" || record?.examName === selectedExam)
+      );
+    })
     .sort((a, b) => {
-      const dateA = new Date(a.createdAt).getTime();
-      const dateB = new Date(b.createdAt).getTime();
+      const dateA = new Date(a?.createdAt || 0).getTime();
+      const dateB = new Date(b?.createdAt || 0).getTime();
       return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
     });
 
@@ -92,14 +96,13 @@ const ReportCheating = () => {
             onClose={() => setShowAddForm(false)}
             onSubmit={fetchRecords}
           />
-          
         )}
 
         {recordToDelete && role === "faculty" && (
           <DeleteConfirmation
-            registrationNumber={recordToDelete.student.registrationNumber} // Corrected path
+            registrationNumber={recordToDelete?.student?.registrationNumber}
             onClose={() => setRecordToDelete(null)}
-            onConfirm={handleDelete} // Corrected handler
+            onConfirm={handleDelete}
           />
         )}
 
@@ -172,21 +175,21 @@ const ReportCheating = () => {
                 {filteredData.map((record) => (
                   <tr key={record._id} className="hover:bg-gray-50">
                     <td className="px-4 py-4 text-sm font-medium text-gray-900 truncate">
-                      {record.student.name}
+                      {record?.student?.name || "N/A"}
                     </td>
                     <td className="px-4 py-4 text-sm text-gray-500 truncate">
-                      {record.examName}
+                      {record?.examName || "N/A"}
                     </td>
                     <td className="px-4 py-4 text-sm text-gray-500">
-                      <p className="">
-                        {record.reason}
-                      </p>
+                      <p className="">{record?.reason || "N/A"}</p>
                     </td>
                     <td className="px-4 py-4 text-sm text-gray-500 truncate">
-                      {record.reportedBy.name}
+                      {record?.reportedBy?.name || "N/A"}
                     </td>
                     <td className="px-4 py-4 text-sm text-gray-500 truncate">
-                      {new Date(record.createdAt).toLocaleDateString()}
+                      {record?.createdAt
+                        ? new Date(record.createdAt).toLocaleDateString()
+                        : "N/A"}
                     </td>
                     {role === "faculty" && (
                       <td className="px-4 py-4 text-sm text-gray-500">
