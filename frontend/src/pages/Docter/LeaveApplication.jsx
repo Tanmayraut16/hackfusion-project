@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import axios from "axios";
 import {
   Calendar,
   Mail,
@@ -8,10 +7,8 @@ import {
   FileText,
   AlertCircle,
   CheckCircle2,
-  Loader2,
+  Loader2
 } from "lucide-react";
-import Sidebar from "../../components/Sidebar";
-import Navbar from "../../components/Navbar"; // Assuming Navbar is imported here
 
 const LeaveApplication = () => {
   const [formData, setFormData] = useState({
@@ -29,14 +26,12 @@ const LeaveApplication = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
     setSuccess(false);
 
-    // Basic validation
     const requiredFields = [
       "studentEmail",
       "registrationNumber",
@@ -47,53 +42,29 @@ const LeaveApplication = () => {
     const missingFields = requiredFields.filter((field) => !formData[field]);
 
     if (missingFields.length > 0) {
-      setError(
-        `Please fill in all required fields: ${missingFields.join(", ")}`
-      );
+      setError(`Please fill in all required fields: ${missingFields.join(", ")}`  );
       return;
     }
 
     setLoading(true);
 
     try {
-      const response = await axios.post(
-        "http://localhost:3000/api/doctor/allocateleave",
-        {
-          email: formData.studentEmail,
-          registrationNo: formData.registrationNumber,
-          studentYear: formData.studentYear,
-          parentEmail: formData.parentEmail,
-          fromDate: formData.fromDate,
-          toDate: formData.toDate,
-          reason: formData.reason,
-          reportedByDoctor: formData.reportedByDoctor,
-          leftCampus: formData.leftCampus,
-        }
-      );
-
-      if (response.status === 200) {
-        setSuccess(true);
-
-        // Reset form
-        setFormData({
-          studentEmail: "",
-          registrationNumber: "",
-          studentYear: "",
-          parentEmail: "",
-          fromDate: "",
-          toDate: "",
-          reason: "",
-          reportedByDoctor: true,
-          leftCampus: true,
-        });
-      } else {
-        throw new Error("Failed to allocate leave. Please try again.");
-      }
+      // Simulated API call
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      setSuccess(true);
+      setFormData({
+        studentEmail: "",
+        registrationNumber: "",
+        studentYear: "",
+        parentEmail: "",
+        fromDate: "",
+        toDate: "",
+        reason: "",
+        reportedByDoctor: true,
+        leftCampus: true,
+      });
     } catch (err) {
-      setError(
-        err.response?.data?.message ||
-          "Failed to allocate leave. Please try again."
-      );
+      setError(err.response?.data?.message || "Failed to allocate leave. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -107,224 +78,201 @@ const LeaveApplication = () => {
     }));
   };
 
-  return (
-    <div className="flex h-screen">
-      {/* Sidebar for Students */}
-      <Sidebar role="Docter" isOpen={isSidebarOpen} />
-
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col bg-gradient-to-r from-blue-50 via-blue-30 to-blue-20">
-        {/* Navbar */}
-        <Navbar
-          toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
-          userName="Docter"
+  const InputField = ({ icon: Icon, label, name, type = "text", required, ...props }) => (
+    <div className="space-y-2">
+      <label className="flex items-center text-sm font-medium text-gray-700">
+        {label}
+        {required && <span className="text-red-500 ml-1">*</span>}
+      </label>
+      <div className="relative">
+        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <Icon className="h-5 w-5 text-gray-400" />
+        </div>
+        <input
+          type={type}
+          name={name}
+          value={formData[name]}
+          onChange={handleChange}
+          className="pl-10 block w-full rounded-lg border border-gray-300 bg-white
+                   focus:border-blue-500 focus:ring-2 focus:ring-blue-500 
+                   hover:border-gray-400 transition-all duration-200
+                   text-sm h-12"
+          {...props}
         />
-        <div className="max-w-4xl m-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-            <div className="px-8 py-10">
-              <h2 className="text-3xl font-extrabold text-gray-900 text-center mb-8">
-                Student Leave Allocation
-              </h2>
+      </div>
+    </div>
+  );
 
-              {error && (
-                <div className="mb-6 p-4 bg-red-100 rounded-lg flex items-center gap-3 text-red-700 border border-red-300 shadow-sm">
-                  <AlertCircle className="h-6 w-6" />
-                  <p>{error}</p>
-                </div>
-              )}
-
-              {success && (
-                <div className="mb-6 p-4 bg-green-100 rounded-lg flex items-center gap-3 text-green-700 border border-green-300 shadow-sm">
-                  <CheckCircle2 className="h-6 w-6" />
-                  <p>Leave allocated and notifications sent successfully.</p>
-                </div>
-              )}
-
-              <form onSubmit={handleSubmit} className=" space-y-8">
-                <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Student Email *
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <Mail className="h-5 w-5 text-gray-400" />
-                      </div>
-                      <input
-                        type="email"
-                        name="studentEmail"
-                        value={formData.studentEmail}
-                        onChange={handleChange}
-                        className="pl-10 block w-full rounded-lg border border-gray-300 shadow-md focus:border-blue-500 focus:ring-2 focus:ring-blue-500 sm:text-sm h-12"
-                        placeholder="student@example.com"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Registration Number *
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <Hash className="h-5 w-5 text-gray-400" />
-                      </div>
-                      <input
-                        type="text"
-                        name="registrationNumber"
-                        value={formData.registrationNumber}
-                        onChange={handleChange}
-                        className="pl-10 block w-full rounded-lg border border-gray-300 shadow-md focus:border-blue-500 focus:ring-2 focus:ring-blue-500 sm:text-sm h-12"
-                        placeholder="e.g., 2021CS001"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Student Year *
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <School className="h-5 w-5 text-gray-400" />
-                      </div>
-                      <select
-                        name="studentYear"
-                        value={formData.studentYear}
-                        onChange={handleChange}
-                        className="pl-10 block w-full rounded-lg border border-gray-300 shadow-md focus:border-blue-500 focus:ring-2 focus:ring-blue-500 sm:text-sm h-12"
-                      >
-                        <option value="">Select Year</option>
-                        <option value="1">First Year</option>
-                        <option value="2">Second Year</option>
-                        <option value="3">Third Year</option>
-                        <option value="4">Fourth Year</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Parent Email
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <Mail className="h-5 w-5 text-gray-400" />
-                      </div>
-                      <input
-                        type="email"
-                        name="parentEmail"
-                        value={formData.parentEmail}
-                        onChange={handleChange}
-                        className="pl-10 block w-full rounded-lg border border-gray-300 shadow-md focus:border-blue-500 focus:ring-2 focus:ring-blue-500 sm:text-sm h-12"
-                        placeholder="parent@example.com"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      From Date *
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <Calendar className="h-5 w-5 text-gray-400" />
-                      </div>
-                      <input
-                        type="date"
-                        name="fromDate"
-                        value={formData.fromDate}
-                        onChange={handleChange}
-                        className="pl-10 block w-full rounded-lg border border-gray-300 shadow-md focus:border-blue-500 focus:ring-2 focus:ring-blue-500 sm:text-sm h-12"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      To Date *
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <Calendar className="h-5 w-5 text-gray-400" />
-                      </div>
-                      <input
-                        type="date"
-                        name="toDate"
-                        value={formData.toDate}
-                        onChange={handleChange}
-                        className="pl-10 block w-full rounded-lg border border-gray-300 shadow-md focus:border-blue-500 focus:ring-2 focus:ring-blue-500 sm:text-sm h-12"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Reason *
-                  </label>
-                  <div className="relative">
-                    <div className="absolute top-3 left-3 pointer-events-none">
-                      <FileText className="h-5 w-5 text-gray-400" />
-                    </div>
-                    <textarea
-                      name="reason"
-                      value={formData.reason}
-                      onChange={handleChange}
-                      rows={4}
-                      className="pl-10 block w-full rounded-lg border border-gray-300 shadow-md focus:border-blue-500 focus:ring-2 focus:ring-blue-500 sm:text-sm"
-                      placeholder="Enter the reason for leave..."
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      name="reportedByDoctor"
-                      checked={formData.reportedByDoctor}
-                      onChange={handleChange}
-                      className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    />
-                    <label className="ml-2 text-sm text-gray-700">
-                      Reported by Doctor
-                    </label>
-                  </div>
-
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      name="leftCampus"
-                      checked={formData.leftCampus}
-                      onChange={handleChange}
-                      className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    />
-                    <label className="ml-2 text-sm text-gray-700">
-                      Left Campus
-                    </label>
-                  </div>
-                </div>
-
-                <div>
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full flex justify-center items-center py-3 px-6 border border-transparent rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-                  >
-                    {loading ? (
-                      <>
-                        <Loader2 className="animate-spin h-6 w-6 mr-2" />
-                        Processing...
-                      </>
-                    ) : (
-                      "Allocate Leave"
-                    )}
-                  </button>
-                </div>
-              </form>
-            </div>
+  return (
+    <div className="min-h-screen py-12 px-4">
+      <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
+        <div className="px-8 py-12">
+          <div className="text-center pb-8 border-b border-gray-200">
+            <h1 className="text-3xl font-bold bg-gradient 
+                         bg-clip-text text-transparent bg-gradient-to-r 
+                         from-blue-600 to-purple-600">
+              Student Leave Application
+            </h1>
+            <p className="mt-2 text-gray-600">
+              Please fill in the required information to submit your leave request
+            </p>
           </div>
+
+          {error && (
+            <div className="mt-6 p-4 bg-red-50 rounded-lg flex items-center gap-3 
+                          text-red-700 border border-red-200">
+              <AlertCircle className="h-5 w-5 flex-shrink-0" />
+              <p>{error}</p>
+            </div>
+          )}
+
+          {success && (
+            <div className="mt-6 p-4 bg-green-50 rounded-lg flex items-center gap-3 
+                          text-green-700 border border-green-200">
+              <CheckCircle2 className="h-5 w-5 flex-shrink-0" />
+              <p>Leave application submitted successfully!</p>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <InputField
+                icon={Mail}
+                label="Student Email"
+                name="studentEmail"
+                type="email"
+                required
+                placeholder="student@example.com"
+              />
+
+              <InputField
+                icon={Hash}
+                label="Registration Number"
+                name="registrationNumber"
+                required
+                placeholder="e.g., 2021CS001"
+              />
+
+              <div className="space-y-2">
+                <label className="flex items-center text-sm font-medium text-gray-700">
+                  Student Year
+                  <span className="text-red-500 ml-1">*</span>
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <School className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <select
+                    name="studentYear"
+                    value={formData.studentYear}
+                    onChange={handleChange}
+                    className="pl-10 block w-full rounded-lg border border-gray-300 bg-white
+                             focus:border-blue-500 focus:ring-2 focus:ring-blue-500 
+                             hover:border-gray-400 transition-all duration-200
+                             text-sm h-12"
+                  >
+                    <option value="">Select Year</option>
+                    <option value="1">First Year</option>
+                    <option value="2">Second Year</option>
+                    <option value="3">Third Year</option>
+                    <option value="4">Fourth Year</option>
+                  </select>
+                </div>
+              </div>
+
+              <InputField
+                icon={Mail}
+                label="Parent Email"
+                name="parentEmail"
+                type="email"
+                placeholder="parent@example.com"
+              />
+
+              <InputField
+                icon={Calendar}
+                label="From Date"
+                name="fromDate"
+                type="date"
+                required
+              />
+
+              <InputField
+                icon={Calendar}
+                label="To Date"
+                name="toDate"
+                type="date"
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="flex items-center text-sm font-medium text-gray-700">
+                Reason
+                <span className="text-red-500 ml-1">*</span>
+              </label>
+              <div className="relative">
+                <div className="absolute top-3 left-3">
+                  <FileText className="h-5 w-5 text-gray-400" />
+                </div>
+                <textarea
+                  name="reason"
+                  value={formData.reason}
+                  onChange={handleChange}
+                  rows={4}
+                  className="pl-10 block w-full rounded-lg border border-gray-300 bg-white
+                           focus:border-blue-500 focus:ring-2 focus:ring-blue-500 
+                           hover:border-gray-400 transition-all duration-200
+                           text-sm"
+                  placeholder="Enter the reason for leave..."
+                />
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <label className="flex items-center space-x-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="reportedByDoctor"
+                  checked={formData.reportedByDoctor}
+                  onChange={handleChange}
+                  className="h-5 w-5 rounded border-gray-300 text-blue-600 
+                           focus:ring-blue-500 cursor-pointer"
+                />
+                <span className="text-sm text-gray-700">Reported by Doctor</span>
+              </label>
+
+              <label className="flex items-center space-x-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="leftCampus"
+                  checked={formData.leftCampus}
+                  onChange={handleChange}
+                  className="h-5 w-5 rounded border-gray-300 text-blue-600 
+                           focus:ring-blue-500 cursor-pointer"
+                />
+                <span className="text-sm text-gray-700">Left Campus</span>
+              </label>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full flex justify-center items-center py-3 px-6 rounded-lg
+                       text-white bg-blue-600 hover:bg-blue-700 
+                       focus:outline-none focus:ring-2 focus:ring-blue-500 
+                       disabled:opacity-50 disabled:cursor-not-allowed
+                       transition-colors duration-200"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="animate-spin h-5 w-5 mr-2" />
+                  Processing...
+                </>
+              ) : (
+                "Submit Leave Application"
+              )}
+            </button>
+          </form>
         </div>
       </div>
     </div>

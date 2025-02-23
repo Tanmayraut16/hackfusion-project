@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { Search, MapPin, AlertCircle, CheckCircle, PenTool as Tools, Filter } from "lucide-react";
+import {
+  Search,
+  MapPin,
+  AlertCircle,
+  CheckCircle,
+  FileText,
+  PenTool as Tools,
+  Filter,
+} from "lucide-react";
 
 const FacultyFacilityBooking = () => {
   const [facilities, setFacilities] = useState([]);
@@ -8,10 +16,7 @@ const FacultyFacilityBooking = () => {
 
   useEffect(() => {
     fetchFacilities();
-    const interval = setInterval(() => {
-      console.log("Refreshing facilities...");
-      fetchFacilities();
-    }, 30000);
+    const interval = setInterval(fetchFacilities, 30000);
     return () => clearInterval(interval);
   }, []);
 
@@ -36,11 +41,9 @@ const FacultyFacilityBooking = () => {
     <div className="min-h-screen">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Search & Filter */}
-        <div className="mb-8 space-y-4 sm:space-y-0 sm:flex sm:items-center sm:justify-between">
+        <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
           <div className="relative flex-1 max-w-md">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="h-5 w-5 text-gray-400" />
-            </div>
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
             <input
               type="text"
               placeholder="Search facilities..."
@@ -66,7 +69,7 @@ const FacultyFacilityBooking = () => {
         </div>
 
         {/* Facilities List */}
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredFacilities.map((facility) => (
             <div
               key={facility._id}
@@ -75,7 +78,9 @@ const FacultyFacilityBooking = () => {
               <div className="p-6">
                 {/* Facility Name & Status */}
                 <div className="flex justify-between items-start mb-4">
-                  <h3 className="text-xl font-semibold text-gray-900">{facility.name}</h3>
+                  <h3 className="text-xl font-semibold text-gray-900">
+                    {facility.name}
+                  </h3>
                   <div className="flex items-center space-x-1">
                     {facility.status === "available" && (
                       <CheckCircle className="w-5 h-5 text-green-500" />
@@ -100,14 +105,19 @@ const FacultyFacilityBooking = () => {
                   </div>
                 </div>
 
-                {/* Location */}
-                <div className="flex items-center text-gray-500 mb-4">
-                  <MapPin className="h-5 w-5 mr-2" />
-                  <p className="text-sm">{facility.location}</p>
-                </div>
+                <div className="space-y-2 mb-4">
+                  {/* Location */}
+                  <p className="flex items-center gap-2 text-sm text-gray-500 mt-2">
+                    <MapPin className="h-5 w-5  text-blue-500 mr-1" />
+                    {facility.location || "No location available"}
+                  </p>
 
-                {/* Description */}
-                <p className="text-gray-600 mb-6">{facility.description}</p>
+                  {/* Description */}
+                  <p className="flex items-center gap-2 text-sm text-gray-500 mt-2">
+                    <FileText className="h-6 w-6 text-green-500 mr-1" />
+                    {facility.description || "No description available"}
+                  </p>
+                </div>
               </div>
             </div>
           ))}
