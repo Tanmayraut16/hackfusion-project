@@ -162,7 +162,7 @@ function BudgetForm({ onClose, onSubmit }) {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Allocated By
+              Created By
             </label>
             <select
               className="w-full p-2 border rounded"
@@ -394,7 +394,7 @@ export default function BudgetComponent() {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {budgets.length === 0 ? (
           <p className="text-gray-500">No budgets found.</p>
         ) : (
@@ -418,6 +418,64 @@ export default function BudgetComponent() {
                 {budget.allocated_by?.name ||
                   budget.allocated_by?.model ||
                   "Unknown"}
+              </p>
+            </div>
+          ))
+        )}
+      </div> */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
+        {budgets.length === 0 ? (
+          <p className="text-gray-500 text-center col-span-full">
+            No budgets found.
+          </p>
+        ) : (
+          budgets.map((budget) => (
+            <div
+              key={budget._id}
+              className={`bg-white p-5 rounded-xl shadow-md hover:shadow-xl transition-all cursor-pointer border 
+                ${
+                  selectedBudget?._id === budget._id
+                    ? "border-blue-500 ring-2 ring-blue-300"
+                    : "border-gray-200"
+                }`}
+              onClick={() => setSelectedBudget(budget)}
+            >
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {budget.title}
+                </h3>
+                <span
+                  className={`px-3 py-1 text-xs font-medium rounded-full 
+                    ${
+                      budget.status === "approved"
+                        ? "bg-green-100 text-green-700"
+                        : budget.status === "pending"
+                        ? "bg-yellow-100 text-yellow-700"
+                        : "bg-red-100 text-red-700"
+                    }`}
+                >
+                  {budget.status}
+                </span>
+              </div>
+              <p className="text-sm text-gray-600">
+                Category:{" "}
+                <span className="font-medium text-gray-800">
+                  {budget.category}
+                </span>
+              </p>
+              <p className="text-sm text-gray-600">
+                Amount:{" "}
+                <span className="font-medium text-gray-800">
+                  ${budget.amount}
+                </span>
+              </p>
+              <p className="text-xs text-gray-500 mt-2">
+                Created by:{" "}
+                <span className="font-medium">
+                  {budget.allocated_by?.name ||
+                    budget.allocated_by?.model ||
+                    "Unknown"}
+                </span>
               </p>
             </div>
           ))
