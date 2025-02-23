@@ -109,7 +109,7 @@ export const submitComplaint = async (req, res) => {
       const complaint = new Complaint({
         content,
         submittedBy: req.user._id,
-        isAnonymous,
+        isAnonymous: true,
         proofUrl: result.url,
       });
 
