@@ -4,11 +4,15 @@ import {
   MapPin,
   AlertCircle,
   CheckCircle,
+  FileText,
   PenTool as Tools,
   Filter,
+  Clock,
+  Users,
+  Building2,
 } from "lucide-react";
 import BookNow from "./BookNow";
-import { updateFacilityStatus } from "../../utils/statusUpdater"; // Import the function
+import { updateFacilityStatus } from "../../utils/statusUpdater";
 
 const StudentFacilityBooking = () => {
   const [facilities, setFacilities] = useState([]);
@@ -16,18 +20,14 @@ const StudentFacilityBooking = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [bookingMessage, setBookingMessage] = useState("");
   const [selectedFacility, setSelectedFacility] = useState(null);
+  const [bookedFacilities, setBookedFacilities] = useState({});
 
   useEffect(() => {
-    // Fetch facilities initially
     fetchFacilities();
-
-    // Set interval to refresh facilities every 60 seconds
     const interval = setInterval(() => {
       console.log("Refreshing facilities...");
       fetchFacilities();
-    }, 30000); // 60 seconds
-
-    // Cleanup interval on unmount
+    }, 10000);
     return () => clearInterval(interval);
   }, []);
 
@@ -37,71 +37,90 @@ const StudentFacilityBooking = () => {
       const data = await response.json();
 
       if (Array.isArray(data)) {
-        setFacilities(data);
+        const updatedFacilities = data.map((facility) => {
+          const bookedData = bookedFacilities[facility._id];
+          return bookedData && facility.status === "booked"
+            ? { ...facility, ...bookedData }
+            : facility;
+        });
+
+        setFacilities(updatedFacilities);
       } else {
         console.error("API response is not an array:", data);
-        setFacilities([]); // Ensure it's always an array
+        setFacilities([]);
       }
     } catch (error) {
       console.error("Error fetching facilities:", error);
-      setFacilities([]); // Prevents `map` errors
+      setFacilities([]);
     }
   };
 
-  // Handle facility booking
   const handleBooking = (facility) => {
     if (facility.status !== "available") return;
     setSelectedFacility(facility);
   };
 
-  // Update facility status after successful booking
-  const handleBookingSuccess = (facilityId) => {
-    updateFacilityStatus(facilityId, "booked", (updatedFacilities) => {
-      setFacilities(updatedFacilities);
-    });
+  const handleBookingSuccess = (facilityId, userType, duration) => {
+    setBookedFacilities((prev) => ({
+      ...prev,
+      [facilityId]: { bookedBy: userType, duration },
+    }));
 
-    setTimeout(() => setBookingMessage(""), 3000);
+    setFacilities((prevFacilities) =>
+      prevFacilities.map((facility) =>
+        facility._id === facilityId
+          ? { ...facility, status: "booked", bookedBy: userType, duration }
+          : facility
+      )
+    );
+
     setSelectedFacility(null);
   };
 
-  // Filter facilities based on search and status
   const filteredFacilities = facilities.filter(
     (facility) =>
       (statusFilter === "all" || facility.status === statusFilter) &&
       facility.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Function to get button text and styles based on facility status
-  const getButtonProps = (status) => {
+  const getStatusConfig = (status) => {
     switch (status) {
       case "available":
         return {
-          text: "Book Now",
-          className: "bg-blue-600 text-white hover:bg-blue-700",
+          icon: CheckCircle,
+          text: "Available",
+          className: "text-green-600 bg-green-50",
+          buttonClass:
+            "bg-blue-600 hover:bg-blue-700 text-white transform hover:scale-105 transition-all duration-200",
         };
       case "booked":
         return {
+          icon: Clock,
           text: "Booked",
-          className: "bg-gray-200 text-gray-400 cursor-not-allowed",
+          className: "text-blue-600 bg-blue-50",
+          buttonClass: "bg-gray-200 text-gray-400 cursor-not-allowed",
         };
       case "under_maintenance":
         return {
+          icon: Tools,
           text: "Under Maintenance",
-          className: "bg-yellow-100 text-yellow-700 cursor-not-allowed",
+          className: "text-yellow-600 bg-yellow-50",
+          buttonClass: "bg-yellow-100 text-yellow-700 cursor-not-allowed",
         };
       default:
         return {
+          icon: AlertCircle,
           text: "Not Available",
-          className: "bg-gray-200 text-gray-400 cursor-not-allowed",
+          className: "text-gray-600 bg-gray-50",
+          buttonClass: "bg-gray-200 text-gray-400 cursor-not-allowed",
         };
     }
   };
 
   return (
     <div className="min-h-screen">
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Search & Filter */}
-        <div className="mb-8 space-y-4 sm:space-y-0 sm:flex sm:items-center sm:justify-between">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="mb-8 space-y-4 sm:space-y-0 sm:flex sm:items-center sm:justify-between bg-white p-6 rounded-xl shadow-sm">
           <div className="relative flex-1 max-w-md">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="h-5 w-5 text-gray-400" />
@@ -109,7 +128,7 @@ const StudentFacilityBooking = () => {
             <input
               type="text"
               placeholder="Search facilities..."
-              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md bg-white"
+              className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -118,7 +137,7 @@ const StudentFacilityBooking = () => {
           <div className="flex items-center space-x-4">
             <Filter className="h-5 w-5 text-gray-400" />
             <select
-              className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 rounded-md"
+              className="block w-full pl-3 pr-10 py-2.5 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
             >
@@ -130,76 +149,84 @@ const StudentFacilityBooking = () => {
           </div>
         </div>
 
-        {/* Booking Message */}
-        {bookingMessage && (
-          <div className="mb-6 p-4 bg-green-100 rounded-md">
-            <p className="text-green-700">{bookingMessage}</p>
-          </div>
-        )}
-
-        {/* Facilities List */}
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredFacilities.map((facility) => (
-            <div
-              key={facility._id}
-              className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
-            >
-              <div className="p-6">
-                {/* Facility Name & Status */}
-                <div className="flex justify-between items-start mb-4">
-                  <h3 className="text-xl font-semibold text-gray-900">
-                    {facility.name}
-                  </h3>
-                  <div className="flex items-center space-x-1">
-                    {facility.status === "available" && (
-                      <CheckCircle className="w-5 h-5 text-green-500" />
-                    )}
-                    {facility.status === "booked" && (
-                      <AlertCircle className="w-5 h-5 text-red-500" />
-                    )}
-                    {facility.status === "under_maintenance" && (
-                      <Tools className="w-5 h-5 text-yellow-500" />
-                    )}
-                    <span
-                      className={`text-sm capitalize ${
-                        facility.status === "available"
-                          ? "text-green-500"
-                          : facility.status === "booked"
-                          ? "text-red-500"
-                          : "text-yellow-500"
-                      }`}
-                    >
-                      {facility.status.replace("_", " ")}
+          {filteredFacilities.map((facility) => {
+            const statusConfig = getStatusConfig(facility.status);
+            const StatusIcon = statusConfig.icon;
+
+            return (
+              <div
+                key={facility._id}
+                className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden"
+              >
+                <div className="relative">
+                  <div
+                    className={`absolute top-4 right-4 px-3 py-1 rounded-full ${statusConfig.className} flex items-center space-x-1`}
+                  >
+                    <StatusIcon className="h-4 w-4" />
+                    <span className="text-sm font-medium">
+                      {statusConfig.text}
                     </span>
                   </div>
                 </div>
 
-                {/* Location */}
-                <div className="flex items-center text-gray-500 mb-4">
-                  <MapPin className="h-5 w-5 mr-2" />
-                  <p className="text-sm">{facility.location}</p>
+                <div className="p-6">
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    {facility.name}
+                  </h3>
+
+                  <div className="space-y-2 mb-4">
+                    {/* Location */}
+                    <p className="flex items-center gap-2 text-sm text-gray-500 mt-2">
+                      <MapPin className="h-5 w-5  text-blue-500 mr-1" />
+                      {facility.location || "No location available"}
+                    </p>
+
+                    {/* Description */}
+                    <p className="flex items-center gap-2 text-sm text-gray-500 mt-2">
+                      <FileText className="h-6 w-6 text-green-500 mr-1" />
+                      {facility.description || "No description available"}
+                    </p>
+                  </div>
+
+                  {facility.status === "booked" && facility.bookedBy && (
+                    <div className="mb-4 p-3 bg-blue-50 rounded-lg">
+                      <p className="text-sm text-blue-700">
+                        <span className="font-semibold">Currently booked:</span>
+                        <br />
+                        {facility.bookedBy} • {facility.duration}
+                      </p>
+                    </div>
+                  )}
+
+                  <button
+                    onClick={() => handleBooking(facility)}
+                    disabled={facility.status !== "available"}
+                    className={`w-full px-4 py-2.5 rounded-lg font-medium transition-all duration-200 ${statusConfig.buttonClass}`}
+                  >
+                    {facility.status === "available"
+                      ? "Book Now"
+                      : statusConfig.text}
+                  </button>
                 </div>
-
-                {/* Description */}
-                <p className="text-gray-600 mb-6">{facility.description}</p>
-
-                {/* Booking Button */}
-                <button
-                  onClick={() => handleBooking(facility)}
-                  disabled={facility.status !== "available"}
-                  className={`w-full px-4 py-2 rounded-md transition ${
-                    getButtonProps(facility.status).className
-                  }`}
-                >
-                  {getButtonProps(facility.status).text}
-                </button>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
-      </main>
 
-      {/* Booking Modal */}
+        {filteredFacilities.length === 0 && (
+          <div className="text-center py-12">
+            <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              No facilities found
+            </h3>
+            <p className="text-gray-600">
+              Try adjusting your search or filter criteria
+            </p>
+          </div>
+        )}
+      </div>
+
       {selectedFacility && (
         <BookNow
           facility={selectedFacility}
@@ -207,8 +234,6 @@ const StudentFacilityBooking = () => {
           onBookingSuccess={handleBookingSuccess}
         />
       )}
-
-      {/* {bookingMessage && <p>{bookingMessage}</p>} */}
     </div>
   );
 };

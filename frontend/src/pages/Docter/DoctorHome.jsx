@@ -30,7 +30,7 @@ function DoctorHome() {
   }
 
   return (
-    <div className="flex h-screen">
+    <div className="flex min-h-screen">
       {/* Sidebar */}
       <Sidebar role="Doctor" isOpen={isSidebarOpen} />
 
