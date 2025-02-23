@@ -22,7 +22,9 @@ export const submitComplaint = async (req, res) => {
     }
 
     if (!req.file) {
-      return res.status(400).json({ success: false, error: "Proof file is required" });
+      return res
+        .status(400)
+        .json({ success: false, error: "Proof file is required" });
     }
 
     // const fileBuffer = getDataUri(req.file);
@@ -30,16 +32,16 @@ export const submitComplaint = async (req, res) => {
 
     // Handle Cloudinary upload failure
     if (!result || !result.secure_url) {
-      return res.status(500).json({ success: false, error: "File upload failed" });
+      return res
+        .status(500)
+        .json({ success: false, error: "File upload failed" });
     }
-
-    
 
     const complaint = new Complaint({
       content,
       submittedBy: req.user._id,
       isAnonymous,
-      proofUrl:result.url,
+      proofUrl: result.url,
     });
 
     await complaint.save();
