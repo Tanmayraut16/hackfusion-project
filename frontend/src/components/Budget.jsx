@@ -27,7 +27,7 @@ function LoadingSpinner() {
 
 function BudgetForm({ onClose, onSubmit }) {
   const [formData, setFormData] = useState({
-    title:"To",
+    title: "To",
     category: "event",
     amount: "",
     allocated_by: {
@@ -41,7 +41,7 @@ function BudgetForm({ onClose, onSubmit }) {
     e.preventDefault();
     setIsSubmitting(true);
     setError(null);
-  
+
     try {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -53,25 +53,25 @@ function BudgetForm({ onClose, onSubmit }) {
       const userRole = decodedToken?.role;
 
       if (!userId) throw new Error("User ID not found in token");
-      if (userRole !== "faculty") throw new Error("Only faculty members can allocate a budget.");
+      if (userRole !== "faculty")
+        throw new Error("Only faculty members can allocate a budget.");
 
-  
       // const decodedToken = jwtDecode(token);
       // console.log("Decoded Token:", decodedToken); // Debugging step
-  
+
       // const userId = decodedToken?.studentId;  // Extracting correct field
       // if (!userId) {
       //   throw new Error("User ID not found in token");
       // }
-  
+
       const submitData = {
-        title:formData.title,
+        title: formData.title,
         category: formData.category,
         amount: Number(formData.amount),
-        allocated_by: userId, 
+        allocated_by: userId,
         allocatedByModel: formData.allocated_by.model,
       };
-  
+
       const response = await axios.post(API_URL_ADD, submitData, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -79,11 +79,11 @@ function BudgetForm({ onClose, onSubmit }) {
         },
         timeout: 5000,
       });
-  
+
       if (response.data.success) {
         onSubmit(response.data.data);
         setFormData({
-          title:"To",
+          title: "To",
           category: "event",
           amount: "",
           allocated_by: { model: "Faculty" },
@@ -93,12 +93,13 @@ function BudgetForm({ onClose, onSubmit }) {
         throw new Error(response.data.message || "Failed to create budget");
       }
     } catch (error) {
-      setError(error.response?.data?.message || error.message || "An error occurred");
+      setError(
+        error.response?.data?.message || error.message || "An error occurred"
+      );
     } finally {
       setIsSubmitting(false);
     }
   };
-  
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
@@ -106,8 +107,8 @@ function BudgetForm({ onClose, onSubmit }) {
         <h2 className="text-xl font-bold mb-4">Create New Budget</h2>
         {error && <ErrorMessage message={error} />}
         <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
               Title
             </label>
             <input
@@ -115,8 +116,6 @@ function BudgetForm({ onClose, onSubmit }) {
               className="w-full p-2 border rounded"
               placeholder="Enter Title"
               value={formData.title}
-          
-              
               disabled={isSubmitting}
               onChange={(e) =>
                 setFormData({ ...formData, title: e.target.value })
@@ -239,12 +238,14 @@ function ExpenseTable({ expenses, isLoading, error }) {
                     ? expense.amount_spent.toFixed(2)
                     : "0.00"}
                 </td>
-                
+
                 <td className="border p-2">
-                  {expense.proof_url ? (
+
+                  {<expense className="proof_url"></expense> ? (
                     <a
                       href={expense.proof_url}
-                      className="text-blue-600 hover:underline flex items-center justify-center cursor-pointer"
+                      className="text-blue-600 hover:underline flex items-center justify-center"
+
                       target="_blank"
                       rel="noopener noreferrer"
                       
@@ -274,7 +275,6 @@ export default function BudgetComponent() {
   const [expensesError, setExpensesError] = useState(null);
   const [isLoadingExpenses, setIsLoadingExpenses] = useState(false);
   const [isExpenseDialogOpen, setIsExpenseDialogOpen] = useState(false);
- 
 
   const fetchBudgets = async () => {
     setIsLoading(true);
@@ -367,19 +367,18 @@ export default function BudgetComponent() {
   };
 
   const handleAddExpense = async (budgetId, newExpense) => {
-      try {
-        setExpenses((prevExpenses) => ({
-          ...prevExpenses,
-          [budgetId]: [...(prevExpenses[budgetId] || []), newExpense],
-        })); // Update UI with new expense
-      } catch (error) {
-        console.error("Error adding expense:", error);
-      }
-    };
+    try {
+      setExpenses((prevExpenses) => ({
+        ...prevExpenses,
+        [budgetId]: [...(prevExpenses[budgetId] || []), newExpense],
+      })); // Update UI with new expense
+    } catch (error) {
+      console.error("Error adding expense:", error);
+    }
+  };
 
   if (isLoading) return <LoadingSpinner />;
   if (error) return <ErrorMessage message={error} />;
-
 
 
   return (
@@ -492,7 +491,9 @@ export default function BudgetComponent() {
       {selectedBudget && (
         <div className="mt-6">
           <div className="flex justify-between items-center mb-2">
-            <h3 className="text-xl font-bold">Expenses - {selectedBudget.title}</h3>
+            <h3 className="text-xl font-bold">
+              Expenses - {selectedBudget.title}
+            </h3>
             <button
               className="px-4 py-2 bg-black text-white rounded"
               onClick={() => setIsExpenseDialogOpen(true)}
@@ -527,7 +528,112 @@ export default function BudgetComponent() {
   );
 }
 
+// function ExpenseForm({ budget, onClose, onSubmit }) {
+//   const [formData, setFormData] = useState({
+//     description: "",
+//     amount_spent: "",
+//   });
+//   const [isSubmitting, setIsSubmitting] = useState(false);
+//   const [error, setError] = useState(null);
 
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
+//     setIsSubmitting(true);
+//     setError(null);
+
+//     if (!formData.description || !formData.amount_spent) {
+//       setError("Description and amount spent are required");
+//       setIsSubmitting(false);
+//       return;
+//     }
+
+//     if (Number(formData.amount_spent) > budget.amount) {
+//       setError("Expense amount cannot exceed the allocated budget");
+//       setIsSubmitting(false);
+//       return;
+//     }
+
+//     try {
+//       const token = localStorage.getItem("token");
+//       if (!token) throw new Error("Authentication token not found");
+
+//       const response = await axios.post(
+//         `http://localhost:3000/api/budgets/${budget._id}`,
+//         formData,
+//         { headers: { Authorization: `Bearer ${token}` } }
+//       );
+
+//       if (response.data.success) {
+//         onSubmit(response.data.data);
+//         setFormData({ description: "", amount_spent: "" });
+//         onClose();
+//       } else {
+//         throw new Error(response.data.message || "Failed to add expense");
+//       }
+//     } catch (error) {
+//       setError(error.response?.data?.error || error.message || "Failed to add expense");
+//     } finally {
+//       setIsSubmitting(false);
+//     }
+//   };
+
+//   return (
+//     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+//       <div className="bg-white p-6 rounded-lg w-96">
+//         <h2 className="text-xl font-bold mb-4">Add Expense - {budget.category}</h2>
+//         {error && <p className="text-red-500 text-sm">{error}</p>}
+//         <form onSubmit={handleSubmit} className="space-y-4">
+//           <div>
+//             <label className="block text-sm font-medium text-gray-700">Description*</label>
+//             <input
+//               className="w-full p-2 border rounded"
+//               placeholder="Enter description"
+//               value={formData.description}
+//               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+//               required
+//               disabled={isSubmitting}
+//             />
+//           </div>
+
+//           <div>
+//             <label className="block text-sm font-medium text-gray-700">
+//               Amount Spent* (Available: ₹{budget.amount})
+//             </label>
+//             <input
+//               type="number"
+//               className="w-full p-2 border rounded"
+//               placeholder="Enter amount"
+//               value={formData.amount_spent}
+//               onChange={(e) => setFormData({ ...formData, amount_spent: e.target.value })}
+//               required
+//               min="0"
+//               max={budget.amount}
+//               disabled={isSubmitting}
+//             />
+//           </div>
+
+//           <div className="flex justify-end space-x-2 pt-4">
+//             <button
+//               type="button"
+//               className="px-4 py-2 border rounded hover:bg-gray-50"
+//               onClick={onClose}
+//               disabled={isSubmitting}
+//             >
+//               Cancel
+//             </button>
+//             <button
+//               type="submit"
+//               className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-blue-300"
+//               disabled={isSubmitting}
+//             >
+//               {isSubmitting ? "Adding..." : "Add Expense"}
+//             </button>
+//           </div>
+//         </form>
+//       </div>
+//     </div>
+//   );
+// }
 
  function ExpenseForm({ budget, onClose, onSubmit }) {
   const [formData, setFormData] = useState({
@@ -538,7 +644,11 @@ export default function BudgetComponent() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
 
+  
   const handleFileChange = (e) => {
+    console.log(e.target.files[0])
+
+
     setFormData({ ...formData, file: e.target.files[0] });
   };
 
@@ -661,6 +771,3 @@ export default function BudgetComponent() {
     </div>
   );
 }
-
-
-

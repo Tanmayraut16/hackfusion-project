@@ -111,6 +111,47 @@ export const getBudgetById = async (req, res) => {
  *   proof_url  // optional
  * }
  */
+// export const createExpenseLog = async (req, res) => {
+//   try {
+//     const { id } = req.params; // Budget ID
+//     const { description, amount_spent } = req.body;
+
+//     // Fetch the budget document from the Budget schema
+//     const budget = await Budget.findById(id);
+//     if (!budget) {
+//       return res.status(404).json({ success: false, error: "Budget not found" });
+//     }
+
+//     // Retrieve the allocated amount from the budget schema
+//     const allocatedAmount = budget.amount;
+
+//     // Validate that the expense does not exceed the allocated budget
+//     if (amount_spent > allocatedAmount) {
+//       return res.status(400).json({
+//         success: false,
+//         error: "Expense amount exceeds allocated budget",
+//       });
+//     }
+
+//     // Create the expense log using the provided data
+//     const expenseLog = new Expense({
+//       budget: id,
+//       description,
+//       amount_spent,
+//     });
+//     await expenseLog.save();
+
+//     // (Optional) Update the budget's remaining amount if needed
+//     // budget.amount = allocatedAmount - amount_spent;
+//     // await budget.save();
+
+//     return res.status(201).json({ success: true, data: expenseLog });
+//   } catch (error) {
+//     console.error("Error in createExpenseLog:", error);
+//     return res.status(500).json({ success: false, error: "Server error" });
+//   }
+// };
+
 export const createExpenseLog = async (req, res) => {
   try {
     const { id } = req.params; // Budget ID
