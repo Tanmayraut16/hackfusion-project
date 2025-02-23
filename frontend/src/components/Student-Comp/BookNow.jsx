@@ -42,48 +42,48 @@ const BookNow = ({ facility, onClose, onBookingSuccess }) => {
         throw new Error("Booking failed");
       }
 
+      // Calculate booking duration
+      const endTime = new Date(data.endTime);
+      const now = new Date();
+      const durationMs = endTime - now;
+      const hours = Math.floor(durationMs / 3600000);
+      const minutes = Math.floor((durationMs % 3600000) / 60000);
+      const durationStr = `${hours}h ${minutes}m`;
+
       // Update facility status to "booked" only if booking is successful
-      updateFacilityStatus(facility._id, "booked", token);
+      await updateFacilityStatus(facility._id, "booked", token);
+
+      // Call onBookingSuccess with facilityId, bookedBy and duration details
+      if (onBookingSuccess) {
+        onBookingSuccess(facility._id, data.userType, durationStr);
+      }
 
       console.log("Booking submitted successfully");
       toast.success("Booking request sent successfully");
-      if (onBookingSuccess) {
-        onBookingSuccess();
-      }
 
       reset();
       onClose();
 
       // Schedule status reset if the end time is in the future
-      const endTime = new Date(data.endTime);
-      const now = new Date();
-      const duration = endTime - now;
-
-      if (duration > 0) {
+      if (durationMs > 0) {
         setTimeout(async () => {
           try {
-            await updateFacilityStatus(facility._id, "available", token); // Await to ensure completion
+            await updateFacilityStatus(facility._id, "available", token);
             console.log("Facility status updated to available");
             toast.success("Facility is now available");
           } catch (error) {
-            console.error(
-              "Failed to update facility status to available:",
-              error
-            );
+            console.error("Failed to update facility status to available:", error);
             toast.error("Failed to update facility status");
           }
-        }, duration);
+        }, durationMs);
       } else {
-        // Directly update if end time has already passed
+        // If end time is in the past, update status immediately
         try {
           await updateFacilityStatus(facility._id, "available", token);
           console.log("Facility status updated immediately to available");
           toast.success("Facility is now available");
         } catch (error) {
-          console.error(
-            "Failed to update facility status to available:",
-            error
-          );
+          console.error("Failed to update facility status to available:", error);
           toast.error("Failed to update facility status");
         }
       }
@@ -161,7 +161,7 @@ const BookNow = ({ facility, onClose, onBookingSuccess }) => {
               User Type
             </label>
             <select
-              {...register("userType", { required: "User type is required" })}
+              {...register("userType", { required: "User type is required" })}  
               className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-900 bg-white"
             >
               <option value="">Select user type</option>
@@ -180,7 +180,7 @@ const BookNow = ({ facility, onClose, onBookingSuccess }) => {
               Reason for Booking
             </label>
             <textarea
-              {...register("reason", { required: "Reason is required" })}
+              {...register("reason", { required: "Reason is required" })}  
               rows={4}
               className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-900 resize-none"
               placeholder="Please provide a reason for your booking..."
