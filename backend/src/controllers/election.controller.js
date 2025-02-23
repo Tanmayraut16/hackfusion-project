@@ -329,6 +329,43 @@ export const getCandidateVotes = async (req, res) => {
   }
 };
 
+export const getPositionResults = async (req, res) => {
+  try {
+    const { electionId, positionName } = req.params;
+
+    const election = await Election.findById(electionId).populate(
+      "positions.candidates.student"
+    );
+
+    if (!election) {
+      return res.status(404).json({ message: "Election not found" });
+    }
+
+    const position = election.positions.find(
+      (pos) => pos.name === decodeURIComponent(positionName)
+    );
+
+    if (!position) {
+      return res.status(404).json({ message: "Position not found" });
+    }
+
+    // Return the entire position with candidates and their votes
+    return res.status(200).json({
+      position: {
+        name: position.name,
+        candidates: position.candidates.map((candidate) => ({
+          _id: candidate._id,
+          student: candidate.student,
+          votes: candidate.votes || 0,
+        })),
+      },
+    });
+  } catch (error) {
+    console.error("Error in getPositionResults:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 // Get all elections
 export const getAllElections = async (req, res) => {
   try {

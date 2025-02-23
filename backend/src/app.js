@@ -34,7 +34,10 @@ app.use(
 
 // ✅ Ensure CORS Headers Are Sent
 app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", process.env.CORS_ORIGIN || "http://localhost:5173");
+  res.header(
+    "Access-Control-Allow-Origin",
+    process.env.CORS_ORIGIN || "http://localhost:5173"
+  );
   res.header("Access-Control-Allow-Credentials", "true");
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH");
   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
@@ -47,9 +50,7 @@ app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.use(express.static("public"));
 app.use(cookieParser());
 
-
 app.use("/public", express.static("public"));
-
 
 // routes
 
@@ -65,7 +66,5 @@ app.use("/api/booking", bookingRouter);
 app.use("/api/facilities", facilityRoutes);
 app.use("/api/applications", applicationRoutes);
 app.use("/api/budgets", budgetRoutes);
-
-
 
 export { app };

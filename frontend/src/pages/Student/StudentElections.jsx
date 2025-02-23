@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import VotingModal from "../../components/Student-Comp/VotingModal";
 import ElectionCard from "../../components/Student-Comp/ElectionCard";
 import OTPModal from "../../components/Student-Comp/OTPModal";
-import axios from "axios";
 import ElectionResults from "../../components/Student-Comp/ElectionResults";
+import axios from "axios";
 
 const StudentElections = () => {
   const [selectedElection, setSelectedElection] = useState(null);
@@ -170,8 +170,13 @@ const StudentElections = () => {
       );
     }
 
-    {
-      activeTab === "done" && <ElectionResults />;
+    if (activeTab === "done") {
+      return (
+        <ElectionResults
+          electionId={selectedElection._id}
+          position={position}
+        />
+      );
     }
 
     return <p className="text-gray-600">Election has ended</p>;
