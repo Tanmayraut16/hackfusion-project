@@ -1,6 +1,5 @@
-import axios from "axios";
-import React, { useState, useEffect } from "react";
-import { toast } from "react-hot-toast";
+import React, { useState, useEffect } from 'react';
+import { Check, X } from 'lucide-react';
 
 const VotingModal = ({ election, position, onClose }) => {
   const [selectedCandidate, setSelectedCandidate] = useState(null);
@@ -28,10 +27,7 @@ const VotingModal = ({ election, position, onClose }) => {
       );
       if (!response.ok) throw new Error("Failed to fetch student profile");
 
-      // console.log(response.json());
-
       const data = await response.json();
-      console.log(data);
       return data.name || "Unknown";
     } catch (error) {
       console.error("Error fetching student name:", error);
@@ -39,17 +35,15 @@ const VotingModal = ({ election, position, onClose }) => {
     }
   };
 
-  // console.log(election._id);
-
   const handleVote = async () => {
     if (!selectedCandidate) {
-      toast.error("Please select a candidate to vote");
+      // We'll handle this with UI feedback instead of a toast
       return;
     }
 
     setLoading(true);
     try {
-      const token = localStorage.getItem("token"); // Retrieve token from localStorage
+      const token = localStorage.getItem("token");
       if (!token) {
         throw new Error("User not authenticated. Please log in again.");
       }
@@ -58,7 +52,7 @@ const VotingModal = ({ election, position, onClose }) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // Attach token for authentication
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           electionId: election._id,
@@ -70,44 +64,79 @@ const VotingModal = ({ election, position, onClose }) => {
       const data = await response.json();
       if (!response.ok) throw new Error(data.message);
 
-      toast.success("Vote cast successfully");
       onClose();
     } catch (error) {
-      toast.error(error.message);
+      console.error(error);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center p-4">
-      <div className="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full">
-        <h2 className="text-2xl font-bold mb-4">Vote for {position.name}</h2>
-        <div className="space-y-3">
+    <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <div className="w-full max-w-2xl bg-gradient-to-b from-zinc-900 to-black rounded-xl border border-zinc-800 shadow-2xl overflow-hidden transform transition-all">
+        {/* Header */}
+        <div className="relative px-6 py-4 bg-zinc-900/50 border-b border-zinc-800">
+          <button
+            onClick={onClose}
+            className="absolute right-4 top-4 text-zinc-400 hover:text-white transition-colors"
+          >
+            <X size={20} />
+          </button>
+          <h2 className="text-xl font-medium text-white">Cast Your Vote</h2>
+          <p className="text-sm text-zinc-400 mt-1">
+            Select your candidate for {position.name}
+          </p>
+        </div>
+
+        {/* Candidates List */}
+        <div className="p-6 space-y-4">
           {candidates.map((candidate) => (
-            <div
+            <button
               key={candidate._id}
-              className={`p-3 border rounded cursor-pointer ${
-                selectedCandidate && selectedCandidate._id === candidate._id
-                  ? "bg-blue-500 text-white"
-                  : "bg-white"
-              }`}
               onClick={() => setSelectedCandidate(candidate)}
+              className={`w-full group relative flex items-center p-4 rounded-lg border transition-all duration-200 ${
+                selectedCandidate?._id === candidate._id
+                  ? 'bg-indigo-600/10 border-indigo-500 text-white'
+                  : 'bg-zinc-900/50 border-zinc-800 text-zinc-300 hover:border-zinc-700 hover:bg-zinc-800/50'
+              }`}
             >
-              {candidate.name}
-            </div>
+              <div className="flex-1">
+                <h3 className="font-medium">{candidate.name}</h3>
+              </div>
+              <div className={`ml-4 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
+                selectedCandidate?._id === candidate._id
+                  ? 'border-indigo-500 bg-indigo-500'
+                  : 'border-zinc-600'
+              }`}>
+                {selectedCandidate?._id === candidate._id && (
+                  <Check size={14} className="text-white" />
+                )}
+              </div>
+            </button>
           ))}
         </div>
-        <div className="flex justify-end space-x-3 mt-4">
-          <button className="px-4 py-2 bg-gray-300 rounded" onClick={onClose}>
+
+        {/* Footer */}
+        <div className="px-6 py-4 bg-zinc-900/50 border-t border-zinc-800 flex justify-end space-x-3">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-sm font-medium text-zinc-300 hover:text-white transition-colors"
+          >
             Cancel
           </button>
           <button
-            className="px-4 py-2 bg-blue-500 text-white rounded"
             onClick={handleVote}
-            disabled={loading}
+            disabled={!selectedCandidate || loading}
+            className={`px-6 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+              !selectedCandidate
+                ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed'
+                : loading
+                ? 'bg-indigo-600/50 text-white cursor-wait'
+                : 'bg-indigo-600 text-white hover:bg-indigo-500'
+            }`}
           >
-            {loading ? "Voting..." : "Vote"}
+            {loading ? 'Submitting...' : 'Submit Vote'}
           </button>
         </div>
       </div>

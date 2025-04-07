@@ -76,7 +76,7 @@ function AdminHome() {
 
         {/* Main Section with Dynamic Content */}
         <div
-          className="flex-1 bg-gradient-to-br from-blue-50 to-blue-100 px-4 py-8"
+          className="flex-1 bg-gradient-to-br from-gray-900 to-gray-800 px-4 py-8 text-gray-100"
           style={{
             height: `calc(100vh - 60px)`,
           }}

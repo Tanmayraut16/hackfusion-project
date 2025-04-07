@@ -3,7 +3,7 @@ import axios from "axios";
 import Navbar from "../Navbar";
 import UserList from "./UserList";
 import UserModal from "./UserModal";
-import { Users, GraduationCap } from "lucide-react";
+import { Users, GraduationCap, ArrowLeft } from "lucide-react";
 
 const AdminUsers = () => {
   const [activeView, setActiveView] = useState(null);
@@ -98,36 +98,40 @@ const AdminUsers = () => {
   );
 
   return (
-    <div className="flex min-h-screen flex-col bg-gradient-to-r from-blue-50 via-blue-30 to-blue-20">
+    <div className="flex min-h-screen flex-col">
       <Navbar userName="Admin" />
       <div
-        className="flex-1 bg-gradient-to-br from-blue-50 to-blue-100 px-4 py-8"
+        className="flex-1  px-4 py-8"
         style={{ height: "calc(100vh - 60px)" }}
       >
         <div className="container mx-auto px-4 sm:px-6 lg:px-10 py-6">
           {!activeView ? (
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-center sm:text-left">
-                All Users and Faculties
+              <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-center sm:text-left text-white">
+                User Management
               </h1>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <button
                   onClick={() => setActiveView("students")}
-                  className="p-4 bg-white rounded-lg shadow transition hover:shadow-lg flex flex-col items-center"
+                  className="p-6 bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl shadow-lg shadow-purple-900/10 transition hover:shadow-purple-900/30 hover:translate-y-[-4px] flex flex-col items-center border border-gray-700"
                 >
-                  <GraduationCap size={28} className="text-blue-600" />
-                  <h2 className="mt-2 text-lg font-semibold">All Students</h2>
-                  <p className="text-gray-500 text-sm">
+                  <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-3 rounded-full mb-3">
+                    <GraduationCap size={24} className="text-white" />
+                  </div>
+                  <h2 className="mt-2 text-lg font-semibold text-white">All Students</h2>
+                  <p className="text-gray-400 text-sm">
                     Manage student accounts
                   </p>
                 </button>
                 <button
                   onClick={() => setActiveView("faculty")}
-                  className="p-4 bg-white rounded-lg shadow transition hover:shadow-lg flex flex-col items-center"
+                  className="p-6 bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl shadow-lg shadow-purple-900/10 transition hover:shadow-purple-900/30 hover:translate-y-[-4px] flex flex-col items-center border border-gray-700"
                 >
-                  <Users size={28} className="text-blue-600" />
-                  <h2 className="mt-2 text-lg font-semibold">All Faculty</h2>
-                  <p className="text-gray-500 text-sm">
+                  <div className="bg-gradient-to-r from-purple-600 to-pink-500 p-3 rounded-full mb-3">
+                    <Users size={24} className="text-white" />
+                  </div>
+                  <h2 className="mt-2 text-lg font-semibold text-white">All Faculty</h2>
+                  <p className="text-gray-400 text-sm">
                     Manage faculty accounts
                   </p>
                 </button>
@@ -138,11 +142,12 @@ const AdminUsers = () => {
               <div className="flex items-center mb-6">
                 <button
                   onClick={() => setActiveView(null)}
-                  className="text-blue-600 hover:text-blue-700 mr-4"
+                  className="flex items-center text-purple-400 hover:text-purple-300 mr-4 transition-colors"
                 >
-                  ← Back
+                  <ArrowLeft size={20} className="mr-1" />
+                  Back
                 </button>
-                <h1 className="text-2xl font-bold">
+                <h1 className="text-2xl font-bold text-white">
                   {activeView === "students" ? "All Students" : "All Faculty"}
                 </h1>
               </div>
@@ -156,19 +161,21 @@ const AdminUsers = () => {
                 onSearchChange={setSearchQuery}
                 onRemoveUser={handleRemoveUser}
               />
-              <div className="flex justify-center mt-4">
-                <button
-                  onClick={() =>
-                    activeView === "students"
-                      ? fetchStudents(studentPage + 1)
-                      : fetchFaculty(facultyPage + 1)
-                  }
-                  disabled={loading}
-                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
-                >
-                  {loading ? "Loading..." : "View More"}
-                </button>
-              </div>
+              {(activeView === "students" ? filteredStudents : filteredFaculty).length > 0 && (
+                <div className="flex justify-center mt-6">
+                  <button
+                    onClick={() =>
+                      activeView === "students"
+                        ? fetchStudents(studentPage + 1)
+                        : fetchFaculty(facultyPage + 1)
+                    }
+                    disabled={loading}
+                    className="px-6 py-2 bg-gradient-to-r from-purple-600 to-blue-500 text-white rounded-lg hover:from-purple-700 hover:to-blue-600 transition-colors disabled:opacity-50"
+                  >
+                    {loading ? "Loading..." : "Load More"}
+                  </button>
+                </div>
+              )}
             </div>
           )}
           {selectedUser && (

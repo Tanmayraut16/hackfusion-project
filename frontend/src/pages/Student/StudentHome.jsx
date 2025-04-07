@@ -8,7 +8,7 @@ import StudentFacilityBooking from "../../components/Student-Comp/StudentFacilit
 import StudentComplaints from "../../components/Student-Comp/StudentComplaints";
 import ReportCheating from "../../components/ReportCheating";
 import ApplicationsPage from "../../components/Student-Comp/StudentApplication";
-import BudgetComponent from "../../components/Student-Comp/StudentBudget";
+import BudgetComponent from "../../components/Budget";
 
 function StudentHome() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -44,13 +44,13 @@ function StudentHome() {
   }
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-gray-900">
       {/* Sidebar for Students */}
       <Sidebar role="Student" isOpen={isSidebarOpen} />
 
       {/* Main Content */}
       <div
-        className="flex-1 flex flex-col bg-gradient-to-r from-blue-50 via-blue-30 to-blue-20"
+        className="flex-1 flex flex-col bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 transition-all duration-300"
         style={{
           marginLeft: isSidebarOpen ? "250px" : "0px",
           width: `calc(100% - ${isSidebarOpen ? "250px" : "0px"})`,
@@ -64,12 +64,12 @@ function StudentHome() {
 
         {/* Main Section with Dynamic Content */}
         <div
-          className="flex-1 bg-gradient-to-br from-green-50 to-green-100 px-4 py-8"
+          className="flex-1 bg-gradient-to-br from-gray-900 to-gray-800 px-4 py-8 text-gray-100"
           style={{
             height: `calc(100vh - 60px)`,
           }}
         >
-          <div className="container mx-auto px-20 py-10">
+          <div className="container mx-auto px-6 py-8 lg:px-12">
             {ContentComponent}
           </div>
         </div>

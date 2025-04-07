@@ -1,7 +1,5 @@
-// StudentDropdown.jsx
-
 import React, { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, User, Search } from "lucide-react";
 
 const StudentDropdown = ({ students, value, onChange }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -18,31 +16,45 @@ const StudentDropdown = ({ students, value, onChange }) => {
   return (
     <div className="relative">
       <div
-        className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 bg-white flex justify-between items-center cursor-pointer"
+        className="w-full border border-gray-700 rounded-lg shadow-sm py-3 px-4 bg-gray-800 flex justify-between items-center cursor-pointer hover:border-purple-500 transition-colors"
         onClick={() => setIsOpen(!isOpen)}
       >
-        <span className="text-gray-700">
-          {selectedStudent ? selectedStudent.name : "Select a student"}
-        </span>
-        <ChevronDown className="h-4 w-4 text-gray-400" />
+        <div className="flex items-center">
+          {selectedStudent ? (
+            <>
+              <div className="bg-gradient-to-r from-purple-600 to-blue-500 rounded-full p-1 mr-3">
+                <User size={16} className="text-white" />
+              </div>
+              <span className="text-white">{selectedStudent.name}</span>
+            </>
+          ) : (
+            <span className="text-gray-400">Select a student</span>
+          )}
+        </div>
+        <ChevronDown className={`h-5 w-5 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </div>
 
       {isOpen && (
-        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg">
-          <input
-            type="text"
-            className="w-full px-3 py-2 border-b border-gray-200"
-            placeholder="Search students..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            onClick={(e) => e.stopPropagation()}
-          />
-          <div className="max-h-60 overflow-auto">
+        <div className="absolute z-10 w-full mt-1 bg-gray-800 border border-gray-700 rounded-lg shadow-lg">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={16} />
+            <input
+              type="text"
+              className="w-full pl-10 pr-3 py-3 bg-gray-900 border-b border-gray-700 rounded-t-lg text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
+              placeholder="Search students..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+          <div className="max-h-60 overflow-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900">
             {filteredStudents.map((student) => (
               <div
                 key={student._id}
-                className={`px-3 py-2 cursor-pointer hover:bg-gray-100 ${
-                  value === student._id ? "bg-indigo-50" : ""
+                className={`px-4 py-3 cursor-pointer hover:bg-gray-700 ${
+                  value === student._id ? "bg-gray-700" : ""
+                } border-l-2 ${
+                  value === student._id ? "border-purple-500" : "border-transparent"
                 }`}
                 onClick={() => {
                   onChange(student._id);
@@ -50,14 +62,14 @@ const StudentDropdown = ({ students, value, onChange }) => {
                   setSearchTerm("");
                 }}
               >
-                <div className="font-medium">{student.name}</div>
-                <div className="text-sm text-gray-500">
+                <div className="font-medium text-white">{student.name}</div>
+                <div className="text-sm text-gray-400">
                   {student.department}
                 </div>
               </div>
             ))}
             {filteredStudents.length === 0 && (
-              <div className="px-3 py-2 text-gray-500">No students found</div>
+              <div className="px-4 py-3 text-gray-400 italic">No students found</div>
             )}
           </div>
         </div>

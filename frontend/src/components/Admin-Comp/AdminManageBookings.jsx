@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   AlertCircle,
   Clock,
+  Search,
 } from "lucide-react";
 import axios from "axios";
 
@@ -17,7 +18,6 @@ const AdminManageBookings = () => {
   const [showAddSuccess, setShowAddSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
-  // Function to fetch facilities
   const fetchFacilities = async () => {
     try {
       const response = await axios.get("http://localhost:3000/api/facilities");
@@ -27,14 +27,13 @@ const AdminManageBookings = () => {
     }
   };
 
-  // Fetch facilities on mount
   useEffect(() => {
     fetchFacilities();
   }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget); // Convert form element to FormData object
+    const formData = new FormData(e.currentTarget);
 
     const newFacility = {
       name: formData.get("name"),
@@ -52,9 +51,9 @@ const AdminManageBookings = () => {
         },
       });
 
-      fetchFacilities(); // Re-fetch after adding
+      fetchFacilities();
       setShowAddSuccess(true);
-      e.target.reset(); // Reset form
+      e.target.reset();
 
       setTimeout(() => setShowAddSuccess(false), 3000);
     } catch (error) {
@@ -70,13 +69,13 @@ const AdminManageBookings = () => {
   const getStatusColor = (status) => {
     switch (status) {
       case "available":
-        return "bg-green-100 text-green-800";
+        return "bg-emerald-900/50 text-emerald-400 border border-emerald-500/20";
       case "booked":
-        return "bg-blue-100 text-blue-800";
+        return "bg-blue-900/50 text-blue-400 border border-blue-500/20";
       case "under_maintenance":
-        return "bg-yellow-100 text-yellow-800";
+        return "bg-amber-900/50 text-amber-400 border border-amber-500/20";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "bg-gray-800 text-gray-300";
     }
   };
 
@@ -86,58 +85,70 @@ const AdminManageBookings = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Filters */}
-            <div className="bg-white rounded-lg shadow p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <Filter className="w-5 h-5 text-gray-500" />
-                <h2 className="text-lg font-semibold">Filter Facilities</h2>
-              </div>
-              <div className="flex gap-2">
-                {["all", "available", "booked", "under_maintenance"].map(
-                  (status) => (
-                    <button
-                      key={status}
-                      onClick={() => setStatusFilter(status)}
-                      className={`px-4 py-2 rounded-md text-sm font-medium ${
-                        statusFilter === status
-                          ? "bg-indigo-600 text-white"
-                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
-                    >
-                      {status.charAt(0).toUpperCase() +
-                        status.slice(1).replace("_", " ")}
-                    </button>
-                  )
-                )}
+            {/* Search and Filters */}
+            <div className="bg-gray-800/50 backdrop-blur-xl rounded-xl border border-gray-700/50 p-6">
+              <div className="flex flex-col sm:flex-row items-center gap-4 mb-6">
+                <div className="relative flex-1 w-full">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <input
+                    type="text"
+                    placeholder="Search facilities..."
+                    className="w-full bg-gray-900/50 border border-gray-700 rounded-lg pl-10 pr-4 py-2 text-gray-300 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                  />
+                </div>
+                <div className="flex gap-2 flex-wrap justify-center sm:justify-start">
+                  {["all", "available", "booked", "under_maintenance"].map(
+                    (status) => (
+                      <button
+                        key={status}
+                        onClick={() => setStatusFilter(status)}
+                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                          statusFilter === status
+                            ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/30"
+                            : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                        }`}
+                      >
+                        {status.charAt(0).toUpperCase() +
+                          status.slice(1).replace("_", " ")}
+                      </button>
+                    )
+                  )}
+                </div>
               </div>
             </div>
 
             {/* Facilities List */}
-            <div className="bg-white rounded-lg shadow overflow-hidden">
-              <div className="p-4 border-b border-gray-200">
-                <h2 className="text-lg font-semibold">Facilities</h2>
+            <div className="bg-gray-800/50 backdrop-blur-xl rounded-xl border border-gray-700/50 overflow-hidden">
+              <div className="p-6 border-b border-gray-700">
+                <h2 className="text-xl font-semibold text-white">Facilities</h2>
               </div>
-              <div className="divide-y divide-gray-200">
+              <div className="divide-y divide-gray-700">
                 {filteredFacilities.map((facility) => (
-                  <div key={facility.id} className="p-4 hover:bg-gray-50">
+                  <div
+                    key={facility.id}
+                    className="p-6 hover:bg-gray-700/30 transition-all duration-200"
+                  >
                     <div className="flex justify-between items-start">
                       <div>
-                        <h3 className="text-lg font-medium text-gray-900">
+                        <h3 className="text-lg font-medium text-white">
                           {facility.name}
                         </h3>
-                        <p className="text-sm text-gray-500">
-                          {facility.location}
-                        </p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Building2 className="w-4 h-4 text-gray-400" />
+                          <p className="text-sm text-gray-400">
+                            {facility.location}
+                          </p>
+                        </div>
                       </div>
                       <span
-                        className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(
+                        className={`px-4 py-1.5 rounded-full text-sm font-medium ${getStatusColor(
                           facility.status
                         )}`}
                       >
                         {facility.status.replace("_", " ")}
                       </span>
                     </div>
-                    <p className="mt-2 text-sm text-gray-600">
+                    <p className="mt-3 text-sm text-gray-400">
                       {facility.description}
                     </p>
                   </div>
@@ -149,23 +160,25 @@ const AdminManageBookings = () => {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Add Facility Form */}
-            <div className="bg-white rounded-2xl shadow-lg p-6 max-w-lg mx-auto">
+            <div className="bg-gradient-to-br from-gray-800 via-gray-800/95 to-gray-800/90 backdrop-blur-xl rounded-xl border border-gray-700/50 p-6">
               <div className="flex items-center gap-3 mb-6">
-                <Plus className="w-6 h-6 text-indigo-600" />
-                <h2 className="text-xl font-semibold text-gray-900">
+                <div className="p-2 bg-indigo-500/10 rounded-lg">
+                  <Plus className="w-6 h-6 text-indigo-400" />
+                </div>
+                <h2 className="text-xl font-semibold text-white">
                   Add New Facility
                 </h2>
               </div>
 
               {showAddSuccess && (
-                <div className="mb-4 p-4 bg-green-100 text-green-800 rounded-md flex items-center justify-between transition-opacity duration-300">
-                  <div className="flex items-center gap-2">
+                <div className="mb-6 p-4 bg-emerald-900/50 border border-emerald-500/20 rounded-lg flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-emerald-400">
                     <CheckCircle2 className="w-5 h-5" />
                     <span>Facility added successfully!</span>
                   </div>
                   <button
                     onClick={() => setShowAddSuccess(false)}
-                    className="text-green-600 hover:text-green-800 transition"
+                    className="text-emerald-400 hover:text-emerald-300 transition"
                   >
                     ✖
                   </button>
@@ -176,7 +189,7 @@ const AdminManageBookings = () => {
                 <div>
                   <label
                     htmlFor="name"
-                    className="block text-sm font-medium text-gray-700"
+                    className="block text-sm font-medium text-gray-300 mb-2"
                   >
                     Facility Name
                   </label>
@@ -185,14 +198,14 @@ const AdminManageBookings = () => {
                     name="name"
                     id="name"
                     required
-                    className="mt-2 block w-full rounded-lg border border-gray-300 px-4 py-2 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-400 transition-all sm:text-sm"
+                    className="w-full bg-gray-900/50 border border-gray-700 rounded-lg px-4 py-2.5 text-gray-300 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
                   />
                 </div>
 
                 <div>
                   <label
                     htmlFor="location"
-                    className="block text-sm font-medium text-gray-700"
+                    className="block text-sm font-medium text-gray-300 mb-2"
                   >
                     Location
                   </label>
@@ -201,14 +214,14 @@ const AdminManageBookings = () => {
                     name="location"
                     id="location"
                     required
-                    className="mt-2 block w-full rounded-lg border border-gray-300 px-4 py-2 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-400 transition-all sm:text-sm"
+                    className="w-full bg-gray-900/50 border border-gray-700 rounded-lg px-4 py-2.5 text-gray-300 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
                   />
                 </div>
 
                 <div>
                   <label
                     htmlFor="description"
-                    className="block text-sm font-medium text-gray-700"
+                    className="block text-sm font-medium text-gray-300 mb-2"
                   >
                     Description
                   </label>
@@ -216,14 +229,14 @@ const AdminManageBookings = () => {
                     name="description"
                     id="description"
                     rows={3}
-                    className="mt-2 block w-full rounded-lg border border-gray-300 px-4 py-2 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-400 transition-all sm:text-sm resize-none"
+                    className="w-full bg-gray-900/50 border border-gray-700 rounded-lg px-4 py-2.5 text-gray-300 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 resize-none"
                   ></textarea>
                 </div>
 
                 <div>
                   <label
                     htmlFor="status"
-                    className="block text-sm font-medium text-gray-700"
+                    className="block text-sm font-medium text-gray-300 mb-2"
                   >
                     Status
                   </label>
@@ -231,7 +244,7 @@ const AdminManageBookings = () => {
                     name="status"
                     id="status"
                     required
-                    className="mt-2 block w-full rounded-lg border border-gray-300 px-4 py-2 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-400 transition-all sm:text-sm cursor-pointer"
+                    className="w-full bg-gray-900/50 border border-gray-700 rounded-lg px-4 py-2.5 text-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 cursor-pointer"
                   >
                     <option value="available">Available</option>
                     <option value="booked">Booked</option>
@@ -241,30 +254,32 @@ const AdminManageBookings = () => {
 
                 <button
                   type="submit"
-                  className="w-full bg-indigo-600 text-white py-3 px-4 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition transform hover:scale-105"
+                  className="w-full bg-gradient-to-r from-indigo-600 to-indigo-500 text-white py-3 px-4 rounded-lg hover:from-indigo-500 hover:to-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-800 transition transform hover:-translate-y-0.5"
                 >
-                  + Add Facility
+                  Add Facility
                 </button>
               </form>
             </div>
 
             {/* Notifications */}
-            <div className="bg-white rounded-lg shadow p-4">
-              <h2 className="text-lg font-semibold mb-4">
+            <div className="bg-gray-800/50 backdrop-blur-xl rounded-xl border border-gray-700/50 p-6">
+              <h2 className="text-xl font-semibold text-white mb-4">
                 Recent Notifications
               </h2>
               <div className="space-y-4">
                 {notifications.map((notification) => (
                   <div
                     key={notification.id}
-                    className="flex items-start gap-3 p-3 bg-gray-50 rounded-md"
+                    className="flex items-start gap-3 p-4 bg-gray-900/50 rounded-lg border border-gray-700/50"
                   >
-                    {getNotificationIcon(notification.type)}
+                    <div className="p-2 bg-indigo-500/10 rounded-lg">
+                      <Bell className="w-5 h-5 text-indigo-400" />
+                    </div>
                     <div>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-gray-300">
                         {notification.message}
                       </p>
-                      <p className="text-xs text-gray-400 mt-1">
+                      <p className="text-xs text-gray-500 mt-1">
                         {notification.time}
                       </p>
                     </div>

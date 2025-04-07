@@ -8,11 +8,11 @@ const ElectionCard = ({ election, onClick, type }) => {
   const getStatusColor = () => {
     switch (type) {
       case 'ongoing':
-        return 'bg-green-500 bg-opacity-20 text-green-800';
+        return 'bg-green-500 bg-opacity-20 text-green-400';
       case 'upcoming':
-        return 'bg-blue-500 bg-opacity-20 text-blue-800';
+        return 'bg-indigo-500 bg-opacity-20 text-indigo-400';
       case 'done':
-        return 'bg-gray-500 bg-opacity-20 text-gray-800';
+        return 'bg-gray-600 bg-opacity-20 text-gray-400';
       default:
         return '';
     }
@@ -23,12 +23,12 @@ const ElectionCard = ({ election, onClick, type }) => {
       onClick={onClick}
       role="button"
       aria-label={`View details for ${election.title}`}
-      className="bg-white w-full rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow cursor-pointer"
+      className="bg-gray-800 w-full rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow cursor-pointer border border-gray-700 hover:border-gray-600"
     >
       <div className="flex justify-between items-start">
         <div>
-          <h3 className="text-xl font-semibold text-gray-900">{election.title}</h3>
-          <div className="flex items-center mt-2 text-gray-600">
+          <h3 className="text-xl font-semibold text-gray-100">{election.title}</h3>
+          <div className="flex items-center mt-2 text-gray-400">
             <Calendar size={16} className="mr-2" />
             <span className="text-sm">{formatDate(election.startDate)} - {formatDate(election.endDate)}</span>
           </div>
@@ -38,10 +38,10 @@ const ElectionCard = ({ election, onClick, type }) => {
         </span>
       </div>
       <div className="mt-4 flex justify-between items-center">
-        <span className="text-sm text-gray-600">
+        <span className="text-sm text-gray-400">
           {election.positions.length} Position{election.positions.length !== 1 ? 's' : ''}
         </span>
-        <ChevronRight size={20} className="text-gray-400" />
+        <ChevronRight size={20} className="text-gray-500" />
       </div>
     </div>
   );

@@ -119,17 +119,17 @@ const StudentElections = () => {
 
   const renderPositionContent = (position) => {
     if (!position.candidates || position.candidates.length === 0) {
-      return <p className="text-gray-500">No candidates for this position.</p>;
+      return <p className="text-gray-400">No candidates for this position.</p>;
     }
 
     if (activeTab === "ongoing") {
       return positionVotingStatus[position._id]?.hasVoted ? (
         <div className="mt-2">
-          <p className="text-green-600">
+          <p className="text-emerald-400">
             You have already voted for this position
           </p>
           {positionVotingStatus[position._id]?.votedCandidate && (
-            <p className="text-gray-600 mt-1">
+            <p className="text-gray-300 mt-1">
               Voted for:{" "}
               {positionVotingStatus[position._id]?.votedCandidate?.student
                 ?.name || "Unknown"}
@@ -139,7 +139,7 @@ const StudentElections = () => {
       ) : (
         <button
           onClick={() => handleVoteClick(position)}
-          className="mt-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          className="mt-2 bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-all duration-200 shadow-lg"
         >
           Vote
         </button>
@@ -150,10 +150,10 @@ const StudentElections = () => {
       return (
         <div>
           <div className="mb-4">
-            <p className="text-gray-700 font-medium mb-2">Candidates:</p>
+            <p className="text-gray-300 font-medium mb-2">Candidates:</p>
             <ul className="space-y-2">
               {position.candidates.map((candidate) => (
-                <li key={candidate._id} className="text-gray-600">
+                <li key={candidate._id} className="text-gray-400">
                   <div className="flex flex-col">
                     <span className="font-medium">
                       {candidate.student?.name || "Unnamed Candidate"}
@@ -163,7 +163,7 @@ const StudentElections = () => {
               ))}
             </ul>
           </div>
-          <p className="text-yellow-600">
+          <p className="text-amber-400">
             Voting will be available when the election starts
           </p>
         </div>
@@ -179,13 +179,13 @@ const StudentElections = () => {
       );
     }
 
-    return <p className="text-gray-600">Election has ended</p>;
+    return <p className="text-gray-400">Election has ended</p>;
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gray-900 text-gray-100">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="border-b border-gray-200 mb-8">
+        <div className="border-b border-gray-700 mb-8">
           <nav className="-mb-px flex space-x-8">
             {["ongoing", "upcoming", "done"].map((tab) => (
               <button
@@ -194,10 +194,10 @@ const StudentElections = () => {
                   setActiveTab(tab);
                   setSelectedElection(null);
                 }}
-                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                className={`py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200 ${
                   activeTab === tab
-                    ? "border-blue-500 text-blue-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    ? "border-indigo-500 text-indigo-400"
+                    : "border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-600"
                 }`}
               >
                 {tab.charAt(0).toUpperCase() + tab.slice(1)} Elections
@@ -208,11 +208,13 @@ const StudentElections = () => {
 
         {!selectedElection ? (
           loading ? (
-            <p>Loading elections...</p>
+            <div className="flex justify-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500"></div>
+            </div>
           ) : error ? (
-            <p className="text-red-500">{error}</p>
+            <p className="text-red-400">{error}</p>
           ) : elections[activeTab].length === 0 ? (
-            <p className="text-gray-500">No {activeTab} elections available.</p>
+            <p className="text-gray-400">No {activeTab} elections available.</p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {elections[activeTab].map((election) => (
@@ -229,11 +231,11 @@ const StudentElections = () => {
           <div>
             <button
               onClick={() => setSelectedElection(null)}
-              className="mb-6 text-blue-600 hover:text-blue-700 flex items-center"
+              className="mb-6 text-indigo-400 hover:text-indigo-300 flex items-center transition-colors duration-200"
             >
               ← Back to Elections
             </button>
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">
+            <h2 className="text-2xl font-bold text-gray-100 mb-6">
               {selectedElection.title}
             </h2>
 
@@ -241,9 +243,9 @@ const StudentElections = () => {
               {selectedElection.positions.map((position) => (
                 <div
                   key={position._id}
-                  className="bg-white rounded-lg shadow-md p-6"
+                  className="bg-gray-800 rounded-lg shadow-lg p-6 border border-gray-700 hover:border-gray-600 transition-all duration-200"
                 >
-                  <h3 className="text-xl font-semibold mb-4">
+                  <h3 className="text-xl font-semibold mb-4 text-gray-100">
                     {position.name}
                   </h3>
                   {renderPositionContent(position)}

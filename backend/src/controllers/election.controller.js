@@ -7,16 +7,18 @@ import { verifyOTP, sendOTPEmail } from "../utils/emailServiceOTP.js";
 export const createElection = async (req, res) => {
   try {
     const { title, startDate, endDate, positions } = req.body;
-    console.log(req.body);
+
     // Check if election already exists
     const existingElection = await Election.findOne({ title });
-    console.log(existingElection);
     if (existingElection) {
       return res.status(400).json({ message: "Election already exists" });
     }
 
+    // Declare newElection outside
+    let newElection;
+
     try {
-      const newElection = await Election.create({
+      newElection = await Election.create({
         title,
         startDate,
         endDate,
@@ -25,22 +27,20 @@ export const createElection = async (req, res) => {
       console.log("this is new election:", newElection);
     } catch (error) {
       console.error("Error creating election:", error);
+      return res.status(500).json({ message: "Failed to create election" });
     }
 
     console.log("hleo blekjfa");
-    // Encode the electionId using Base64 URL encoding
-    // const encodedElectionId = base64url(newElection._id.toString());
-    // console.log(encodedElectionId);
 
     return res.status(201).json({
       message: "Election created successfully",
       election: newElection,
-      //electionId: encodedElectionId, // Obfuscated ID
     });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
 };
+
 
 /**
  * Add a candidate to a specific position.
