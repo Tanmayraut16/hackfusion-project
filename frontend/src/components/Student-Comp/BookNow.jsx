@@ -1,9 +1,9 @@
 import React from "react";
 import { useForm } from "react-hook-form";
-import { CalendarIcon, Clock } from "lucide-react";
+import { CalendarIcon, Clock, BookOpen, UserRound, MessageSquare } from "lucide-react";
 import { format } from "date-fns";
 import toast from "react-hot-toast";
-import { updateFacilityStatus } from "../../utils/statusUpdater"; // Importing extracted function
+import { updateFacilityStatus } from "../../utils/statusUpdater";
 
 const BookNow = ({ facility, onClose, onBookingSuccess }) => {
   const {
@@ -96,31 +96,35 @@ const BookNow = ({ facility, onClose, onBookingSuccess }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-[500px] overflow-hidden">
-        <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <div className="bg-gray-900 border border-gray-700/50 rounded-2xl shadow-2xl w-full max-w-[550px] overflow-hidden animate-fadeIn">
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-700 px-6 py-5">
           <div className="flex items-center gap-3">
-            <CalendarIcon className="h-7 w-7 text-white" />
-            <h2 className="text-2xl font-semibold text-white">Book Facility</h2>
+            <div className="bg-white/20 p-2 rounded-lg">
+              <BookOpen className="h-6 w-6 text-white" />
+            </div>
+            <h2 className="text-2xl font-bold text-white">Book {facility.name}</h2>
           </div>
         </div>
+        
         <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Facility Name
-            </label>
-            <input
-              type="text"
-              {...register("facilityName")}
-              readOnly
-              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900"
-            />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="col-span-2">
+              <div className="bg-gray-800/50 p-4 rounded-xl border border-gray-700/50 mb-6">
+                <div className="flex items-start gap-3">
+                  <CalendarIcon className="h-5 w-5 text-blue-400 mt-0.5" />
+                  <div>
+                    <p className="text-gray-300 font-medium">{facility.name}</p>
+                    <p className="text-gray-400 text-sm">{facility.location}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
                 <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-gray-500" /> Start Time
+                  <Clock className="h-4 w-4 text-blue-400" /> Start Time
                 </div>
               </label>
               <input
@@ -128,41 +132,45 @@ const BookNow = ({ facility, onClose, onBookingSuccess }) => {
                 {...register("startTime", {
                   required: "Start time is required",
                 })}
-                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-900"
+                className="w-full px-4 py-3 border border-gray-700 rounded-xl bg-gray-800 text-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 min={format(new Date(), "yyyy-MM-dd'T'HH:mm")}
               />
               {errors.startTime && (
-                <p className="mt-1 text-sm text-red-600">
+                <p className="mt-2 text-sm text-red-400">
                   {errors.startTime.message}
                 </p>
               )}
             </div>
+            
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
                 <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-gray-500" /> End Time
+                  <Clock className="h-4 w-4 text-blue-400" /> End Time
                 </div>
               </label>
               <input
                 type="datetime-local"
                 {...register("endTime", { required: "End time is required" })}
-                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-900"
+                className="w-full px-4 py-3 border border-gray-700 rounded-xl bg-gray-800 text-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 min={format(new Date(), "yyyy-MM-dd'T'HH:mm")}
               />
               {errors.endTime && (
-                <p className="mt-1 text-sm text-red-600">
+                <p className="mt-2 text-sm text-red-400">
                   {errors.endTime.message}
                 </p>
               )}
             </div>
           </div>
+          
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              User Type
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              <div className="flex items-center gap-2">
+                <UserRound className="h-4 w-4 text-blue-400" /> User Type
+              </div>
             </label>
             <select
               {...register("userType", { required: "User type is required" })}  
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-900 bg-white"
+              className="w-full px-4 py-3 border border-gray-700 rounded-xl bg-gray-800 text-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">Select user type</option>
               <option value="Student">Student</option>
@@ -170,40 +178,44 @@ const BookNow = ({ facility, onClose, onBookingSuccess }) => {
               <option value="Staff">Staff</option>
             </select>
             {errors.userType && (
-              <p className="mt-1 text-sm text-red-600">
+              <p className="mt-2 text-sm text-red-400">
                 {errors.userType.message}
               </p>
             )}
           </div>
+          
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Reason for Booking
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              <div className="flex items-center gap-2">
+                <MessageSquare className="h-4 w-4 text-blue-400" /> Reason for Booking
+              </div>
             </label>
             <textarea
               {...register("reason", { required: "Reason is required" })}  
               rows={4}
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-900 resize-none"
+              className="w-full px-4 py-3 border border-gray-700 rounded-xl bg-gray-800 text-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
               placeholder="Please provide a reason for your booking..."
             />
             {errors.reason && (
-              <p className="mt-1 text-sm text-red-600">
+              <p className="mt-2 text-sm text-red-400">
                 {errors.reason.message}
               </p>
             )}
           </div>
-          <div className="flex justify-end gap-3 pt-4">
+          
+          <div className="flex justify-end gap-4 pt-4">
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg"
+              className="px-6 py-3 text-sm font-medium text-gray-300 bg-gray-800 hover:bg-gray-700 rounded-xl border border-gray-700 transition-colors duration-300"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-5 py-2.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg"
+              className="px-6 py-3 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 rounded-xl shadow-lg shadow-blue-900/30 transition-all duration-300 transform hover:translate-y-1"
             >
-              Submit Booking
+              Book Facility
             </button>
           </div>
         </form>

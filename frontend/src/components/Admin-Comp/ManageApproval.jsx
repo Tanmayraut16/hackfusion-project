@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import axios from "axios";
+import { Activity, CheckCircle2, XCircle, Clock, AlertTriangle } from "lucide-react";
 
 const API_URL = "http://localhost:3000/api/budgets/all";
 
@@ -11,7 +12,6 @@ export default function ManageBudget() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Updated Handle Approve/Reject Action
   const handleAction = async (id, status) => {
     try {
       const token = localStorage.getItem("token");
@@ -29,14 +29,12 @@ export default function ManageBudget() {
         }
       );
 
-      // Update local state
       setData((prev) =>
         prev.map((budget) =>
           budget._id === id ? { ...budget, status } : budget
         )
       );
 
-      // Clear any existing errors
       setError(null);
     } catch (error) {
       console.error(`Failed to update budget status:`, error);
@@ -55,9 +53,6 @@ export default function ManageBudget() {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        console.log(response);
-        
-
         if (response.data && response.data.data) {
           setData(response.data.data);
         } else {
@@ -74,7 +69,6 @@ export default function ManageBudget() {
     fetchBudgets();
   }, []);
 
-  // Rest of the component remains the same...
   const stats = useMemo(() => {
     return {
       pending: data.filter((budget) => budget.status === "pending").length,
@@ -86,114 +80,146 @@ export default function ManageBudget() {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center">Loading budget data...</div>
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-gray-100 p-8">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-red-500 text-center">{error}</div>
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-gray-100 p-8">
+        <div className="bg-red-900/30 border border-red-500/50 rounded-lg p-4 text-center">
+          <AlertTriangle className="h-8 w-8 text-red-500 mx-auto mb-2" />
+          <p className="text-red-400">{error}</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-4">Budget Approvals</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {[
-          { title: "Pending Approvals", count: stats.pending, color: "text-yellow-500" },
-          { title: "Approved", count: stats.approved, color: "text-green-500" },
-          { title: "Rejected", count: stats.rejected, color: "text-red-500" },
-          { title: "High Budget Requests", count: stats.highAmount, color: "text-orange-500" },
-        ].map((stat, index) => (
-          <div key={index} className="p-4 bg-white shadow rounded-lg">
-            <h2 className="text-lg font-semibold mb-2">{stat.title}</h2>
-            <div className={`text-2xl font-bold ${stat.color}`}>{stat.count}</div>
+    <div className="min-h-screen bg-gradient-to-br  text-gray-100 p-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex items-center gap-3 mb-8">
+          <Activity className="h-8 w-8 text-purple-500" />
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+            Budget Management Dashboard
+          </h1>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="bg-gradient-to-br from-yellow-500/10 to-yellow-600/10 border border-yellow-500/20 rounded-xl p-6">
+            <div className="flex items-center gap-3 mb-2">
+              <Clock className="h-5 w-5 text-yellow-500" />
+              <h3 className="text-lg font-medium text-yellow-400">Pending</h3>
+            </div>
+            <p className="text-3xl font-bold text-yellow-500">{stats.pending}</p>
           </div>
-        ))}
-      </div>
 
-      <div className="bg-white shadow rounded-lg p-6">
-        <h2 className="text-xl font-bold mb-4">Recent Budget Requests</h2>
-        {data.length === 0 ? (
-          <div className="text-center py-4">No budget requests found.</div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse border border-gray-300">
-              <thead>
-                <tr className="bg-gray-200">
-                    
-                  <th className="p-2 border">Title</th>
-                  <th className="p-2 border">Category</th>
-                  <th className="p-2 border">Amount (₹)</th>
-                  <th className="p-2 border">Created By</th>
-                  <th className="p-2 border">Status</th>
-                  {canReview && <th className="p-2 border">Actions</th>}
-                </tr>
-              </thead>
-              <tbody>
-                {data.map((budget) => (
-                  <tr key={budget._id} className="border">
-                    <td className="p-2 border capitalize">{budget.title}</td>
-                    <td className="p-2 border capitalize">{budget.category}</td>
-                    <td className={`p-2 border font-semibold ${budget.amount >= 100000 ? "text-red-500" : ""}`}>
-                      ₹{budget.amount.toLocaleString()}
+          <div className="bg-gradient-to-br from-green-500/10 to-green-600/10 border border-green-500/20 rounded-xl p-6">
+            <div className="flex items-center gap-3 mb-2">
+              <CheckCircle2 className="h-5 w-5 text-green-500" />
+              <h3 className="text-lg font-medium text-green-400">Approved</h3>
+            </div>
+            <p className="text-3xl font-bold text-green-500">{stats.approved}</p>
+          </div>
 
-                    </td>
-                    <td className="p-2 border">{`${budget.allocatedByModel} -(${budget.allocated_by.name})`}</td>
-                    <td className="p-2 border">
-                      <span
-                        className={`px-3 py-1 rounded font-semibold ${
-                          budget.status === "approved"
-                            ? "bg-green-200 text-green-800"
-                            : budget.status === "rejected"
-                            ? "bg-red-200 text-red-800"
-                            : "bg-yellow-200 text-yellow-800"
-                        }`}
-                      >
-                        {budget.status.charAt(0).toUpperCase() + budget.status.slice(1)}
-                      </span>
-                    </td>
-                    {canReview && (
-                      <td className="p-2 border text-center">
-                        {budget.status === "pending" ? (
-                          <div className="flex gap-2 justify-center">
-                            <button
-                              onClick={() => handleAction(budget._id, "approved")}
-                              className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-700"
-                            >
-                              Approve
-                            </button>
-                            <button
-                              onClick={() => handleAction(budget._id, "rejected")}
-                              className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-700"
-                            >
-                              Reject
-                            </button>
-                          </div>
-                        ) : (
-                          <span
-                            className={`px-3 py-1 rounded font-semibold ${
-                              budget.status === "approved"
-                                ? "bg-green-200 text-green-800"
-                                : "bg-red-200 text-red-800"
-                            }`}
-                          >
-                            {budget.status.charAt(0).toUpperCase() + budget.status.slice(1)}
-                          </span>
-                        )}
-                      </td>
-                    )}
+          <div className="bg-gradient-to-br from-red-500/10 to-red-600/10 border border-red-500/20 rounded-xl p-6">
+            <div className="flex items-center gap-3 mb-2">
+              <XCircle className="h-5 w-5 text-red-500" />
+              <h3 className="text-lg font-medium text-red-400">Rejected</h3>
+            </div>
+            <p className="text-3xl font-bold text-red-500">{stats.rejected}</p>
+          </div>
+
+          <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/10 border border-purple-500/20 rounded-xl p-6">
+            <div className="flex items-center gap-3 mb-2">
+              <AlertTriangle className="h-5 w-5 text-purple-500" />
+              <h3 className="text-lg font-medium text-purple-400">High Value</h3>
+            </div>
+            <p className="text-3xl font-bold text-purple-500">{stats.highAmount}</p>
+          </div>
+        </div>
+
+        <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-xl p-6">
+          <h2 className="text-xl font-bold mb-6 text-gray-200">Recent Budget Requests</h2>
+          
+          {data.length === 0 ? (
+            <div className="text-center py-12 text-gray-400">No budget requests found.</div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-700/50">
+                    <th className="px-4 py-3 text-left text-gray-400">Title</th>
+                    <th className="px-4 py-3 text-left text-gray-400">Category</th>
+                    <th className="px-4 py-3 text-left text-gray-400">Amount (₹)</th>
+                    <th className="px-4 py-3 text-left text-gray-400">Created By</th>
+                    <th className="px-4 py-3 text-left text-gray-400">Status</th>
+                    {canReview && <th className="px-4 py-3 text-gray-400">Actions</th>}
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+                </thead>
+                <tbody className="divide-y divide-gray-700/50">
+                  {data.map((budget) => (
+                    <tr key={budget._id} className="group hover:bg-gray-700/20 transition-colors">
+                      <td className="px-4 py-3 capitalize">{budget.title}</td>
+                      <td className="px-4 py-3 capitalize">{budget.category}</td>
+                      <td className={`px-4 py-3 font-medium ${
+                        budget.amount >= 100000 ? "text-red-400" : "text-gray-200"
+                      }`}>
+                        ₹{budget.amount.toLocaleString()}
+                      </td>
+                      <td className="px-4 py-3 text-gray-300">
+                        {`${budget.allocatedByModel} - (${budget.allocated_by.name})`}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                          budget.status === "approved"
+                            ? "bg-green-500/10 text-green-400 border border-green-500/20"
+                            : budget.status === "rejected"
+                            ? "bg-red-500/10 text-red-400 border border-red-500/20"
+                            : "bg-yellow-500/10 text-yellow-400 border border-yellow-500/20"
+                        }`}>
+                          {budget.status.charAt(0).toUpperCase() + budget.status.slice(1)}
+                        </span>
+                      </td>
+                      {canReview && (
+                        <td className="px-4 py-3">
+                          {budget.status === "pending" ? (
+                            <div className="flex gap-2 justify-center">
+                              <button
+                                onClick={() => handleAction(budget._id, "approved")}
+                                className="px-4 py-1.5 bg-green-500/10 text-green-400 border border-green-500/20 rounded-lg hover:bg-green-500/20 transition-colors"
+                              >
+                                Approve
+                              </button>
+                              <button
+                                onClick={() => handleAction(budget._id, "rejected")}
+                                className="px-4 py-1.5 bg-red-500/10 text-red-400 border border-red-500/20 rounded-lg hover:bg-red-500/20 transition-colors"
+                              >
+                                Reject
+                              </button>
+                            </div>
+                          ) : (
+                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                              budget.status === "approved"
+                                ? "bg-green-500/10 text-green-400 border border-green-500/20"
+                                : "bg-red-500/10 text-red-400 border border-red-500/20"
+                            }`}>
+                              {budget.status.charAt(0).toUpperCase() + budget.status.slice(1)}
+                            </span>
+                          )}
+                        </td>
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

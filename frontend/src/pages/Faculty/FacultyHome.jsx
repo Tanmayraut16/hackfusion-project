@@ -45,7 +45,7 @@ function FacultyHome() {
 
       {/* Main Content */}
       <div
-        className="flex-1 flex flex-col bg-gradient-to-r from-purple-50 via-purple-30 to-purple-20"
+        className="flex-1 flex flex-col bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 transition-all duration-300"
         style={{
           marginLeft: isSidebarOpen ? "250px" : "0px",
           width: `calc(100% - ${isSidebarOpen ? "250px" : "0px"})`,
@@ -59,7 +59,7 @@ function FacultyHome() {
 
         {/* Main Section with Dynamic Content */}
         <div
-          className="flex-1 bg-gradient-to-br from-purple-50 to-purple-100 px-4 py-8"
+          className="flex-1 bg-gradient-to-br from-gray-900 to-gray-800 px-4 py-8 text-gray-100"
           style={{
             height: `calc(100vh - 60px)`,
           }}

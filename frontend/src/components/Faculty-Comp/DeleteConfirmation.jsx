@@ -1,27 +1,41 @@
 import React from 'react';
-import { X } from 'lucide-react';
+import { X, AlertTriangle } from 'lucide-react';
 
 const DeleteConfirmation = ({ onClose, onConfirm, registrationNumber }) => {
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg max-w-md w-full p-6">
+    <div className="fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-lg max-w-md w-full p-6 border border-gray-700 shadow-lg">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-gray-900">Delete Record</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+          <h2 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-red-400 to-orange-500">
+            Delete Record
+          </h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-red-400 transition-colors">
             <X className="h-6 w-6" />
           </button>
         </div>
-        <div className="mb-6">
-          <p className="text-gray-700">
-            Are you sure you want to delete the record for student <span className="font-semibold">{registrationNumber}</span>? 
+        <div className="mb-6 flex">
+          <div className="mr-3 flex-shrink-0">
+            <AlertTriangle className="h-6 w-6 text-red-500" />
+          </div>
+          <p className="text-gray-300">
+            Are you sure you want to delete the record for student{" "}
+            <span className="font-semibold text-white bg-gradient-to-r from-red-400 to-orange-400 bg-clip-text text-transparent">
+              {registrationNumber}
+            </span>?{" "}
             This action cannot be undone.
           </p>
         </div>
-        <div className="flex justify-end gap-2">
-          <button onClick={onClose} className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+        <div className="flex justify-end gap-3">
+          <button 
+            onClick={onClose} 
+            className="px-4 py-2 border border-gray-600 rounded-lg text-gray-300 hover:bg-gray-700 transition-colors"
+          >
             Cancel
           </button>
-          <button onClick={onConfirm} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+          <button 
+            onClick={onConfirm} 
+            className="px-4 py-2 bg-gradient-to-r from-red-600 to-orange-600 text-white rounded-lg hover:from-red-700 hover:to-orange-700 transition-all shadow-md"
+          >
             Delete
           </button>
         </div>

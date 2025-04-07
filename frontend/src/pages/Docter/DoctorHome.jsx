@@ -50,8 +50,10 @@ function DoctorHome() {
 
         {/* Main Section with Dynamic Content */}
         <div
-          className="flex-1 bg-gradient-to-br from-green-50 to-green-100 px-4 py-8"
-          style={{ height: "calc(100vh - 60px)" }}
+          className="flex-1 bg-gradient-to-br from-gray-900 to-gray-800 px-4 py-8 text-gray-100"
+          style={{
+            height: `calc(100vh - 60px)`,
+          }}
         >
           <div className="container mx-auto px-20 py-10">
             {ContentComponent}
