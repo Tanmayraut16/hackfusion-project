@@ -473,3 +473,19 @@ export const getVoters = async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 };
+
+export const deleteElection = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deleted = await Election.findByIdAndDelete(id);
+
+    if (!deleted) {
+      return res.status(404).json({ message: "Election not found" });
+    }
+
+    res.status(200).json({ message: "Election deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting election:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};

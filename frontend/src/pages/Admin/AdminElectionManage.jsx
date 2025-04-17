@@ -12,6 +12,7 @@ import ElectionList from "../../components/Election-Comp/ElectionList";
 import PendingElection from "../../components/Election-Comp/PendingElection";
 import NewElectionModal from "../../components/Election-Comp/NewElectionModal";
 import AddCandidateModal from "../../components/Election-Comp/AddCandidateModal";
+import DeleteConfirmation from "../../components/Election-Comp/DeleteConfirmation";
 import { fetchAllElections } from "../../components/Election-Comp/electionService";
 import { fetchAllStudents } from "../../components/Election-Comp/studentService";
 
@@ -21,6 +22,10 @@ function AdminElectionManage() {
   const [selectedPosition, setSelectedPosition] = useState(null);
   const [selectedPositionDetails, setSelectedPositionDetails] = useState(null);
   const [editingElectionId, setEditingElectionId] = useState(null);
+  // Add this state to track delete confirmation modal and election to delete
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [electionToDelete, setElectionToDelete] = useState(null);
+
   const [formData, setFormData] = useState({
     title: "",
     startDate: "",
@@ -209,31 +214,35 @@ function AdminElectionManage() {
     setShowNewElectionModal(true);
   };
 
-  const handleDeleteElection = async (election) => {
-    if (
-      window.confirm(
-        `Are you sure you want to delete the election "${election.title}"?`
-      )
-    ) {
-      try {
-        const token = localStorage.getItem("token");
+  // Replace the current handleDeleteElection function with this:
+  const handleDeleteElection = (election) => {
+    setElectionToDelete(election);
+    setShowDeleteModal(true);
+  };
 
-        await axios.delete(
-          `http://localhost:3000/api/election/${election._id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+  // Add a new function to handle the actual deletion
+  const confirmDeleteElection = async () => {
+    try {
+      const token = localStorage.getItem("token");
 
-        // Update the elections list
-        setElections(elections.filter((e) => e._id !== election._id));
-        setSuccessMessage("Election deleted successfully!");
-      } catch (error) {
-        console.error("Error deleting election:", error);
-        setError(error.response?.data?.message || "Failed to delete election");
-      }
+      await axios.delete(
+        `http://localhost:3000/api/election/elections/${electionToDelete._id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // Update the elections list
+      setElections(elections.filter((e) => e._id !== electionToDelete._id));
+      setSuccessMessage("Election deleted successfully!");
+      setShowDeleteModal(false);
+      setElectionToDelete(null);
+    } catch (error) {
+      console.error("Error deleting election:", error);
+      setError(error.response?.data?.message || "Failed to delete election");
+      setShowDeleteModal(false);
     }
   };
 
@@ -439,6 +448,14 @@ function AdminElectionManage() {
             resetForm();
           }}
           onSubmit={handleCreateElection}
+        />
+      )}
+
+      {showDeleteModal && electionToDelete && (
+        <DeleteConfirmation
+          onClose={() => setShowDeleteModal(false)}
+          onConfirm={confirmDeleteElection}
+          electionName={electionToDelete.title}
         />
       )}
 

@@ -12,6 +12,7 @@ import {
   verifyVoterOTP,
   getVoters,
   getPositionResults,
+  deleteElection,
 } from "../controllers/election.controller.js";
 import {
   verifyToken,
@@ -32,8 +33,6 @@ router.get("/:electionId/results", getResults);
 // Route to get real-time votes for all candidates in a specific position
 router.get("/:electionId/positions/:positionName/votes", getPositionVotes);
 router.get("/:electionId/positions/:positionName/results", getPositionResults);
-router.get("/elections", getAllElections); // Fetch all elections
-router.get("/elections/:id", getElectionById); // Fetch a specific election by ID
 
 // Route to get the number of votes for a specific candidate in a specific position
 router.get(
@@ -46,6 +45,9 @@ router.get("/elections", getAllElections);
 
 // Route to get election by ID
 router.get("/elections/:id", getElectionById);
+
+// Delete election by ID (admin only)
+router.delete("/elections/:id", verifyAdmin, deleteElection);
 
 router.get("/voters/:id", verifyStudent, getVoters);
 
