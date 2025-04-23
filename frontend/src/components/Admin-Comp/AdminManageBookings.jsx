@@ -20,7 +20,7 @@ const AdminManageBookings = () => {
 
   const fetchFacilities = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/api/facilities");
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/facilities`);
       setFacilities(response.data);
     } catch (error) {
       console.error("Error fetching facilities:", error);
@@ -44,7 +44,7 @@ const AdminManageBookings = () => {
 
     try {
       const token = localStorage.getItem("token");
-      await axios.post("http://localhost:3000/api/facilities", newFacility, {
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/facilities`, newFacility, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",

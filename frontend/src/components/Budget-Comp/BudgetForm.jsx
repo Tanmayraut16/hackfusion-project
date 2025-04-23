@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 
-const API_URL_ADD = "http://localhost:3000/api/budgets/add";
+const API_URL_ADD = `${import.meta.env.VITE_API_URL}/api/budgets/add`;
 
 function BudgetForm({ onClose, onSubmit }) {
   const [formData, setFormData] = useState({

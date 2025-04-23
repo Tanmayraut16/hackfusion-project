@@ -23,7 +23,7 @@ function StudentComplaints() {
   useEffect(() => {
     setIsLoading(true);
     axios
-      .get("http://localhost:3000/api/complaint/all")
+      .get(`${import.meta.env.VITE_API_URL}/api/complaint/all`)
       .then((response) => {
         setComplaints(response.data);
         setIsLoading(false);
@@ -40,7 +40,7 @@ function StudentComplaints() {
       if (!token) throw new Error("Authentication token not found");
 
       const response = await axios.post(
-        "http://localhost:3000/api/complaint/submit",
+        `${import.meta.env.VITE_API_URL}/api/complaint/submit`,
         formData,
         {
           headers: {

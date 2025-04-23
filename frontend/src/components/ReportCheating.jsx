@@ -24,7 +24,7 @@ const ReportCheating = () => {
 
   const fetchRecords = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/api/cheating/all");
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/cheating/all`);
       setRecords(response.data);
     } catch (error) {
       console.error("Error fetching records:", error);
@@ -38,7 +38,7 @@ const ReportCheating = () => {
     try {
       const tok = localStorage.getItem("token");
       await axios.delete(
-        `http://localhost:3000/api/cheating/delete/${recordToDelete._id}`,
+        `${import.meta.env.VITE_API_URL}/api/cheating/delete/${recordToDelete._id}`,
         {
           headers: { Authorization: `Bearer ${tok}` },
         }

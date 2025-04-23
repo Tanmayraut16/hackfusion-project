@@ -215,7 +215,7 @@ const DoctorDashboard = () => {
     const fetchData = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:3000/api/doctor/medicaldetails"
+          `${import.meta.env.VITE_API_URL}/api/doctor/medicaldetails`
         );
         setData(response.data.data);
         setIsLoading(false);

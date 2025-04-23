@@ -26,7 +26,7 @@ const FacultyFacilityBooking = () => {
   const fetchFacilities = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch("http://localhost:3000/api/facilities");
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/facilities`);
       const data = await response.json();
       setFacilities(Array.isArray(data) ? data : []);
     } catch (error) {

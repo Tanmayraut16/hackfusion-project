@@ -23,7 +23,7 @@ const BookNow = ({ facility, onClose, onBookingSuccess }) => {
 
       // Save booking details
       const bookingResponse = await fetch(
-        "http://localhost:3000/api/booking/bookings",
+        `${import.meta.env.VITE_API_URL}/api/booking/bookings`,
         {
           method: "POST",
           headers: {

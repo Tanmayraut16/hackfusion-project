@@ -13,7 +13,6 @@ export const createApplication = async (req, res) => {
     let userModel = req.user.role; // e.g., "student" or "faculty"
     userModel =
       userModel.charAt(0).toUpperCase() + userModel.slice(1).toLowerCase();
-    // console.log(userModel); // "Student" or "Faculty"
 
     // Validate userModel to ensure it's either Student or Faculty
     if (!["Student", "Faculty"].includes(userModel)) {

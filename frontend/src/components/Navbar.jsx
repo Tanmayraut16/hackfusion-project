@@ -38,21 +38,20 @@ const Navbar = ({ toggleSidebar }) => {
   }, []);
 
   const fetchUserDetails = async (userId, role) => {
-    console.log(userId);
     try {
       let endpoint = "";
       switch (role) {
         case "student":
-          endpoint = `http://localhost:3000/api/student-login/profile/${userId}`;
+          endpoint = `${import.meta.env.VITE_API_URL}/api/student-login/profile/${userId}`;
           break;
         case "faculty":
-          endpoint = `http://localhost:3000/api/faculty-login/profile/${userId}`;
+          endpoint = `${import.meta.env.VITE_API_URL}/api/faculty-login/profile/${userId}`;
           break;
         case "admin":
-          endpoint = `http://localhost:3000/api/admin/`;
+          endpoint = `${import.meta.env.VITE_API_URL}/api/admin/`;
           break;
         default:
-          endpoint = `http://localhost:3000/api/`;
+          endpoint = `${import.meta.env.VITE_API_URL}/api/`;
       }
       const response = await axios.get(endpoint);
       const data = response.data;

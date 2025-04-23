@@ -23,7 +23,6 @@ export const createBudget = async (req, res) => {
     }
 
     const userId = req.user._id; // Ensure req.user is properly set
-    console.log("Authenticated User ID:", userId);
 
     const {title, category, amount, allocatedByModel } = req.body;
 
@@ -68,7 +67,6 @@ export const getBudgets = async (req, res) => {
 export const getBudgetById = async (req, res) => {
   try {
     const budgetId = req.params.id;
-    console.log(budgetId);
     // Ensure ID format is valid
     if (!mongoose.Types.ObjectId.isValid(budgetId)) {
       return res
@@ -87,7 +85,7 @@ export const getBudgetById = async (req, res) => {
 
     // Fetch related expenses
     const expenses = await Expense.find({ budget: budgetId });
-    console.log(expenses);
+    
     // Return data
     res.json({
       success: true,
@@ -202,7 +200,6 @@ export const createExpenseLog = async (req, res) => {
       proof_url: result.url,
     });
 
-    console.log(expenseLog);
     await expenseLog.save();
 
     // Update the budget amount 

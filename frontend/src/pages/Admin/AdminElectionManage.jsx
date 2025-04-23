@@ -176,7 +176,7 @@ function AdminElectionManage() {
         })),
       };
 
-      await axios.post("http://localhost:3000/api/election/", formattedData, {
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/election/`, formattedData, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
@@ -226,7 +226,7 @@ function AdminElectionManage() {
       const token = localStorage.getItem("token");
 
       await axios.delete(
-        `http://localhost:3000/api/election/elections/${electionToDelete._id}`,
+        `${import.meta.env.VITE_API_URL}/api/election/elections/${electionToDelete._id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

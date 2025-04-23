@@ -27,7 +27,7 @@ const StudentElections = () => {
       setLoading(true);
       try {
         const response = await fetch(
-          "http://localhost:3000/api/election/elections"
+          `${import.meta.env.VITE_API_URL}/api/election/elections`
         );
         if (!response.ok) throw new Error("Failed to load elections.");
 
@@ -57,7 +57,7 @@ const StudentElections = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        `http://localhost:3000/api/election/elections/${id}`,
+        `${import.meta.env.VITE_API_URL}/api/election/elections/${id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -65,7 +65,7 @@ const StudentElections = () => {
         }
       );
 
-      console.log("Fetched election data:", response.data);
+      // console.log("Fetched election data:", response.data);
       setSelectedElection(response.data);
 
       // Fetch voting status immediately after getting election details
@@ -89,7 +89,7 @@ const StudentElections = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        `http://localhost:3000/api/election/voters/${electionID}`,
+        `${import.meta.env.VITE_API_URL}/api/election/voters/${electionID}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

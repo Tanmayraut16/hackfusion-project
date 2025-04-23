@@ -1,6 +1,6 @@
 export const updateFacilityStatus = async (facilityId, newStatus, setFacilities) => {
   try {
-    const response = await fetch(`http://localhost:3000/api/facilities/${facilityId}/updateStatus`, {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/facilities/${facilityId}/updateStatus`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status: newStatus }),

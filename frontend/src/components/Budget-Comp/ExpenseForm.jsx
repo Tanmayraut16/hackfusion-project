@@ -41,7 +41,7 @@ function ExpenseForm({ budget, onClose, onSubmit }) {
       formDataToSend.append("file", formData.file);
 
       const response = await axios.post(
-        `http://localhost:3000/api/budgets/${budget._id}`,
+        `${import.meta.env.VITE_API_URL}/api/budgets/${budget._id}`,
         formDataToSend,
         {
           headers: {

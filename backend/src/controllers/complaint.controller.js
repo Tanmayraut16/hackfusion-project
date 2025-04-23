@@ -36,7 +36,6 @@ export async function detectSafeSearchWithApiKey(imageUrl) {
     const response = await axios.post(endpoint, requestBody);
     const safeSearchAnnotations =
       response.data.responses[0].safeSearchAnnotation;
-    console.log("SafeSearch Annotations:", safeSearchAnnotations);
     return safeSearchAnnotations;
   } catch (error) {
     console.error(

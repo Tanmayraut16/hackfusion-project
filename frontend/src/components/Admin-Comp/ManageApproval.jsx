@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import { Activity, CheckCircle2, XCircle, Clock, AlertTriangle } from "lucide-react";
 
-const API_URL = "http://localhost:3000/api/budgets/all";
+const API_URL = `${import.meta.env.VITE_API_URL}/api/budgets/all`;
 
 export default function ManageBudget() {
   const [userRole] = useState("faculty");
@@ -17,7 +17,7 @@ export default function ManageBudget() {
       const token = localStorage.getItem("token");
       
       await axios.put(
-        "http://localhost:3000/api/budgets/update-status",
+        `${import.meta.env.VITE_API_URL}/api/budgets/update-status`,
         { 
           id: id,
           status: status 

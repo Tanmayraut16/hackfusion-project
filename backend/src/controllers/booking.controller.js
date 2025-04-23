@@ -4,7 +4,6 @@ import Facility from "../models/facility.model.js";
 // Create a new booking (for Faculty or Student)
 export const createBooking = async (req, res) => {
   try {
-    console.log("Request body:", req.body);
     const { facilityName, startTime, endTime, reason } = req.body;
 
     // Further validation
@@ -16,7 +15,7 @@ export const createBooking = async (req, res) => {
 
     // Verify that the facility exists (make sure to import Facility)
     const facilityObj = await Facility.findOne({ name: facilityName });
-    console.log(facilityObj);
+    
     if (!facilityObj) {
       return res.status(404).json({ message: "Facility not found" });
     }
@@ -29,7 +28,6 @@ export const createBooking = async (req, res) => {
       end_time: endTime,
       reason,
     });
-    console.log("in booking controller: " + booking);
 
     res.status(201).json(booking);
   } catch (error) {
@@ -40,7 +38,6 @@ export const createBooking = async (req, res) => {
 // Get all bookings for the current user (or all bookings if admin)
 export const getBookings = async (req, res) => {
   try {
-    console.log("in the get bookings");
     let filter = {};
     if (req.user.role !== "admin") {
       // Non-admin users can only see their own bookings
@@ -88,7 +85,6 @@ export const getBooking = async (req, res) => {
 // Approve a booking (admin only)
 export const approveBooking = async (req, res) => {
   try {
-    console.log("in approve Booking");
     if (req.user.role !== "admin") {
       return res.status(403).json({ message: "Access denied" });
     }
@@ -150,7 +146,6 @@ export const updateFacilityStatus = async (req, res) => {
     const { status } = req.body;
     const { id } = req.params;
 
-    console.log("Received request to update status:", { id, status });
 
     if (!["available", "booked", "under_maintenance"].includes(status)) {
       return res.status(400).json({ error: "Invalid status value" });

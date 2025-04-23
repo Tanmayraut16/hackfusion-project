@@ -24,13 +24,13 @@ export const createElection = async (req, res) => {
         endDate,
         positions,
       });
-      console.log("this is new election:", newElection);
+      // console.log("this is new election:", newElection);
     } catch (error) {
       console.error("Error creating election:", error);
       return res.status(500).json({ message: "Failed to create election" });
     }
 
-    console.log("hleo blekjfa");
+    // console.log("hleo blekjfa");
 
     return res.status(201).json({
       message: "Election created successfully",
@@ -163,7 +163,6 @@ export const verifyVoterOTP = async (req, res) => {
 
 export const castVote = async (req, res) => {
   try {
-    console.log("Received request body:", req.body);
 
     const { electionId, positionName, candidateName } = req.body;
 
@@ -195,15 +194,12 @@ export const castVote = async (req, res) => {
 
     let election = await Election.findById(electionId);
     if (!election) {
-      console.log("Election not found:", electionId);
       return res.status(404).json({ message: "Election not found" });
     }
 
-    // console.log("Election before population:", election);
     election = await Election.findById(electionId).populate(
       "positions.candidates.student"
     );
-    // console.log("Election after population:", election);
 
     // return res.status(200).json({ election });
 

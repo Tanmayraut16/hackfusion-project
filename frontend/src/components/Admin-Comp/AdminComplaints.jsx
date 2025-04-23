@@ -18,7 +18,7 @@ function AdminComplaints() {
       try {
         const token = localStorage.getItem("token");
         const response = await axios.get(
-          "http://localhost:3000/api/complaint/all",
+          `${import.meta.env.VITE_API_URL}/api/complaint/all`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -44,7 +44,7 @@ function AdminComplaints() {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.put(
-        `http://localhost:3000/api/complaint/vote/${complaintId}`,
+        `${import.meta.env.VITE_API_URL}/api/complaint/vote/${complaintId}`,
         {},
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -64,7 +64,7 @@ function AdminComplaints() {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.put(
-        `http://localhost:3000/api/complaint/moderate/${complaintId}`,
+        `${import.meta.env.VITE_API_URL}/api/complaint/moderate/${complaintId}`,
         { action: action },
         {
           headers: { Authorization: `Bearer ${token}` },

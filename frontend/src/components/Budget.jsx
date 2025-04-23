@@ -17,9 +17,9 @@ import BudgetForm from "./Budget-Comp/BudgetForm";
 import ExpenseForm from "./Budget-Comp/ExpenseForm";
 import ExpenseTable from "./Budget-Comp/ExpenseTable";
 
-const API_URL = "http://localhost:3000/api/budgets/all";
-const API_URL_ID = "http://localhost:3000/api/budgets/";
-const API_URL_ADD = "http://localhost:3000/api/budgets/add";
+const API_URL = `${import.meta.env.VITE_API_URL}/api/budgets/all`;
+const API_URL_ID = `${import.meta.env.VITE_API_URL}/api/budgets/`;
+const API_URL_ADD = `${import.meta.env.VITE_API_URL}/api/budgets/add`;
 
 function ErrorMessage({ message }) {
   return (

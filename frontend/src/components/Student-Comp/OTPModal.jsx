@@ -10,7 +10,7 @@ const OTPModal = ({ email, setEmail, otp, setOtp, onClose, onVerify }) => {
     setLoading(true);
     setError("");
     try {
-      const response = await fetch("http://localhost:3000/api/election/vote/request-otp", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/election/vote/request-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
@@ -29,7 +29,7 @@ const OTPModal = ({ email, setEmail, otp, setOtp, onClose, onVerify }) => {
     setLoading(true);
     setError("");
     try {
-      const response = await fetch("http://localhost:3000/api/election/verify-otp", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/election/verify-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, otp }),

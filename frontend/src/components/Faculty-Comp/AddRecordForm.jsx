@@ -17,7 +17,7 @@ const AddRecordForm = ({ onClose }) => {
     try {
       const token = localStorage.getItem("token"); // Get token from storage
       const response = await axios.post(
-        "http://localhost:3000/api/cheating/add",
+        `${import.meta.env.VITE_API_URL}/api/cheating/add`,
         formData,
         {
           headers: {

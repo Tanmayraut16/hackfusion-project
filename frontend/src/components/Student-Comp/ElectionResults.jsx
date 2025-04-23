@@ -13,7 +13,7 @@ const ElectionResults = ({ electionId, position }) => {
         const encodedPositionName = encodeURIComponent(position.name);
 
         const response = await axios.get(
-          `http://localhost:3000/api/election/${electionId}/positions/${encodedPositionName}/results`
+          `${import.meta.env.VITE_API_URL}/api/election/${electionId}/positions/${encodedPositionName}/results`
         );
 
         setResults(response.data);

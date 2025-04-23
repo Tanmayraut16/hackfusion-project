@@ -11,8 +11,8 @@ import {
   AlertTriangle,
 } from "lucide-react";
 
-const API_URL = "http://localhost:3000/api/applications/all";
-const API_URL2 = "http://localhost:3000/api/applications/add";
+const API_URL = `${import.meta.env.VITE_API_URL}/api/applications/all`;
+const API_URL2 = `${import.meta.env.VITE_API_URL}/api/applications/add`;
 
 const statusColors = {
   pending: "bg-amber-500/20 text-amber-500 border border-amber-500/20",
@@ -77,7 +77,7 @@ export default function ApplicationsPage() {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        `http://localhost:3000/api/applications/${id}`,
+        `${import.meta.env.VITE_API_URL}/api/applications/${id}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }

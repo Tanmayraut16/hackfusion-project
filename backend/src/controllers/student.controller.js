@@ -68,7 +68,6 @@ const loginStudent = async (req, res) => {
 };
 
 export const getStudents = async (req, res) => {
-  console.log("i am in students");
 
   try {
     const page = parseInt(req.query.page) || 1;
@@ -115,7 +114,6 @@ const getStudentById = async (req, res) => {
   try {
     const { studentId } = req.params; // Extract studentId from URL params
     const student = await Student.findById(studentId);
-    console.log(student);
 
     if (!student) {
       return res.status(404).json({ message: "Student not found" });

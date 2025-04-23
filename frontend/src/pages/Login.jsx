@@ -40,16 +40,16 @@ function Login() {
 
       switch (role) {
         case "student":
-          endpoint = "http://localhost:3000/api/student-login/login";
+          endpoint = `${import.meta.env.VITE_API_URL}/api/student-login/login`;
           break;
         case "faculty":
-          endpoint = "http://localhost:3000/api/faculty-login/login";
+          endpoint = `${import.meta.env.VITE_API_URL}/api/faculty-login/login`;
           break;
         case "admin":
           endpoint =
             email === "doctor@sggs.ac.in"
-              ? "http://localhost:3000/api/doctor/login"
-              : "http://localhost:3000/api/admin/login";
+              ? `${import.meta.env.VITE_API_URL}/api/doctor/login`
+              : `${import.meta.env.VITE_API_URL}/api/admin/login`;
           break;
         default:
           toast.error("Invalid role selected");

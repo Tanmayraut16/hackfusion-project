@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 
-const API_URL = "http://localhost:3000/api/applications/all";
+const API_URL = `${import.meta.env.VITE_API_URL}/api/applications/all`;
 
 export default function ManageApplication() {
   const [userRole] = useState("faculty");
@@ -12,7 +12,7 @@ export default function ManageApplication() {
   const handleAction = async (id, action) => {
     try {
       const token = localStorage.getItem("token");
-      const endpoint = `http://localhost:3000/api/applications/${id}/${action}`;
+      const endpoint = `${import.meta.env.VITE_API_URL}/api/applications/${id}/${action}`;
 
       await axios.post(endpoint, {}, { headers: { Authorization: `Bearer ${token}` } });
 

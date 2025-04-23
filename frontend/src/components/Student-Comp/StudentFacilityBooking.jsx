@@ -32,7 +32,7 @@ const StudentFacilityBooking = () => {
     }
     
     try {
-      const response = await fetch("http://localhost:3000/api/facilities");
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/facilities`);
       const data = await response.json();
 
       if (Array.isArray(data)) {

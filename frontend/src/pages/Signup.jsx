@@ -99,7 +99,7 @@ function Signup() {
     setIsLoading(true);
     try {
       const response = await axios.post(
-        "http://localhost:3000/api/election/vote/request-otp",
+        `${import.meta.env.VITE_API_URL}/api/election/vote/request-otp`,
         {
           email: formData.email,
         }
@@ -132,7 +132,7 @@ function Signup() {
     try {
       // First verify OTP
       const verifyResponse = await axios.post(
-        "http://localhost:3000/api/election/verify-otp",
+        `${import.meta.env.VITE_API_URL}/api/election/verify-otp`,
         {
           email: formData.email,
           otp: otp,
@@ -143,8 +143,8 @@ function Signup() {
         // If OTP is verified, proceed with registration
         const endpoint =
           role === "faculty"
-            ? "http://localhost:3000/api/faculty-login/register"
-            : "http://localhost:3000/api/student-login/register";
+            ? `${import.meta.env.VITE_API_URL}/api/faculty-login/register`
+            : `${import.meta.env.VITE_API_URL}/api/student-login/register`;
 
         const response = await axios.post(endpoint, formData);
 

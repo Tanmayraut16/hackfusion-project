@@ -23,7 +23,7 @@ const VotingModal = ({ election, position, onClose }) => {
   const getStudentName = async (studentId) => {
     try {
       const response = await fetch(
-        `http://localhost:3000/api/student-login/profile/${studentId}`
+        `${import.meta.env.VITE_API_URL}/api/student-login/profile/${studentId}`
       );
       if (!response.ok) throw new Error("Failed to fetch student profile");
 
@@ -48,7 +48,7 @@ const VotingModal = ({ election, position, onClose }) => {
         throw new Error("User not authenticated. Please log in again.");
       }
 
-      const response = await fetch("http://localhost:3000/api/election/vote", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/election/vote`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
