@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Check, X, Vote, Loader2, AlertCircle } from 'lucide-react';
+import { Check, X, Vote, Loader2, AlertCircle, Users, Trophy } from 'lucide-react';
 
 const VotingModal = ({ election, position, onClose }) => {
   const [selectedCandidate, setSelectedCandidate] = useState(null);
   const [loading, setLoading] = useState(false);
   const [candidates, setCandidates] = useState([]);
+  const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -67,6 +68,7 @@ const VotingModal = ({ election, position, onClose }) => {
       const data = await response.json();
       if (!response.ok) throw new Error(data.message);
 
+      setSuccess(true);  // ✅ Add this line
       onClose();
     } catch (error) {
       setError(error.message);
