@@ -1,63 +1,25 @@
 import React, { useState } from "react";
-import { useLocation } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
 import Navbar from "../../components/Navbar";
 import AdminDashboard from "../../components/Admin-Comp/AdminDashboard";
 import AdminUsers from "../../components/Admin-Comp/AdminUsers";
 import AdminElectionsManage from "./AdminElectionManage";
-import AdminApprovals from "../../components/Admin-Comp/AdminApprovals";
-import AdminSettings from "../../components/Admin-Comp/AdminSettings";
-import AdminManageBookings from "../../components/Admin-Comp/AdminManageBookings";
 import AdminComplaints from "../../components/Admin-Comp/AdminComplaints";
+import AdminManageBookings from "../../components/Admin-Comp/AdminManageBookings";
+import AdminSettings from "../../components/Admin-Comp/AdminSettings";
 
 import ManageApplication from "../../components/ManageApplication";
 import BudgetComponent from "../../components/Budget";
 import ManageBudget from "../../components/Admin-Comp/ManageApproval";
+import ExpensesComponent from "../../components/Budget-Comp/Expenses"; // Assuming you want budget detail view
 
 function AdminHome() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const location = useLocation();
-  const lastPart = location.pathname.split("/").pop();
-
-  let ContentComponent;
-  switch (lastPart) {
-    case "dashboard":
-      ContentComponent = <AdminDashboard />;
-      break;
-    case "complaints":
-      ContentComponent = <AdminComplaints />;
-      break;
-    case "users":
-      ContentComponent = <AdminUsers />;
-      break;
-    case "elections":
-      ContentComponent = <AdminElectionsManage />;
-      break;
-    case "bookings":
-      ContentComponent = <AdminManageBookings />;
-      break;
-    // case "approvals":
-    //   ContentComponent = <AdminApprovals />;
-    //   break;
-    case "application":
-      ContentComponent = <ManageApplication />;
-      break;
-     case "budget":
-        ContentComponent=<BudgetComponent/>
-        break;
-    case "approvals":
-      ContentComponent=<ManageBudget/>
-      break;
-    case "settings":
-      ContentComponent = <AdminSettings />;
-      break;
-    default:
-      ContentComponent = <AdminDashboard />;
-  }
 
   return (
     <div className="flex min-h-screen">
-      {/* Sidebar for Admin */}
+      {/* Sidebar */}
       <Sidebar role="Admin" isOpen={isSidebarOpen} />
 
       {/* Main Content */}
@@ -74,7 +36,7 @@ function AdminHome() {
           userName="Admin"
         />
 
-        {/* Main Section with Dynamic Content */}
+        {/* Main Section */}
         <div
           className="flex-1 bg-gradient-to-br from-gray-900 to-gray-800 px-4 py-8 text-gray-100"
           style={{
@@ -82,7 +44,19 @@ function AdminHome() {
           }}
         >
           <div className="container mx-auto px-20 py-10">
-            {ContentComponent}
+            <Routes>
+              <Route path="dashboard" element={<AdminDashboard />} />
+              <Route path="complaints" element={<AdminComplaints />} />
+              <Route path="users" element={<AdminUsers />} />
+              <Route path="elections" element={<AdminElectionsManage />} />
+              <Route path="bookings" element={<AdminManageBookings />} />
+              <Route path="application" element={<ManageApplication />} />
+              <Route path="budget" element={<BudgetComponent />} />
+              <Route path="budget/:budgetId" element={<ExpensesComponent />} />
+              <Route path="approvals" element={<ManageBudget />} />
+              <Route path="settings" element={<AdminSettings />} />
+              <Route path="*" element={<AdminDashboard />} />
+            </Routes>
           </div>
         </div>
       </div>

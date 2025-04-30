@@ -24,7 +24,7 @@ const router = express.Router();
 const verifyStudentFacultyAdmin = (req, res, next) =>
   verifyToken(req, res, next, ["student", "faculty", "admin"]);
 
-router.post("/:id", verifyFacultyOrAdmin,upload.single("file"), createExpenseLog);
+// router.post("/:id", verifyFacultyOrAdmin,upload.single("file"), createExpenseLog);
 
 // GET /budgets
 // Accessible to students, faculty, and admin
@@ -42,7 +42,7 @@ router.post("/add", verifyStudentOrFaculty, createBudget);
 // Only faculty and admin can add expense logs
 // router.post("/:id", verifyFacultyOrAdmin,upload.single("proof"), createExpenseLog);
 
-router.post("/:id", verifyFacultyOrAdmin, upload.single("file"), createExpenseLog);
+router.post("/:id/expenses", verifyFacultyOrAdmin, upload.single("file"), createExpenseLog);
 
 
 

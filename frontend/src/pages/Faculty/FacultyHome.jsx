@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useLocation } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
 import Navbar from "../../components/Navbar";
 import FacultyDashboard from "../../components/Faculty-Comp/FacultyDashboard";
@@ -8,35 +8,10 @@ import FacultyFacilityBooking from "../../components/Faculty-Comp/FacultyFacilit
 import ReportCheating from "../../components/ReportCheating";
 import ManageApplication from "../../components/ManageApplication";
 import BudgetComponent from "../../components/Budget";
+import ExpensesComponent from "../../components/Budget-Comp/Expenses";
 
 function FacultyHome() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const location = useLocation();
-  const lastPart = location.pathname.split("/").pop();
-
-  let ContentComponent;
-  switch (lastPart) {
-    case "dashboard":
-      ContentComponent = <FacultyDashboard />;
-      break;
-    case "complaints":
-      ContentComponent = <FacultyComplaints />;
-      break;
-    case "report-cheating":
-      ContentComponent = <ReportCheating />;
-      break;
-    case "booking":
-      ContentComponent = <FacultyFacilityBooking />;
-      break;
-     case "budget":
-        ContentComponent=<BudgetComponent/>
-        break;
-    case "application":
-      ContentComponent = <ManageApplication />;
-      break;
-    default:
-      ContentComponent = <FacultyDashboard />;
-  }
 
   return (
     <div className="flex min-h-screen">
@@ -65,7 +40,16 @@ function FacultyHome() {
           }}
         >
           <div className="container mx-auto px-20 py-10">
-            {ContentComponent}
+            <Routes>
+              <Route path="dashboard" element={<FacultyDashboard />} />
+              <Route path="complaints" element={<FacultyComplaints />} />
+              <Route path="report-cheating" element={<ReportCheating />} />
+              <Route path="booking" element={<FacultyFacilityBooking />} />
+              <Route path="budget" element={<BudgetComponent />} />
+              <Route path="budget/:budgetId" element={<ExpensesComponent />} />
+              <Route path="application" element={<ManageApplication />} />
+              <Route path="*" element={<FacultyDashboard />} />
+            </Routes>
           </div>
         </div>
       </div>

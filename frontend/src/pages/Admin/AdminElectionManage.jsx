@@ -13,6 +13,7 @@ import PendingElection from "../../components/Election-Comp/PendingElection";
 import NewElectionModal from "../../components/Election-Comp/NewElectionModal";
 import AddCandidateModal from "../../components/Election-Comp/AddCandidateModal";
 import DeleteConfirmation from "../../components/Election-Comp/DeleteConfirmation";
+import ViewElectionResult from "../../components/Election-Comp/ViewElectionResult";
 import { fetchAllElections } from "../../components/Election-Comp/electionService";
 import { fetchAllStudents } from "../../components/Election-Comp/studentService";
 
@@ -25,6 +26,10 @@ function AdminElectionManage() {
   // Add this state to track delete confirmation modal and election to delete
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [electionToDelete, setElectionToDelete] = useState(null);
+  const [showResultsModal, setShowResultsModal] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [viewResultsData, setViewResultsData] = useState(null);
+  // Removed duplicate declaration of handleViewResults
 
   const [formData, setFormData] = useState({
     title: "",
@@ -57,7 +62,29 @@ function AdminElectionManage() {
           fetchAllElections(),
         ]);
         setStudents(studentsData);
-        setElections(electionsData);
+
+        // Sort elections into categories like in StudentElections.jsx
+        const now = new Date();
+        const categorizedElections = electionsData.map((election) => {
+          const startDate = new Date(election.startDate);
+          const endDate = new Date(election.endDate);
+
+          let category;
+          if (startDate > now) {
+            category = "upcoming";
+          } else if (endDate < now) {
+            category = "past"; // equivalent to "done" in StudentElections
+          } else {
+            category = "active"; // equivalent to "ongoing" in StudentElections
+          }
+
+          return {
+            ...election,
+            category, // Add/override the category based on dates
+          };
+        });
+
+        setElections(categorizedElections);
       } catch (error) {
         console.error("Error fetching data:", error);
         setError("Failed to load data. Please try again later.");
@@ -176,12 +203,16 @@ function AdminElectionManage() {
         })),
       };
 
-      await axios.post(`${import.meta.env.VITE_API_URL}/api/election/`, formattedData, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/election/`,
+        formattedData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       const updatedElections = await fetchAllElections();
       setElections(updatedElections);
@@ -214,6 +245,17 @@ function AdminElectionManage() {
     setShowNewElectionModal(true);
   };
 
+  const handleViewResults = (election) => {
+    if (election && election.positions && election.positions.length > 0) {
+      setViewResultsData({
+        electionId: election._id,
+        position: election.positions[0],
+      });
+      setShowResultsModal(true);
+      setIsModalOpen(true);
+    }
+  };
+
   // Replace the current handleDeleteElection function with this:
   const handleDeleteElection = (election) => {
     setElectionToDelete(election);
@@ -226,7 +268,9 @@ function AdminElectionManage() {
       const token = localStorage.getItem("token");
 
       await axios.delete(
-        `${import.meta.env.VITE_API_URL}/api/election/elections/${electionToDelete._id}`,
+        `${import.meta.env.VITE_API_URL}/api/election/elections/${
+          electionToDelete._id
+        }`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -429,11 +473,12 @@ function AdminElectionManage() {
         <div className="bg-gradient-to-r from-gray-800/30 to-gray-900/30 rounded-xl border border-gray-700/40 backdrop-blur-sm shadow-lg overflow-hidden relative">
           <ElectionList
             isLoading={isLoading}
-            elections={elections}
+            elections={filteredElections}
             selectedPositionDetails={selectedPositionDetails}
             onPositionClick={handlePositionClick}
             onEditElection={handleEditElection}
             onDeleteElection={handleDeleteElection}
+            onViewResults={handleViewResults} // This passes the handler function
           />
         </div>
       </div>
@@ -448,6 +493,15 @@ function AdminElectionManage() {
             resetForm();
           }}
           onSubmit={handleCreateElection}
+        />
+      )}
+
+      {showResultsModal && viewResultsData && (
+        <ViewElectionResult
+        isOpen={isModalOpen}
+          electionId={viewResultsData.electionId}
+          position={viewResultsData.position}
+          onClose={() => setShowResultsModal(false)}
         />
       )}
 

@@ -32,6 +32,8 @@ app.use(
   })
 );
 
+app.options('*', cors());
+
 // ✅ Ensure CORS Headers Are Sent
 app.use((req, res, next) => {
   res.header(

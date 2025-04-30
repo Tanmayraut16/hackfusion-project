@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-function ExpenseForm({ budget, onClose, onSubmit }) {
+function ExpenseForm({ budgetId, onClose, onSubmit }) {
+  const [budget, setBudget] = useState(null);
   const [formData, setFormData] = useState({
     description: "",
     amount_spent: "",
@@ -9,6 +10,42 @@ function ExpenseForm({ budget, onClose, onSubmit }) {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch budget data using budgetId
+  useEffect(() => {
+    const fetchBudget = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) throw new Error("Authentication token not found");
+
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_URL}/api/budgets/${budgetId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (response.data.success) {
+          setBudget(response.data.data);
+        } else {
+          throw new Error(response.data.message || "Failed to fetch budget details");
+        }
+      } catch (error) {
+        setError(
+          error.response?.data?.error || error.message || "Failed to fetch budget details"
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (budgetId) {
+      fetchBudget();
+    }
+  }, [budgetId]);
 
   const handleFileChange = (e) => {
     setFormData({ ...formData, file: e.target.files[0] });
@@ -25,7 +62,7 @@ function ExpenseForm({ budget, onClose, onSubmit }) {
       return;
     }
 
-    if (Number(formData.amount_spent) > budget.amount) {
+    if (!budget || Number(formData.amount_spent) > budget.amount) {
       setError("Expense amount cannot exceed the allocated budget.");
       setIsSubmitting(false);
       return;
@@ -41,7 +78,7 @@ function ExpenseForm({ budget, onClose, onSubmit }) {
       formDataToSend.append("file", formData.file);
 
       const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/budgets/${budget._id}`,
+        `${import.meta.env.VITE_API_URL}/api/budgets/${budgetId}/expenses`,
         formDataToSend,
         {
           headers: {
@@ -67,12 +104,28 @@ function ExpenseForm({ budget, onClose, onSubmit }) {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50">
+        <div className="bg-gray-900 p-6 rounded-lg w-full max-w-md border border-gray-700 shadow-lg">
+          <div className="flex justify-center items-center h-40">
+            <svg className="animate-spin h-8 w-8 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span className="ml-2 text-white">Loading budget details...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50">
       <div className="bg-gray-900 p-6 rounded-lg w-full max-w-md border border-gray-700 shadow-lg">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold text-white">
-            Add Expense - {budget.category}
+            Add Expense - {budget?.category || ""}
           </h2>
           <button 
             onClick={onClose}
@@ -109,7 +162,7 @@ function ExpenseForm({ budget, onClose, onSubmit }) {
 
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-1">
-              Amount Spent* <span className="text-gray-400">(Available: ₹{budget.amount})</span>
+              Amount Spent* <span className="text-gray-400">(Available: ₹{budget?.amount || 0})</span>
             </label>
             <input
               type="number"
@@ -121,7 +174,7 @@ function ExpenseForm({ budget, onClose, onSubmit }) {
               }
               required
               min="0"
-              max={budget.amount}
+              max={budget?.amount || 0}
               disabled={isSubmitting}
             />
           </div>
@@ -153,7 +206,7 @@ function ExpenseForm({ budget, onClose, onSubmit }) {
             <button
               type="submit"
               className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-blue-800 disabled:opacity-50 transition-colors"
-              disabled={isSubmitting}
+              disabled={isSubmitting || !budget}
             >
               {isSubmitting ? (
                 <div className="flex items-center">

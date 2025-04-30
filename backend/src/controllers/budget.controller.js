@@ -100,62 +100,15 @@ export const getBudgetById = async (req, res) => {
   }
 };
 
-/**
- * Create a new expense log for a given budget.
- * Expected req.body:
- * {
- *   description,
- *   amount_spent,
- *   proof_url  // optional
- * }
- */
-// export const createExpenseLog = async (req, res) => {
-//   try {
-//     const { id } = req.params; // Budget ID
-//     const { description, amount_spent } = req.body;
-
-//     // Fetch the budget document from the Budget schema
-//     const budget = await Budget.findById(id);
-//     if (!budget) {
-//       return res.status(404).json({ success: false, error: "Budget not found" });
-//     }
-
-//     // Retrieve the allocated amount from the budget schema
-//     const allocatedAmount = budget.amount;
-
-//     // Validate that the expense does not exceed the allocated budget
-//     if (amount_spent > allocatedAmount) {
-//       return res.status(400).json({
-//         success: false,
-//         error: "Expense amount exceeds allocated budget",
-//       });
-//     }
-
-//     // Create the expense log using the provided data
-//     const expenseLog = new Expense({
-//       budget: id,
-//       description,
-//       amount_spent,
-//     });
-//     await expenseLog.save();
-
-//     // (Optional) Update the budget's remaining amount if needed
-//     // budget.amount = allocatedAmount - amount_spent;
-//     // await budget.save();
-
-//     return res.status(201).json({ success: true, data: expenseLog });
-//   } catch (error) {
-//     console.error("Error in createExpenseLog:", error);
-//     return res.status(500).json({ success: false, error: "Server error" });
-//   }
-// };
 
 export const createExpenseLog = async (req, res) => {
   try {
     const { id } = req.params; // Budget ID
+    console.log(id);
+    
     const { description, amount_spent } = req.body;
 
-    const file = req.file;
+    const file = file;
     
 
     // Validate amount_spent
@@ -164,12 +117,13 @@ export const createExpenseLog = async (req, res) => {
     }
 
     // Validate file upload
-    if (!req.file) {
+    if (!file) {
       return res.status(400).json({ success: false, error: "Proof file is required" });
     }
 
-    // const fileBuffer = getDataUri(req.file);
-    const result = await uploadOnCloudinary(req.file.path);
+    // const fileBuffer = getDataUri(file);
+    const result = await uploadOnCloudinary(file.path);
+    logger.info("Cloudinary upload result:", result);
 
     // Handle Cloudinary upload failure
     if (!result || !result.secure_url) {
@@ -222,7 +176,7 @@ export const createExpenseLog = async (req, res) => {
 export const getExpenseLogs = async (req, res) => {
   try {
     const { id } = req.params; // Budget ID
-    const logs = await ExpenseLog.find({ budget: id });
+    const logs = await Expense.find({ budget: id });
     return res.status(200).json({ success: true, data: logs });
   } catch (error) {
     console.error("Error in getExpenseLogs:", error);
@@ -232,7 +186,7 @@ export const getExpenseLogs = async (req, res) => {
 
 export const getAllExpenseLogs = async (req, res) => {
   try {
-    const logs = await ExpenseLog.find();
+    const logs = await Expense.find();
     return res.status(200).json({ success: true, data: logs });
   } catch (error) {
     console.error("Error in getAllExpenseLogs:", error);

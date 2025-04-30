@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { jwtDecode } from "jwt-decode";
 import {
   BarChart3,
   Wallet,
@@ -12,13 +12,11 @@ import {
   ChevronRight,
   AlertCircle,
   Loader2,
+  Eye
 } from "lucide-react";
 import BudgetForm from "./Budget-Comp/BudgetForm";
-import ExpenseForm from "./Budget-Comp/ExpenseForm";
-import ExpenseTable from "./Budget-Comp/ExpenseTable";
 
 const API_URL = `${import.meta.env.VITE_API_URL}/api/budgets/all`;
-const API_URL_ID = `${import.meta.env.VITE_API_URL}/api/budgets/`;
 const API_URL_ADD = `${import.meta.env.VITE_API_URL}/api/budgets/add`;
 
 function ErrorMessage({ message }) {
@@ -53,16 +51,20 @@ const CategoryIcon = ({ category, className }) => {
 };
 
 export default function BudgetComponent() {
+  const navigate = useNavigate();
+  const location = useLocation().pathname;
   const [budgets, setBudgets] = useState([]);
-  const [selectedBudget, setSelectedBudget] = useState(null);
   const [isBudgetDialogOpen, setIsBudgetDialogOpen] = useState(false);
-  const [expenses, setExpenses] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [expensesError, setExpensesError] = useState(null);
-  const [isLoadingExpenses, setIsLoadingExpenses] = useState(false);
-  const [isExpenseDialogOpen, setIsExpenseDialogOpen] = useState(false);
   const [filterCategory, setFilterCategory] = useState("all");
+  const [userRole, setUserRole] = useState("");
+
+  useEffect(() => {
+    // Get user role from localStorage
+    const role = localStorage.getItem("role");
+    setUserRole(role);
+  }, []);
 
   const fetchBudgets = async () => {
     setIsLoading(true);
@@ -86,9 +88,8 @@ export default function BudgetComponent() {
     } catch (error) {
       const errorMessage =
         error.response?.data?.message ||
-        error.message |
-          (Student - Comp / StudentBudget) |
-          "Failed to fetch budgets";
+        error.message ||
+        "Failed to fetch budgets";
       setError(errorMessage);
     } finally {
       setIsLoading(false);
@@ -99,80 +100,14 @@ export default function BudgetComponent() {
     fetchBudgets();
   }, []);
 
-  useEffect(() => {
-    async function fetchExpenses(budgetId) {
-      setIsLoadingExpenses(true);
-      setExpensesError(null);
-
-      try {
-        if (!budgetId) return;
-
-        const token = localStorage.getItem("token");
-        if (!token) {
-          throw new Error("Authentication token not found");
-        }
-
-        const response = await axios.get(`${API_URL_ID}${budgetId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-          timeout: 5000,
-        });
-
-        const expensesData = response.data?.data?.expenses;
-        if (!Array.isArray(expensesData)) {
-          throw new Error("Expenses not found in response");
-        }
-
-        setExpenses((prev) => ({
-          ...prev,
-          [budgetId]: expensesData,
-        }));
-      } catch (error) {
-        const errorMessage =
-          error.response?.data?.message ||
-          error.message ||
-          "Failed to fetch expenses";
-        setExpensesError(errorMessage);
-      } finally {
-        setIsLoadingExpenses(false);
-      }
-    }
-
-    if (selectedBudget?._id) {
-      fetchExpenses(selectedBudget._id);
-    }
-  }, [selectedBudget]);
-
   const handleCreateBudget = (newBudget) => {
     setBudgets((prev) => [...prev, newBudget]);
     setIsBudgetDialogOpen(false);
     fetchBudgets();
   };
 
-  const handleAddExpense = async (budgetId, newExpense) => {
-    try {
-      setExpenses((prevExpenses) => ({
-        ...prevExpenses,
-        [budgetId]: [...(prevExpenses[budgetId] || []), newExpense],
-      }));
-
-      if (selectedBudget?._id) {
-        const token = localStorage.getItem("token");
-        const response = await axios.get(`${API_URL_ID}${budgetId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-          timeout: 5000,
-        });
-
-        const expensesData = response.data?.data?.expenses;
-        if (Array.isArray(expensesData)) {
-          setExpenses((prev) => ({
-            ...prev,
-            [budgetId]: expensesData,
-          }));
-        }
-      }
-    } catch (error) {
-      console.error("Error adding expense:", error);
-    }
+  const handleViewExpenses = (budget) => {
+    navigate(`${location}/${budget._id}`);
   };
 
   const filteredBudgets =
@@ -275,16 +210,11 @@ export default function BudgetComponent() {
             filteredBudgets.map((budget) => (
               <div
                 key={budget._id}
-                onClick={() => setSelectedBudget(budget)}
                 className={`
                   group bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border transition-all duration-200 cursor-pointer
-                  hover:bg-gray-800/70 hover:shadow-lg hover:shadow-purple-500/5
-                  ${
-                    selectedBudget?._id === budget._id
-                      ? "border-purple-500/50 ring-1 ring-purple-500/50"
-                      : "border-gray-700/50 hover:border-gray-600/50"
-                  }
+                  hover:bg-gray-800/70 hover:shadow-lg hover:shadow-purple-500/5 border-gray-700/50 hover:border-gray-600/50
                 `}
+                onClick={() => handleViewExpenses(budget)}
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-3">
@@ -338,63 +268,29 @@ export default function BudgetComponent() {
                     Created by:{" "}
                     <span className="text-gray-300">
                       {budget.allocated_by?.name ||
-                        budget.allocated_by?.model ||
+                        budget.allocated_by?.email ||
                         "Unknown"}
                     </span>
                   </div>
-                  <ChevronRight className="w-5 h-5 text-purple-400 transition-transform group-hover:translate-x-1" />
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent card click event
+                      handleViewExpenses(budget);
+                    }}
+                    className="inline-flex items-center gap-1.5 text-purple-400 hover:text-purple-300 transition-colors"
+                  >
+                    <Eye className="w-4 h-4" />
+                    <span>View expenses</span>
+                    <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                  </button>
                 </div>
               </div>
             ))
           )}
         </div>
-
-        {/* Selected Budget Details */}
-        {selectedBudget && (
-          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 overflow-hidden">
-            <div className="p-6 border-b border-gray-700/50">
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div>
-                  <h2 className="text-xl font-semibold text-white mb-1">
-                    {selectedBudget.title}
-                  </h2>
-                  <p className="text-gray-400">
-                    Budget: ${selectedBudget.amount.toLocaleString()} •
-                    Category: {selectedBudget.category}
-                  </p>
-                </div>
-                {localStorage.getItem("role") !== "student" && (
-                  <button
-                    onClick={() => setIsExpenseDialogOpen(true)}
-                    className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-2"
-                  >
-                    <PlusCircle className="w-5 h-5" />
-                    <span>Add Expense</span>
-                  </button>
-                )}
-              </div>
-            </div>
-
-            <div className="p-6">
-              <ExpenseTable
-                expenses={expenses[selectedBudget._id] || []}
-                isLoading={isLoadingExpenses}
-                error={expensesError}
-              />
-            </div>
-          </div>
-        )}
       </div>
 
-      {/* Modals */}
-      {isExpenseDialogOpen && selectedBudget && (
-        <ExpenseForm
-          budget={selectedBudget}
-          onClose={() => setIsExpenseDialogOpen(false)}
-          onSubmit={(expense) => handleAddExpense(selectedBudget._id, expense)}
-        />
-      )}
-
+      {/* Budget Form Modal */}
       {isBudgetDialogOpen && (
         <BudgetForm
           onClose={() => setIsBudgetDialogOpen(false)}

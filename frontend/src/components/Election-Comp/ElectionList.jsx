@@ -1,5 +1,5 @@
 import React from "react";
-import { Calendar, ChevronRight, Award, Edit, Trash2 } from "lucide-react";
+import { Calendar, ChevronRight, Award, Edit, Trash2, BarChart3 } from "lucide-react";
 
 const ElectionList = ({
   isLoading,
@@ -8,6 +8,7 @@ const ElectionList = ({
   onPositionClick,
   onEditElection,
   onDeleteElection,
+  onViewResults,
 }) => {
   if (isLoading) {
     return (
@@ -60,6 +61,16 @@ const ElectionList = ({
                 </div>
                 {/* Add Edit and Delete buttons */}
                 <div className="flex space-x-2">
+                  {election.category === "past" && (
+                    <button
+                      onClick={() => onViewResults(election)}
+                      className="px-3 py-1.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-500 
+                transition-colors duration-200 flex items-center space-x-1.5 text-sm"
+                    >
+                      <BarChart3 className="h-4 w-4" />
+                      <span>View Results</span>
+                    </button>
+                  )}
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
