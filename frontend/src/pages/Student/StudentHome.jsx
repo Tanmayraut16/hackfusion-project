@@ -1,9 +1,11 @@
 import { Routes, Route } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
 import Navbar from "../../components/Navbar";
+import BookingVerification from "../../components/BookingVerification";
 import StudentDashboard from "../../components/Student-Comp/StudentDashboard";
 import StudentElections from "./StudentElections";
 import StudentFacilityBooking from "../../components/Student-Comp/StudentFacilityBooking";
+import StudentMyBookings from "../../components/Student-Comp/StudentMyBookings";
 import StudentComplaints from "../../components/Student-Comp/StudentComplaints";
 import ReportCheating from "../../components/ReportCheating";
 import ApplicationsPage from "../../components/Student-Comp/StudentApplication";
@@ -37,6 +39,8 @@ function StudentHome() {
               <Route path="dashboard" element={<StudentDashboard />} />
               <Route path="elections" element={<StudentElections />} />
               <Route path="booking" element={<StudentFacilityBooking />} />
+              <Route path="booking/my-bookings" element={<StudentMyBookings />} />
+              <Route path="/verify-booking/:id" element={<BookingVerification />} />
               <Route path="report-cheating" element={<ReportCheating />} />
               <Route path="complaints" element={<StudentComplaints />} />
               <Route path="application" element={<ApplicationsPage />} />

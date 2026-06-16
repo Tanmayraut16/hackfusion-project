@@ -103,6 +103,7 @@ export const addCandidate = async (req, res) => {
 export const requestVoteOTP = async (req, res) => {
   try {
     const { email } = req.body;
+    // const authenticatedEmail = req.user?.email;
 
     if (!email) {
       return res.status(400).json({ message: "Email is required" });
@@ -114,7 +115,21 @@ export const requestVoteOTP = async (req, res) => {
       });
     }
 
-    await sendOTPEmail(email);
+    // if (email !== authenticatedEmail) {
+    //   return res.status(403).json({ 
+    //     message: "Youq can only request an OTP for your own registered email." 
+    //   });
+    // }
+
+    const result = await sendOTPEmail(email);
+
+    if (!result.success) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to send OTP email",
+      });
+    }
+
     return res.status(200).json({
       success: true,
       message: "OTP sent successfully",
@@ -123,7 +138,7 @@ export const requestVoteOTP = async (req, res) => {
     console.error("OTP Request Error:", error);
     return res.status(500).json({
       success: false,
-      message: "Failed to send OTP",
+      message: "Internal server error",
     });
   }
 };
@@ -228,7 +243,7 @@ export const castVote = async (req, res) => {
     }
 
     const alreadyVoted = position.candidates.some((cand) =>
-      cand.voters.includes(voter._id)
+      cand.voters.some((voterId) => voterId.equals(voter._id))
     );
     if (alreadyVoted) {
       return res

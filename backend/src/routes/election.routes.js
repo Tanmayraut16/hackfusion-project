@@ -24,7 +24,7 @@ const router = express.Router();
 
 router.post("/", verifyAdmin, createElection);
 router.post("/candidate", verifyToken, verifyAdmin, addCandidate);
-router.post("/vote/request-otp", requestVoteOTP);
+router.post("/vote/request-otp", verifyToken, requestVoteOTP);
 
 router.post("/verify-otp", verifyVoterOTP); // OTP verification endpoint
 

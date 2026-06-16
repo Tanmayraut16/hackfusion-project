@@ -3,7 +3,6 @@ import { useForm } from "react-hook-form";
 import { CalendarIcon, Clock, BookOpen, UserRound, MessageSquare } from "lucide-react";
 import { format } from "date-fns";
 import toast from "react-hot-toast";
-import { updateFacilityStatus } from "../../utils/statusUpdater";
 
 const BookNow = ({ facility, onClose, onBookingSuccess }) => {
   const {
@@ -21,7 +20,7 @@ const BookNow = ({ facility, onClose, onBookingSuccess }) => {
     try {
       const token = localStorage.getItem("token");
 
-      // Save booking details
+      // 1. Submit booking request
       const bookingResponse = await fetch(
         `${import.meta.env.VITE_API_URL}/api/booking/bookings`,
         {
@@ -38,60 +37,33 @@ const BookNow = ({ facility, onClose, onBookingSuccess }) => {
         }
       );
 
+      const result = await bookingResponse.json();
+
       if (!bookingResponse.ok) {
-        throw new Error("Booking failed");
+        throw new Error(result.message || "Booking failed");
       }
 
-      // Calculate booking duration
-      const endTime = new Date(data.endTime);
-      const now = new Date();
-      const durationMs = endTime - now;
+      // 2. Calculate duration for LOCAL UI display only
+      const start = new Date(data.startTime);
+      const end = new Date(data.endTime);
+      const durationMs = end - start;
       const hours = Math.floor(durationMs / 3600000);
       const minutes = Math.floor((durationMs % 3600000) / 60000);
       const durationStr = `${hours}h ${minutes}m`;
 
-      // Update facility status to "booked" only if booking is successful
-      await updateFacilityStatus(facility._id, "booked", token);
-
-      // Call onBookingSuccess with facilityId, bookedBy and duration details
+      // 3. Immediate local UI update
+      // This makes the UI feel snappy while waiting for Admin approval/Backend refresh
       if (onBookingSuccess) {
         onBookingSuccess(facility._id, data.userType, durationStr);
       }
 
-      console.log("Booking submitted successfully");
-      toast.success("Booking request sent successfully");
-
+      toast.success("Booking request submitted! Awaiting approval.");
       reset();
       onClose();
 
-      // Schedule status reset if the end time is in the future
-      if (durationMs > 0) {
-        setTimeout(async () => {
-          try {
-            await updateFacilityStatus(facility._id, "available", token);
-            console.log("Facility status updated to available");
-            toast.success("Facility is now available");
-          } catch (error) {
-            console.error("Failed to update facility status to available:", error);
-            toast.error("Failed to update facility status");
-          }
-        }, durationMs);
-      } else {
-        // If end time is in the past, update status immediately
-        try {
-          await updateFacilityStatus(facility._id, "available", token);
-          console.log("Facility status updated immediately to available");
-          toast.success("Facility is now available");
-        } catch (error) {
-          console.error("Failed to update facility status to available:", error);
-          toast.error("Failed to update facility status");
-        }
-      }
     } catch (error) {
       console.error("Booking failed:", error);
-      toast.error(
-        error.message || "Failed to submit booking. Please try again."
-      );
+      toast.error(error.message || "Failed to submit booking.");
     }
   };
 

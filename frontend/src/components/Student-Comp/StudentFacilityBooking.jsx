@@ -9,9 +9,10 @@ import {
   Filter,
   Clock,
   RefreshCw,
+  LayoutList,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import BookNow from "./BookNow";
-import { updateFacilityStatus } from "../../utils/statusUpdater";
 
 const StudentFacilityBooking = () => {
   const [facilities, setFacilities] = useState([]);
@@ -23,30 +24,26 @@ const StudentFacilityBooking = () => {
   const [bookedFacilities, setBookedFacilities] = useState({});
   const [lastUpdated, setLastUpdated] = useState(new Date());
 
-  // Memoize fetch function to prevent unnecessary recreations
+  const navigate = useNavigate();
+
   const fetchFacilities = useCallback(async (showRefreshIndicator = true) => {
-    if (showRefreshIndicator) {
-      setIsRefreshing(true);
-    } else {
-      setIsLoading(true);
-    }
-    
+    if (showRefreshIndicator) setIsRefreshing(true);
+    else setIsLoading(true);
+
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/facilities`);
       const data = await response.json();
 
       if (Array.isArray(data)) {
         const updatedFacilities = data.map((facility) => {
-          const bookedData = bookedFacilities[facility._id];
-          return bookedData && facility.status === "booked"
-            ? { ...facility, ...bookedData }
+          const localBookedData = bookedFacilities[facility._id];
+          return localBookedData && facility.status === "available"
+            ? { ...facility, status: "booked", ...localBookedData }
             : facility;
         });
 
         setFacilities(updatedFacilities);
         setLastUpdated(new Date());
-      } else {
-        console.error("API response is not an array:", data);
       }
     } catch (error) {
       console.error("Error fetching facilities:", error);
@@ -63,7 +60,7 @@ const StudentFacilityBooking = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       fetchFacilities(true);
-    }, 10000);
+    }, 15000);
     return () => clearInterval(interval);
   }, [fetchFacilities]);
 
@@ -78,26 +75,20 @@ const StudentFacilityBooking = () => {
       [facilityId]: { bookedBy: userType, duration },
     }));
 
-    setFacilities((prevFacilities) =>
-      prevFacilities.map((facility) =>
-        facility._id === facilityId
-          ? { ...facility, status: "booked", bookedBy: userType, duration }
-          : facility
+    setFacilities((prev) =>
+      prev.map((f) =>
+        f._id === facilityId
+          ? { ...f, status: "booked", bookedBy: userType, duration }
+          : f
       )
     );
-
     setSelectedFacility(null);
-    setLastUpdated(new Date());
-  };
-
-  const manualRefresh = () => {
-    fetchFacilities(true);
   };
 
   const filteredFacilities = facilities.filter(
-    (facility) =>
-      (statusFilter === "all" || facility.status === statusFilter) &&
-      facility.name.toLowerCase().includes(searchTerm.toLowerCase())
+    (f) =>
+      (statusFilter === "all" || f.status === statusFilter) &&
+      f.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const getStatusConfig = (status) => {
@@ -106,41 +97,44 @@ const StudentFacilityBooking = () => {
         return {
           icon: CheckCircle,
           text: "Available",
-          badgeClass: "bg-gradient-to-r from-emerald-500/20 to-teal-500/20 text-emerald-300 border border-emerald-500/20",
-          buttonClass:
-            "bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 transform hover:scale-[1.02] transition-all duration-300",
+          badgeClass: "bg-emerald-500/20 text-emerald-300 border border-emerald-500/20",
+          buttonClass: "bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg",
         };
       case "booked":
         return {
           icon: Clock,
           text: "Booked",
-          badgeClass: "bg-gradient-to-r from-blue-500/20 to-indigo-500/20 text-blue-300 border border-blue-500/20",
-          buttonClass: "bg-gray-800/50 text-gray-400 cursor-not-allowed border border-gray-700/50",
+          badgeClass: "bg-blue-500/20 text-blue-300 border border-blue-500/20",
+          buttonClass: "bg-gray-800/50 text-gray-400 cursor-not-allowed",
         };
       case "under_maintenance":
         return {
           icon: Tools,
           text: "Under Maintenance",
-          badgeClass: "bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-300 border border-amber-500/20",
-          buttonClass: "bg-gray-800/50 text-gray-400 cursor-not-allowed border border-gray-700/50",
+          badgeClass: "bg-amber-500/20 text-amber-300 border border-amber-500/20",
+          buttonClass: "bg-gray-800/50 text-gray-400 cursor-not-allowed",
         };
       default:
         return {
           icon: AlertCircle,
           text: "Not Available",
-          badgeClass: "bg-gradient-to-r from-gray-500/20 to-gray-600/20 text-gray-300 border border-gray-500/20",
-          buttonClass: "bg-gray-800/50 text-gray-400 cursor-not-allowed border border-gray-700/50",
+          badgeClass: "bg-gray-500/20 text-gray-300 border border-gray-500/20",
+          buttonClass: "bg-gray-800/50 text-gray-400 cursor-not-allowed",
         };
     }
   };
 
   const formatTime = (date) => {
-    return new Intl.DateTimeFormat('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: true
+    return new Intl.DateTimeFormat("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true,
     }).format(date);
+  };
+
+  const manualRefresh = () => {
+    fetchFacilities(true);
   };
 
   return (
@@ -159,17 +153,30 @@ const StudentFacilityBooking = () => {
                   Book facilities for your academic and extracurricular needs
                 </p>
               </div>
-              
-              <div className="flex items-center gap-4">
+
+              <div className="flex items-center gap-3">
                 <div className="text-sm text-gray-400">
                   Last updated: {formatTime(lastUpdated)}
                 </div>
-                <button 
+
+                {/* ── My Bookings Button ── */}
+                <button
+                  onClick={() => navigate("/student/booking/my-bookings")}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 transition-colors duration-300 border border-purple-500/30 text-purple-300 text-sm font-medium"
+                >
+                  <LayoutList className="h-4 w-4" />
+                  My Bookings
+                </button>
+
+                {/* Refresh Button */}
+                <button
                   onClick={manualRefresh}
                   disabled={isRefreshing}
                   className="flex items-center justify-center p-3 rounded-xl bg-gray-800/50 hover:bg-gray-700/50 transition-colors duration-300 border border-gray-700/50"
                 >
-                  <RefreshCw className={`h-5 w-5 text-blue-400 ${isRefreshing ? 'animate-spin' : ''}`} />
+                  <RefreshCw
+                    className={`h-5 w-5 text-blue-400 ${isRefreshing ? "animate-spin" : ""}`}
+                  />
                 </button>
               </div>
             </div>
@@ -188,7 +195,7 @@ const StudentFacilityBooking = () => {
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-              
+
               <div className="lg:col-span-2 relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <Filter className="h-5 w-5 text-purple-400" />
@@ -208,10 +215,10 @@ const StudentFacilityBooking = () => {
 
             {/* Status Legend */}
             <div className="flex flex-wrap gap-3 mt-6">
-              {["available", "booked", "under_maintenance"].map(status => {
+              {["available", "booked", "under_maintenance"].map((status) => {
                 const config = getStatusConfig(status);
                 return (
-                  <div 
+                  <div
                     key={status}
                     className={`flex items-center rounded-full px-4 py-2 ${config.badgeClass}`}
                   >
@@ -223,7 +230,7 @@ const StudentFacilityBooking = () => {
             </div>
           </div>
         </div>
-        
+
         {/* Facilities Grid */}
         {isLoading ? (
           <div className="text-center py-20">
@@ -245,22 +252,21 @@ const StudentFacilityBooking = () => {
                     key={facility._id}
                     className="group relative overflow-hidden rounded-2xl bg-gray-900/40 backdrop-blur-sm hover:bg-gray-800/40 transition-all duration-500 border border-gray-800/50"
                   >
-                    {/* Background Gradient Effect */}
                     <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-transparent to-blue-500/5 group-hover:opacity-100 transition-opacity duration-500"></div>
-                    
-                    {/* Facility Status Badge */}
-                    <div className={`absolute top-4 right-4 px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-1.5 ${statusConfig.badgeClass}`}>
+
+                    <div
+                      className={`absolute top-4 right-4 px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-1.5 ${statusConfig.badgeClass}`}
+                    >
                       <StatusIcon className="h-3.5 w-3.5" />
                       <span>{statusConfig.text}</span>
                     </div>
-                    
+
                     <div className="relative p-6 pt-12">
                       <h3 className="text-xl font-bold text-gray-100 mb-4 group-hover:text-purple-400 transition-colors duration-300">
                         {facility.name}
                       </h3>
-                      
+
                       <div className="space-y-4 mb-6">
-                        {/* Location */}
                         <div className="flex items-start gap-3">
                           <div className="mt-0.5 bg-purple-500/10 p-2 rounded-lg">
                             <MapPin className="h-4 w-4 text-purple-400" />
@@ -269,8 +275,7 @@ const StudentFacilityBooking = () => {
                             {facility.location || "Location not specified"}
                           </p>
                         </div>
-                        
-                        {/* Description */}
+
                         <div className="flex items-start gap-3">
                           <div className="mt-0.5 bg-blue-500/10 p-2 rounded-lg">
                             <FileText className="h-4 w-4 text-blue-400" />
@@ -280,8 +285,7 @@ const StudentFacilityBooking = () => {
                           </p>
                         </div>
                       </div>
-                      
-                      {/* Booking Info */}
+
                       {facility.status === "booked" && facility.bookedBy && (
                         <div className="mb-6 py-3 px-4 bg-blue-500/5 border border-blue-500/10 rounded-xl">
                           <p className="text-sm text-blue-300">
@@ -293,8 +297,7 @@ const StudentFacilityBooking = () => {
                           </p>
                         </div>
                       )}
-                      
-                      {/* Action Button */}
+
                       <button
                         onClick={() => handleBooking(facility)}
                         disabled={!isAvailable}

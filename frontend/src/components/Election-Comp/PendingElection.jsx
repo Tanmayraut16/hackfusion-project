@@ -1,9 +1,10 @@
 import React from "react";
-import { UserPlus } from "lucide-react";
+import { UserPlus, Trash2 } from "lucide-react";
 
 const PendingElection = ({ 
   pendingElection, 
   onAddCandidate, 
+  onRemoveCandidate,
   onFinalizeElection, 
   isSubmitting 
 }) => {
@@ -27,20 +28,34 @@ const PendingElection = ({
                 </h4>
                 <div className="mt-2 space-y-2">
                   {position.candidates?.map((candidate) => (
-                    <div
-                      key={candidate.id}
-                      className="flex items-center space-x-3 bg-gray-700 p-2 rounded"
-                    >
-                      <div>
-                        <p className="text-sm font-medium text-white">
-                          {candidate.name}
-                        </p>
-                        <p className="text-xs text-gray-400">
-                          {candidate.department}
-                        </p>
+                      // This parent div wraps everything for one candidate row
+                      <div
+                        key={candidate.id}
+                        className="flex items-center justify-between bg-gray-700 p-2 rounded"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <div>
+                            <p className="text-sm font-medium text-white">
+                              {candidate.name}
+                            </p>
+                            <p className="text-xs text-gray-400">
+                              {candidate.department}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* The button is now a sibling to the div above, 
+                            both contained by the flex parent */}
+                        <button
+                          type="button" 
+                          onClick={() => onRemoveCandidate(position.id, candidate.id)}
+                          className="text-gray-400 hover:text-red-500 transition-colors p-1"
+                          title="Remove candidate"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
                       </div>
-                    </div>
-                  ))}
+                    ))}
                   <button
                     onClick={() => onAddCandidate(position)}
                     className="w-full mt-2 px-4 py-2 bg-indigo-900 text-indigo-100 rounded-md hover:bg-indigo-800 transition-colors flex items-center justify-center"

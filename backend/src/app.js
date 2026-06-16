@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 
 // Import routes
+import initCronJobs from "./utils/cronService.js";
 import studentRouter from "../src/routes/student.routes.js";
 import facultyRouter from "../src/routes/faculty.routes.js";
 import adminRouter from "../src/routes/admin.routes.js";
@@ -54,8 +55,9 @@ app.use(cookieParser());
 
 app.use("/public", express.static("public"));
 
-// routes
+initCronJobs();
 
+// routes
 app.use("/api/student-login", studentRouter);
 app.use("/api/faculty-login", facultyRouter);
 app.use("/api/details", userDetailRouter);

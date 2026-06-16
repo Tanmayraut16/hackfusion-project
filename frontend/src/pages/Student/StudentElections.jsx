@@ -77,6 +77,9 @@ const StudentElections = () => {
   };
 
   const handleVoteClick = (position) => {
+    // Prevent opening modal if already voted
+    if (positionVotingStatus[position._id]?.hasVoted) return;
+    
     setSelectedPosition(position);
     setShowOTPModal(true);
   };
@@ -127,6 +130,8 @@ const StudentElections = () => {
   };
 
   const renderPositionContent = (position) => {
+    const status = positionVotingStatus[position._id];
+
     if (!position.candidates || position.candidates.length === 0) {
       return (
         <div className="flex items-center justify-center h-24 text-zinc-400">
@@ -136,20 +141,29 @@ const StudentElections = () => {
     }
 
     if (activeTab === "ongoing") {
-      return positionVotingStatus[position._id]?.hasVoted ? (
+      return status?.hasVoted ? (
         <div className="mt-4 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
           <div className="flex items-center space-x-2">
             <Trophy className="w-5 h-5 text-emerald-400" />
             <p className="text-emerald-400 font-medium">Vote Recorded</p>
           </div>
-          {positionVotingStatus[position._id]?.votedCandidate && (
+          {status?.votedCandidate && (
             <p className="text-zinc-300 mt-2 text-sm">
               You voted for:{" "}
               <span className="font-medium text-emerald-300">
-                {positionVotingStatus[position._id]?.votedCandidate?.student?.name || "Unknown"}
+                {status?.votedCandidate?.student?.name || "Unknown"}
               </span>
             </p>
           )}
+          {/* Visual indicator for disabled state */}
+          <button
+            disabled
+            className="mt-4 w-full bg-zinc-800 text-zinc-500 px-6 py-3 rounded-lg
+                     cursor-not-allowed flex items-center justify-center space-x-2 border border-zinc-700"
+          >
+            <Vote className="w-5 h-5" />
+            <span>Vote Already Cast</span>
+          </button>
         </div>
       ) : (
         <button
@@ -364,7 +378,11 @@ const StudentElections = () => {
           <VotingModal
             election={selectedElection}
             position={selectedPosition}
-            onClose={() => setShowVotingModal(false)}
+            onClose={() => {
+              setShowVotingModal(false);
+              // CRITICAL: Refresh the voting status immediately after the modal closes
+              handleVoteRender(selectedElection._id);
+            }}
           />
         )}
       </main>

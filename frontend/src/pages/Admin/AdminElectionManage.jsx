@@ -176,6 +176,22 @@ function AdminElectionManage() {
     setShowCandidateModal(false);
   };
 
+  const handleRemoveCandidate = (positionId, candidateId) => {
+    setPendingElection((prev) => ({
+      ...prev,
+      positions: prev.positions.map((pos) => {
+        if (pos.id === positionId) {
+          return {
+            ...pos,
+            // Filter out the specific candidate
+            candidates: pos.candidates.filter((cand) => cand.id !== candidateId),
+          };
+        }
+        return pos;
+      }),
+    }));
+  };
+
   const handleFinalSubmit = async () => {
     setIsSubmitting(true);
     setError(null);
@@ -463,6 +479,7 @@ function AdminElectionManage() {
                 setSelectedPosition(position);
                 setShowCandidateModal(true);
               }}
+              onRemoveCandidate={handleRemoveCandidate} // Add this line
               onFinalizeElection={handleFinalSubmit}
               isSubmitting={isSubmitting}
             />
